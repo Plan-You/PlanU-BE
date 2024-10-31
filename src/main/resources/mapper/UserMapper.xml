@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.planu.group_meeting.dao.UserDAO">
+
+    <insert id="insertUser" parameterType="com.planu.group_meeting.entity.User">
+        INSERT INTO USER (username, email, password, name, createdAt, updatedAt, role)
+        VALUES (#{username}, #{email}, #{password}, #{name}, #{createdAt}, #{updatedAt}, #{role})
+    </insert>
+
+    <!-- 중복된 username 확인 -->
+    <select id="existsByUsername" parameterType="String" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM USER
+        WHERE username = #{username}
+    </select>
+
+    <select id="existsByEmail" parameterType="String" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM USER
+        WHERE email = #{email}
+    </select>
+
+    <select id="findByUsername" parameterType="String">
+        SELECT id, username,
+        email,
+        password,
+        name,
+        role,
+        profileImgUrl,
+        birthDate,
+        createdAt,
+        updatedAt
+        FROM USER
+        WHERE username = #{username}
+    </select>
+
+    <update id="updateUserProfile" parameterType="com.planu.group_meeting.entity.User">
+        UPDATE USER
+        SET profileImgUrl = #{profileImgUrl},
+        birthDate = #{birthDate},
+        updatedAt = NOW()
+        WHERE username = #{username}
+    </update>
+
+</mapper>
