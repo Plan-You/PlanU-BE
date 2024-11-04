@@ -25,7 +25,7 @@ jobs:
       - name: Run Docker Compose on EC2
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.AWS_EC2_IP }} << 'EOF'
-            cd ~/app
+            cd /home/ubuntu/projects/planu-backend
             echo "Copying environment variables..."
             export SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
             export SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
