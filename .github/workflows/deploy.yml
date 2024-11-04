@@ -10,11 +10,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Java 17 설치
+      # 1. Java 17 설치 (distribution 추가)
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
+          distribution: 'temurin'  # 또는 'zulu' 사용 가능
 
       # 2. 코드 체크아웃
       - name: Check out the repository
