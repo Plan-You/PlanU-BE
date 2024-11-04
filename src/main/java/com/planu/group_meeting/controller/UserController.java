@@ -25,6 +25,11 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body("회원가입 성공");
     }
 
+    @GetMapping("/username/{username}/exists")
+    public ResponseEntity<Boolean>checkDuplicatedUsername(@PathVariable("username")String username){
+        return ResponseEntity.ok(userService.isDuplicatedUsername(username));
+    }
+
     @PostMapping("/profile")
     public ResponseEntity<String>createUserProfile(@RequestBody UserDto.UserProfileRequest userDto){
         userService.createUserProfile(userDto);

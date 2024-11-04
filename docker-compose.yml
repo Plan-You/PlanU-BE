@@ -25,7 +25,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}  # 환경 변수 사용
       MYSQL_DATABASE: ${MYSQL_DATABASE}
     ports:
-      - "3306:3306"
+      - "${DB_PORT:-3306}:3306"  # DB_PORT 환경 변수를 사용하고 기본값으로 3306 설정
     volumes:
       - db_data:/var/lib/mysql
       - ./initdb:/docker-entrypoint-initdb.d
@@ -33,7 +33,7 @@ services:
   redis:
     image: redis:latest
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"  # REDIS_PORT 환경 변수를 사용하고 기본값으로 6379 설정
     volumes:
       - redis_data:/data
 
