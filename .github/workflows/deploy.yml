@@ -20,7 +20,7 @@ jobs:
 
       - name: Copy files to EC2
         run: |
-          scp -o StrictHostKeyChecking=no -r ./* ubuntu@${{ secrets.AWS_EC2_IP }}:~/app
+          scp -o StrictHostKeyChecking=no -r ./* ubuntu@${{ secrets.AWS_EC2_IP }}:/home/ubuntu/projects/planu-backend
 
       - name: Run Docker Compose on EC2
         run: |
