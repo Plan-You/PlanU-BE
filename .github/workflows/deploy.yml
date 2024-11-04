@@ -27,6 +27,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.AWS_EC2_IP }} << 'EOF'
             cd /home/ubuntu/projects/planu-backend
             echo "Copying environment variables..."
+            touch .env
             export SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
             export SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
             export SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
