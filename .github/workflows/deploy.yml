@@ -54,6 +54,9 @@ jobs:
             export REDIS_PORT=${{ secrets.REDIS_PORT }}
             export MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
             export MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
+            export GOOGLE_EMAIL=${{ secrets.GOOGLE_EMAIL }}
+            export GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}
+            export SPRING_JWT_SECRET=${{ secrets.SPRING_JWT_SECRET }}
             docker-compose down
             docker-compose up -d --build
           EOF
