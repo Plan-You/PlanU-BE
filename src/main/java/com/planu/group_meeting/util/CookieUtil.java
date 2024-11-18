@@ -1,14 +1,39 @@
 package com.planu.group_meeting.util;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.util.Arrays;
 
 public class CookieUtil {
     public static Cookie createCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24 * 60 * 60); // 쿠키의 만료 시간을 1일로 설정
-        // cookie.setSecure(true); // 보안 쿠키로 설정할 경우 주석 해제
-        cookie.setPath("/"); // 쿠키의 경로 설정 (기본값은 현재 경로)
-        cookie.setHttpOnly(true); // 자바스크립트에서 접근 금지
+        cookie.setMaxAge(24 * 60 * 60); // 쿠키 만료 시간을 1일
+        cookie.setSecure(true); // https에서만 동작
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
         return cookie;
+    }
+
+    public static Cookie deleteCookie(String cookieName){
+        Cookie cookie = new Cookie(cookieName,null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true); // https에서만 동작
+        return cookie;
+    }
+
+    public static String getCookieValue(HttpServletRequest request, String cookieName) {
+        Cookie[] cookies = request.getCookies();
+        if(cookies == null){
+            return null;
+        }
+        return Arrays.stream(cookies)
+                .filter(cookie -> cookieName.equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
     }
 }

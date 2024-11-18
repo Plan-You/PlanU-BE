@@ -1,8 +1,9 @@
 package com.planu.group_meeting.controller;
 
+import com.planu.group_meeting.dto.TokenDTO;
 import com.planu.group_meeting.dto.UserDto;
-import com.planu.group_meeting.exception.user.InvalidTokenException;
 import com.planu.group_meeting.service.UserService;
+import com.planu.group_meeting.util.CookieUtil;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,42 +22,50 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<String>createUser(@Valid @RequestBody UserDto.SignUpRequest userDto){
+    public ResponseEntity<String> createUser(@Valid @RequestBody UserDto.SignUpRequest userDto) {
         userService.createUser(userDto);
         return ResponseEntity.status(HttpStatus.CREATED).body("회원가입 성공");
     }
 
     @GetMapping("/username/{username}/exists")
-    public ResponseEntity<Boolean>checkDuplicatedUsername(@PathVariable("username")String username){
+    public ResponseEntity<Boolean> checkDuplicatedUsername(@PathVariable("username") String username) {
         return ResponseEntity.ok(userService.isDuplicatedUsername(username));
     }
 
     @PostMapping("/email-verification/sends")
-    public ResponseEntity<String>sendEmailCode(@RequestParam("email")String email) throws MessagingException {
+    public ResponseEntity<String> sendEmailCode(@RequestParam("email") String email) throws MessagingException {
         userService.sendCodeToEmail(email);
-        // 이메일 형식 검증 기능 필요
         return ResponseEntity.status(HttpStatus.OK).body("인증 코드 전송 성공");
     }
 
     @PostMapping("/email-verification/verify")
-    public ResponseEntity<String>verifyEmailCode(@RequestParam("email")String email,
-                                                 @RequestParam("authCode")String authCode){
-        userService.verifyEmailCode(email,authCode);
+    public ResponseEntity<String> verifyEmailCode(@RequestParam("email") String email,
+                                                  @RequestParam("authCode") String authCode) {
+        userService.verifyEmailCode(email, authCode);
         return ResponseEntity.status(HttpStatus.OK).body("인증 성공");
     }
 
     @PostMapping("/profile")
-    public ResponseEntity<String>createUserProfile(@RequestBody UserDto.UserProfileRequest userDto){
+    public ResponseEntity<String> createUserProfile(@RequestBody UserDto.UserProfileRequest userDto) {
         userService.createUserProfile(userDto);
         return ResponseEntity.status(HttpStatus.CREATED).body("프로필 등록 성공");
     }
 
     @PostMapping("/token/reissue")
-    public ResponseEntity<String>reissueAccessToken(HttpServletResponse response, HttpServletRequest request){
-        userService.reissueAccessToken(request,response);
+    public ResponseEntity<String> reissueAccessToken(HttpServletResponse response, HttpServletRequest request) {
+        String refresh = CookieUtil.getCookieValue(request, "refresh");
+        TokenDTO tokenDTO = userService.reissueAccessToken(refresh);
+        response.setHeader("access", tokenDTO.getAccess());
+        response.addCookie(CookieUtil.createCookie("refresh",tokenDTO.getRefresh()));
+        response.setStatus(HttpStatus.OK.value());
         return ResponseEntity.status(HttpStatus.OK).body("access 토콘 재발급 성공");
     }
-
-
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+        String refresh = CookieUtil.getCookieValue(request, "refresh");
+        userService.logout(refresh);
+        response.addCookie(CookieUtil.deleteCookie("refresh"));
+        return ResponseEntity.status(HttpStatus.OK).body("로그아웃 성공");
+    }
 
 }

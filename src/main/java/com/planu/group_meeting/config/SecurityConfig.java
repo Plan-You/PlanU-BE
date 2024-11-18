@@ -43,7 +43,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth)->auth
                         .requestMatchers("/", "/users","/login","/users/profile","/users/token/reissue",
-                                "/users/username/**","/users/email-verification/**").permitAll()
+                                "/users/username/**","/users/email-verification/**","/profile").permitAll()
                         .anyRequest().authenticated()
                 );
 
