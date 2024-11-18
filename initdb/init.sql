@@ -1,17 +1,18 @@
-CREATE TABLE USER (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,    -- 고유 사용자 ID, 자동 증가
-    username VARCHAR(50) NOT NULL,           -- 사용자 이름
-    password VARCHAR(255) NOT NULL,          -- 비밀번호 (암호화된 상태로 저장)
-    name VARCHAR(100) NOT NULL,              -- 실제 이름
-    email VARCHAR(100) NOT NULL,             -- 이메일 주소
-    role ENUM('USER', 'ADMIN') NOT NULL,     -- 역할 (USER, ADMIN)
-    profileImgUrl VARCHAR(255),            -- 프로필 이미지 URL
-    birthDate DATE,                         -- 생년월일
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 생성 시간
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- 업데이트 시간
+CREATE DATABASE IF NOT EXISTS planu;
+
+CREATE TABLE IF NOT EXISTS `USER` (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    role ENUM('ROLE_USER', 'ROLE_ADMIN') NOT NULL,
+    profileImgUrl VARCHAR(255),
+    birthDate DATE,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-
-INSERT INTO USER (username, password, name, email, role, profileImgUrl, birthDate)
+INSERT INTO `USER` (username, password, name, email, role, profileImgUrl, birthDate)
 VALUES
-    ('user', 'password', 'name', 'user@example.com', 'USER', NULL, '1990-01-01');
+    ('user', 'password', 'name', 'user@example.com', 'ROLE_USER', NULL, '1990-01-01');

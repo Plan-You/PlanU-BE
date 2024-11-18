@@ -43,7 +43,7 @@ public class UserDto {
                     .password(this.password)
                     .name(this.name)
                     .email(this.email)
-                    .role(Role.USER)
+                    .role(Role.ROLE_USER)
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .build();

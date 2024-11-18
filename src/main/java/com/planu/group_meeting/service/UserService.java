@@ -1,6 +1,7 @@
 package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.dao.UserDAO;
+import com.planu.group_meeting.dto.TokenDTO;
 import com.planu.group_meeting.dto.UserDto;
 import com.planu.group_meeting.entity.User;
 import com.planu.group_meeting.exception.user.*;
@@ -15,6 +16,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -62,34 +64,18 @@ public class UserService {
         userDAO.updateUserProfile(user);
     }
 
-    public void reissueAccessToken(HttpServletRequest request, HttpServletResponse response) {
-        String refresh = null;
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("refresh")) {
-                    refresh = cookie.getValue();
-                    break;
-                }
-            }
-        }
-        if (refresh == null || jwtUtil.isExpired(refresh) || !jwtUtil.getCategory(refresh).equals("refresh")) {
-            throw new InvalidTokenException();
-        }
+    public TokenDTO reissueAccessToken(String refresh) {
+        validateRefreshToken(refresh);
         String username = jwtUtil.getUsername(refresh);
         String storedRefresh = redisTemplate.opsForValue().get(username);
         if (storedRefresh == null || !storedRefresh.equals(refresh)) {
             throw new InvalidTokenException();
         }
         redisTemplate.delete(username);
-
         String role = jwtUtil.getRole(refresh);
         String newAccess = jwtUtil.createAccessToken(username, role, 30 * 60 * 1000L);
         String newRefresh = jwtUtil.createRefreshToken(username, role, 7 * 24 * 60 * 60 * 1000L);
-
-        response.setHeader("access", newAccess);
-        response.addCookie(CookieUtil.createCookie("refresh", newRefresh));
-        response.setStatus(HttpStatus.OK.value());
+        return new TokenDTO(newAccess, newRefresh);
     }
 
     public void sendCodeToEmail(String email) throws MessagingException {
@@ -114,10 +100,23 @@ public class UserService {
         redisTemplate.delete("authCode:" + email);
     }
 
+    public void logout(String refresh) {
+        validateRefreshToken(refresh);
+        String username = jwtUtil.getUsername(refresh);
+        redisTemplate.delete(username);
+
+    }
+
     private String generateRandomCode() {
         Random random = new Random();
         int code = 100000 + random.nextInt(900000);
         return String.valueOf(code);
+    }
+
+    private void validateRefreshToken(String refresh) {
+        if (refresh == null || jwtUtil.isExpired(refresh) || !jwtUtil.getCategory(refresh).equals("refresh")) {
+            throw new InvalidTokenException();
+        }
     }
 
 
