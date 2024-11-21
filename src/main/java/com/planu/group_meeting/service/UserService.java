@@ -73,8 +73,8 @@ public class UserService {
         }
         redisTemplate.delete(username);
         String role = jwtUtil.getRole(refresh);
-        String newAccess = jwtUtil.createAccessToken(username, role, 30 * 60 * 1000L);
-        String newRefresh = jwtUtil.createRefreshToken(username, role, 7 * 24 * 60 * 60 * 1000L);
+        String newAccess = jwtUtil.createAccessToken(username, role);
+        String newRefresh = jwtUtil.createRefreshToken(username, role);
         return new TokenDTO(newAccess, newRefresh);
     }
 
@@ -104,7 +104,6 @@ public class UserService {
         validateRefreshToken(refresh);
         String username = jwtUtil.getUsername(refresh);
         redisTemplate.delete(username);
-
     }
 
     private String generateRandomCode() {

@@ -14,6 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import static com.planu.group_meeting.jwt.JwtFilter.AUTHORIZATION_HEADER;
+import static com.planu.group_meeting.jwt.JwtFilter.BEARER_PREFIX;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
@@ -55,11 +58,11 @@ public class UserController {
     public ResponseEntity<String> reissueAccessToken(HttpServletResponse response, HttpServletRequest request) {
         String refresh = CookieUtil.getCookieValue(request, "refresh");
         TokenDTO tokenDTO = userService.reissueAccessToken(refresh);
-        response.setHeader("access", tokenDTO.getAccess());
-        response.addCookie(CookieUtil.createCookie("refresh",tokenDTO.getRefresh()));
-        response.setStatus(HttpStatus.OK.value());
+        response.setHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + tokenDTO.getAccess());
+        response.addCookie(CookieUtil.createCookie("refresh", tokenDTO.getRefresh()));
         return ResponseEntity.status(HttpStatus.OK).body("access 토콘 재발급 성공");
     }
+
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
         String refresh = CookieUtil.getCookieValue(request, "refresh");

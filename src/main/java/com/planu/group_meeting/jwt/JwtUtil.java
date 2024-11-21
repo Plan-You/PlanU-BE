@@ -13,7 +13,8 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class JwtUtil {
-
+    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000L * 60 * 30;            // 30분
+    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000L * 60 * 60 * 24 * 7;  // 7일
     private final RedisTemplate<String, String> redisTemplate;
     private SecretKey secretKey;
 
@@ -41,32 +42,32 @@ public class JwtUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
-    public String createAccessToken(String username, String role, Long expiredMs) {
+    public String createAccessToken(String username, String role) {
 
         return Jwts.builder()
                 .claim("category","access")
                 .claim("username", username)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expiredMs))
+                .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRE_TIME))
                 .signWith(secretKey)
                 .compact();
     }
 
-    public String createRefreshToken(String username, String role, Long expiredMs) {
+    public String createRefreshToken(String username, String role) {
         String refresh = Jwts.builder()
                 .claim("category","refresh")
                 .claim("username", username)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expiredMs))
+                .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRE_TIME))
                 .signWith(secretKey)
                 .compact();
 
         redisTemplate.opsForValue().set(
                 username,
                 refresh,
-                expiredMs,
+                REFRESH_TOKEN_EXPIRE_TIME,
                 TimeUnit.MILLISECONDS
         );
         return refresh;

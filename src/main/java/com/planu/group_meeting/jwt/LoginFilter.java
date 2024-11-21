@@ -21,6 +21,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 
+import static com.planu.group_meeting.jwt.JwtFilter.AUTHORIZATION_HEADER;
+import static com.planu.group_meeting.jwt.JwtFilter.BEARER_PREFIX;
+
 @RequiredArgsConstructor
 @Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
@@ -52,14 +55,15 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         String username = userDetails.getUsername();
         String role = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)  // 권한 이름을 추출
-                .findFirst()  // 첫 번째 권한을 가져옴 (다중 권한 사용 시 변경 가능)
-                .orElse(null);  // 없을 경우 null 반환
+                .map(GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElse(null);
 
-        String access = jwtUtil.createAccessToken(username, role, 30 * 60 * 1000L); //30분
-        String refresh = jwtUtil.createRefreshToken(username, role, 7 * 24 * 60 * 60 * 1000L); // 7일
+        String access = jwtUtil.createAccessToken(username, role);
+        String refresh = jwtUtil.createRefreshToken(username, role);
+        System.out.println(role);
 
-        response.addHeader("access", access);
+        response.addHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + access);
         response.addCookie(CookieUtil.createCookie("refresh", refresh));
         response.setStatus(HttpStatus.OK.value());
     }
