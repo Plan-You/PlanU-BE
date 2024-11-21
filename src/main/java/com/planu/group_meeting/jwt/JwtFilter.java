@@ -10,49 +10,51 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
-import java.io.PrintWriter;
+
 
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
+    public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String BEARER_PREFIX = "Bearer ";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String accessToken = request.getHeader("access");
-        System.out.println("jwtFilter 실행");
-        System.out.println("access : " + accessToken);
-        if (accessToken == null) {
+        String accessToken = request.getHeader(AUTHORIZATION_HEADER);
+
+        if (accessToken == null || !accessToken.startsWith(BEARER_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
         }
+        accessToken = accessToken.substring(BEARER_PREFIX.length());
+
         try {
             jwtUtil.isExpired(accessToken);
         } catch (ExpiredJwtException e) {
-            PrintWriter printWriter = response.getWriter();
-            printWriter.print("access token expired");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Access token expired");
             return;
         }
+
         String category = jwtUtil.getCategory(accessToken);
         if (!category.equals("access")) {
-            PrintWriter printWriter = response.getWriter();
-            printWriter.print("access token invalid");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Access token invalid");
+            return;
         }
+
         String username = jwtUtil.getUsername(accessToken);
         String role = jwtUtil.getRole(accessToken);
+
         User user = new User();
         user.setUsername(username);
-        user.setRole(Role.ROLE_USER);
+        user.setRole(Role.valueOf(role));
         CustomUserDetails userDetails = new CustomUserDetails(user);
+
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authToken);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         filterChain.doFilter(request, response);
     }
 }
