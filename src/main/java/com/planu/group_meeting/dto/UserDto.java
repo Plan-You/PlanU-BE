@@ -30,13 +30,6 @@ public class UserDto {
         @Email(message = "올바른 이메일 주소를 입력해주세요!")
         private String email;
 
-        public SignUpRequest(String username, String password, String name, String email) {
-            this.username = username;
-            this.password = password;
-            this.name = name;
-            this.email = email;
-        }
-
         public User toEntity() {
             return User.builder()
                     .username(this.username)
@@ -49,7 +42,6 @@ public class UserDto {
                     .build();
         }
     }
-
     @Getter
     @NoArgsConstructor
     public static class UserProfileRequest {
@@ -59,19 +51,15 @@ public class UserDto {
 
         private LocalDateTime birthDate;
 
-        public UserProfileRequest(String username, String profileImgUrl, LocalDateTime birthDate) {
-            this.username = username;
-            this.profileImgUrl = profileImgUrl;
-            this.birthDate = birthDate;
-        }
-
-        public User toEntity(){
-            return User.builder()
-                    .username(this.username)
-                    .profileImgUrl(this.profileImgUrl)
-                    .birthDate(String.valueOf(this.birthDate))
-                    .build();
-        }
-
     }
+    @Getter
+    public static class EmailRequest{
+        private String email;
+    }
+    @Getter
+    public static class EmailVerificationRequest{
+        private String email;
+        private String verificationCode;
+    }
+
 }
