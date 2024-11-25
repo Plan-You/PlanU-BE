@@ -13,19 +13,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
     private final User user;
-
-    //    @Override
-//    public Collection<? extends GrantedAuthority> getAuthorities() {
-//        return Arrays.stream(user.getRole().name().split(","))
-//                .map(role -> "ROLE_" + role)  // 수정: ROLE_ 접두사 추가
-//                .map(SimpleGrantedAuthority::new)
-//                .collect(Collectors.toList());
-//    }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Arrays.stream(new String[]{user.getRole().name()})  // Role을 하나의 값으로 처리
+        return Arrays.stream(new String[]{user.getRole().name()})
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
+    }
+    public Long getId(){
+        return user.getId();
     }
 
     @Override

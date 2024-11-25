@@ -1,6 +1,6 @@
 package com.planu.group_meeting.controller;
 
-import com.planu.group_meeting.dto.TokenDTO;
+import com.planu.group_meeting.dto.TokenDto;
 import com.planu.group_meeting.dto.UserDto;
 import com.planu.group_meeting.service.UserService;
 import com.planu.group_meeting.util.CookieUtil;
@@ -57,7 +57,7 @@ public class UserController {
     @PostMapping("/token/reissue")
     public ResponseEntity<String> reissueAccessToken(HttpServletResponse response, HttpServletRequest request) {
         String refresh = CookieUtil.getCookieValue(request, "refresh");
-        TokenDTO tokenDTO = userService.reissueAccessToken(refresh);
+        TokenDto tokenDTO = userService.reissueAccessToken(refresh);
         response.setHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + tokenDTO.getAccess());
         response.addCookie(CookieUtil.createCookie("refresh", tokenDTO.getRefresh()));
         return ResponseEntity.status(HttpStatus.OK).body("access 토콘 재발급 성공");
