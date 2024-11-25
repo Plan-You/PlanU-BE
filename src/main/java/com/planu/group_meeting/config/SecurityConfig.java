@@ -1,5 +1,6 @@
 package com.planu.group_meeting.config;
 
+import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.jwt.JwtFilter;
 import com.planu.group_meeting.jwt.JwtUtil;
 import com.planu.group_meeting.jwt.LoginFilter;
@@ -28,6 +29,7 @@ import java.util.Collections;
 public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtil jwtUtil;
+    private final UserDAO userDAO;
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder(){
         return new BCryptPasswordEncoder();
@@ -51,7 +53,7 @@ public class SecurityConfig {
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         http
-                .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class);
+                .addFilterBefore(new JwtFilter(jwtUtil,userDAO), LoginFilter.class);
 
         http
                 .csrf((auth) -> auth.disable());
@@ -71,7 +73,7 @@ public class SecurityConfig {
 
                         CorsConfiguration configuration = new CorsConfiguration();
 
-                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                        configuration.setAllowedOrigins(Collections.singletonList("https://localhost:5173"));
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
                         configuration.setAllowedHeaders(Collections.singletonList("*"));

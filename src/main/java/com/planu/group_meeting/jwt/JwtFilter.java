@@ -1,6 +1,7 @@
 package com.planu.group_meeting.jwt;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.entity.Role;
 import com.planu.group_meeting.entity.User;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -18,6 +19,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
+    private final UserDAO userDAO;
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer ";
 
@@ -43,13 +45,7 @@ public class JwtFilter extends OncePerRequestFilter {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Access token invalid");
             return;
         }
-
-        String username = jwtUtil.getUsername(accessToken);
-        String role = jwtUtil.getRole(accessToken);
-
-        User user = new User();
-        user.setUsername(username);
-        user.setRole(Role.valueOf(role));
+        User user = userDAO.findByUsername(jwtUtil.getUsername(accessToken));
         CustomUserDetails userDetails = new CustomUserDetails(user);
 
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
