@@ -1,10 +1,11 @@
 package com.planu.group_meeting.valid;
 
 import com.planu.group_meeting.exception.Group.InvalidInputException;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
-
+@Component
 public class InputValidator {
 
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB 제한

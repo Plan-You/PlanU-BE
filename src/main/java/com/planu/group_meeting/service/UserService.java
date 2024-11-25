@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static com.planu.group_meeting.jwt.JwtUtil.REFRESH_TOKEN_PREFIX;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -62,7 +64,7 @@ public class UserService {
     public TokenDto reissueAccessToken(String refresh) {
         validateRefreshToken(refresh);
         String username = jwtUtil.getUsername(refresh);
-        String storedRefresh = redisTemplate.opsForValue().get(username);
+        String storedRefresh = redisTemplate.opsForValue().get(REFRESH_TOKEN_PREFIX + username);
         if (storedRefresh == null || !storedRefresh.equals(refresh)) {
             throw new InvalidTokenException();
         }
@@ -73,7 +75,8 @@ public class UserService {
         return new TokenDto(newAccess, newRefresh);
     }
 
-    public void sendCodeToEmail(String email) throws MessagingException {
+    public void sendCodeToEmail(UserDto.EmailRequest emailDto) throws MessagingException {
+        String email = emailDto.getEmail();
         if (isDuplicatedEmail(email)) {
             throw new DuplicatedEmailException();
         }
@@ -83,7 +86,9 @@ public class UserService {
         mailService.sendVerificationCode(email, authCode);
     }
 
-    public void verifyEmailCode(String email, String authCode) {
+    public void verifyEmailCode(UserDto.EmailVerificationRequest emailVerificationDto) {
+        String email = emailVerificationDto.getEmail();
+        String authCode = emailVerificationDto.getVerificationCode();
         String storedCode = redisTemplate.opsForValue().get("authCode: " + email);
         if (storedCode == null) {
             throw new ExpiredAuthCodeException();

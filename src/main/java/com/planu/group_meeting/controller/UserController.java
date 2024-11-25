@@ -36,15 +36,21 @@ public class UserController {
     }
 
     @PostMapping("/email-verification/sends")
-    public ResponseEntity<String> sendEmailCode(@RequestParam("email") String email) throws MessagingException {
-        userService.sendCodeToEmail(email);
+    public ResponseEntity<String>sendEmailCode(@RequestBody UserDto.EmailRequest emailDto) throws MessagingException {
+        userService.sendCodeToEmail(emailDto);
         return ResponseEntity.status(HttpStatus.OK).body("인증 코드 전송 성공");
     }
 
+//    @PostMapping("/email-verification/verify")
+//    public ResponseEntity<String> verifyEmailCode(@RequestParam("email") String email,
+//                                                  @RequestParam("authCode") String authCode) {
+//        userService.verifyEmailCode(email, authCode);
+//        return ResponseEntity.status(HttpStatus.OK).body("인증 성공");
+//    }
+
     @PostMapping("/email-verification/verify")
-    public ResponseEntity<String> verifyEmailCode(@RequestParam("email") String email,
-                                                  @RequestParam("authCode") String authCode) {
-        userService.verifyEmailCode(email, authCode);
+    public ResponseEntity<String>verifyEmailCode(@RequestBody UserDto.EmailVerificationRequest emailVerificationDto){
+        userService.verifyEmailCode(emailVerificationDto);
         return ResponseEntity.status(HttpStatus.OK).body("인증 성공");
     }
 

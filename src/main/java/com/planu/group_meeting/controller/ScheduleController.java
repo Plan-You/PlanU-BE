@@ -22,7 +22,6 @@ public class ScheduleController {
     @PostMapping
     public ResponseEntity<String>createSchedules(@Valid @RequestBody ScheduleDto.ScheduleSaveRequest scheduleDto,
                                                  @AuthenticationPrincipal CustomUserDetails userDetails){
-        System.out.println(userDetails.getId());
         scheduleService.createSchedule(userDetails.getId(),scheduleDto);
         return ResponseEntity.status(HttpStatus.CREATED).body("일정 생성 성공");
     }

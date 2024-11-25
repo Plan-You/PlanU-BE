@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 public class JwtUtil {
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000L * 60 * 30;            // 30분
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000L * 60 * 60 * 24 * 7;  // 7일
+    public static final String REFRESH_TOKEN_PREFIX = "refresh: ";
     private final RedisTemplate<String, String> redisTemplate;
     private SecretKey secretKey;
 
@@ -65,7 +66,7 @@ public class JwtUtil {
                 .compact();
 
         redisTemplate.opsForValue().set(
-                username,
+                REFRESH_TOKEN_PREFIX + username,
                 refresh,
                 REFRESH_TOKEN_EXPIRE_TIME,
                 TimeUnit.MILLISECONDS
