@@ -4,11 +4,22 @@ import com.planu.group_meeting.exception.Group.InvalidInputException;
 import com.planu.group_meeting.exception.user.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        StringBuilder errorMessage = new StringBuilder();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            errorMessage.append(error.getDefaultMessage()).append(" ");
+        });
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage.toString());
+    }
 
     @ExceptionHandler(DuplicatedUsernameException.class)
     public final ResponseEntity<String>handleDuplicatedUsernameException(DuplicatedUsernameException e){
@@ -39,7 +50,6 @@ public class GlobalExceptionHandler {
     public final ResponseEntity<String>handleUnverifiedEmailException(UnverifiedEmailException e){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이메일 인증이 완료되지 않았습니다.");
     }
-
     @ExceptionHandler(InvalidInputException.class)
     public ResponseEntity<String> handleInvalidInputException(InvalidInputException e){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
