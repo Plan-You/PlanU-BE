@@ -2,7 +2,6 @@ package com.planu.group_meeting.jwt;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dao.UserDAO;
-import com.planu.group_meeting.entity.Role;
 import com.planu.group_meeting.entity.User;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;

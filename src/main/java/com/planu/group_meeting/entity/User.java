@@ -1,5 +1,7 @@
 package com.planu.group_meeting.entity;
 
+import com.planu.group_meeting.entity.common.Gender;
+import com.planu.group_meeting.entity.common.Role;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -16,6 +18,7 @@ public class User {
     private String name;
     private String email;
     private Role role;
+    private Gender gender;
     private String profileImgUrl;
     private String birthDate;
     private LocalDateTime createdAt;

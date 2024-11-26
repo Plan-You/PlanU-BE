@@ -41,13 +41,6 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body("인증 코드 전송 성공");
     }
 
-//    @PostMapping("/email-verification/verify")
-//    public ResponseEntity<String> verifyEmailCode(@RequestParam("email") String email,
-//                                                  @RequestParam("authCode") String authCode) {
-//        userService.verifyEmailCode(email, authCode);
-//        return ResponseEntity.status(HttpStatus.OK).body("인증 성공");
-//    }
-
     @PostMapping("/email-verification/verify")
     public ResponseEntity<String>verifyEmailCode(@RequestBody UserDto.EmailVerificationRequest emailVerificationDto){
         userService.verifyEmailCode(emailVerificationDto);
