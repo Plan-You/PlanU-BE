@@ -1,8 +1,8 @@
 package com.planu.group_meeting.entity;
+import com.planu.group_meeting.entity.common.ScheduleVisibility;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 
 import java.time.LocalDateTime;
 

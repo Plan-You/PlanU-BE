@@ -58,6 +58,7 @@ public class UserService {
         User user = userDAO.findByUsername(username);
         user.setProfileImgUrl(userDto.getProfileImgUrl());
         user.setBirthDate(String.valueOf(userDto.getBirthDate()));
+        user.setGender(userDto.getGender());
         userDAO.updateUserProfile(user);
     }
 

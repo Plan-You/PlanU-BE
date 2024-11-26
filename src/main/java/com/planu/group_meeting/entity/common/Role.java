@@ -1,4 +1,4 @@
-package com.planu.group_meeting.entity;
+package com.planu.group_meeting.entity.common;
 
 public enum Role {
     ROLE_USER,

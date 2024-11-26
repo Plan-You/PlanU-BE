@@ -1,6 +1,7 @@
 package com.planu.group_meeting.dto;
 
-import com.planu.group_meeting.entity.Role;
+import com.planu.group_meeting.entity.common.Gender;
+import com.planu.group_meeting.entity.common.Role;
 import com.planu.group_meeting.entity.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -37,6 +38,7 @@ public class UserDto {
                     .name(this.name)
                     .email(this.email)
                     .role(Role.ROLE_USER)
+                    .gender(null)
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .build();
@@ -49,7 +51,12 @@ public class UserDto {
 
         private String profileImgUrl;
 
+        @NotNull(message = "생년월일을 입력해주세요")
         private LocalDateTime birthDate;
+
+        @NotNull(message = "성별을 입력해주세요.")
+        private Gender gender;
+
 
     }
     @Getter
