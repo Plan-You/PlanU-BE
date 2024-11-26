@@ -45,7 +45,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth)->auth
                         .requestMatchers("/", "/users","/login","/users/profile","/users/token/reissue",
-                                "/users/username/**","/users/email-verification/**","/profile").permitAll()
+                                "/users/username/**","/users/email-verification/**","/profile","/swagger-ui/**","/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
