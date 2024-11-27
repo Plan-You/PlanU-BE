@@ -58,6 +58,9 @@ jobs:
             echo "GOOGLE_EMAIL=${{ secrets.GOOGLE_EMAIL }}" >> .env
             echo "GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}" >> .env
             echo "SPRING_JWT_SECRET=${{ secrets.SPRING_JWT_SECRET }}" >> .env
+            
+            echo "aws.credentials.access-key=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
+            echo "aws.credentials.secret-key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
 
             # Docker Compose 실행
             docker-compose down
