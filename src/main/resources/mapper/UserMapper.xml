@@ -41,6 +41,7 @@
         UPDATE USER
         SET profileImgUrl = #{profileImgUrl},
         birthDate = #{birthDate},
+        gender = #{gender},
         updatedAt = NOW()
         WHERE username = #{username}
     </update>

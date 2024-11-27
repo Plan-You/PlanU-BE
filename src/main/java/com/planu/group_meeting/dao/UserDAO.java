@@ -7,7 +7,6 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface UserDAO {
     void insertUser(User user);
-
     void updateUserProfile(User user);
     User findByUsername(String username);
     boolean existsByUsername(String username);

@@ -1,6 +1,7 @@
 package com.planu.group_meeting.dto;
 
-import com.planu.group_meeting.entity.Role;
+import com.planu.group_meeting.entity.common.Gender;
+import com.planu.group_meeting.entity.common.Role;
 import com.planu.group_meeting.entity.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -30,13 +31,6 @@ public class UserDto {
         @Email(message = "올바른 이메일 주소를 입력해주세요!")
         private String email;
 
-        public SignUpRequest(String username, String password, String name, String email) {
-            this.username = username;
-            this.password = password;
-            this.name = name;
-            this.email = email;
-        }
-
         public User toEntity() {
             return User.builder()
                     .username(this.username)
@@ -44,12 +38,12 @@ public class UserDto {
                     .name(this.name)
                     .email(this.email)
                     .role(Role.ROLE_USER)
+                    .gender(null)
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .build();
         }
     }
-
     @Getter
     @NoArgsConstructor
     public static class UserProfileRequest {
@@ -57,21 +51,22 @@ public class UserDto {
 
         private String profileImgUrl;
 
+        @NotNull(message = "생년월일을 입력해주세요")
         private LocalDateTime birthDate;
 
-        public UserProfileRequest(String username, String profileImgUrl, LocalDateTime birthDate) {
-            this.username = username;
-            this.profileImgUrl = profileImgUrl;
-            this.birthDate = birthDate;
-        }
+        @NotNull(message = "성별을 입력해주세요.")
+        private Gender gender;
 
-        public User toEntity(){
-            return User.builder()
-                    .username(this.username)
-                    .profileImgUrl(this.profileImgUrl)
-                    .birthDate(String.valueOf(this.birthDate))
-                    .build();
-        }
 
     }
+    @Getter
+    public static class EmailRequest{
+        private String email;
+    }
+    @Getter
+    public static class EmailVerificationRequest{
+        private String email;
+        private String verificationCode;
+    }
+
 }

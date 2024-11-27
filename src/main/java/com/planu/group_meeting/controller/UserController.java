@@ -1,6 +1,6 @@
 package com.planu.group_meeting.controller;
 
-import com.planu.group_meeting.dto.TokenDTO;
+import com.planu.group_meeting.dto.TokenDto;
 import com.planu.group_meeting.dto.UserDto;
 import com.planu.group_meeting.service.UserService;
 import com.planu.group_meeting.util.CookieUtil;
@@ -36,15 +36,14 @@ public class UserController {
     }
 
     @PostMapping("/email-verification/sends")
-    public ResponseEntity<String> sendEmailCode(@RequestParam("email") String email) throws MessagingException {
-        userService.sendCodeToEmail(email);
+    public ResponseEntity<String>sendEmailCode(@RequestBody UserDto.EmailRequest emailDto) throws MessagingException {
+        userService.sendCodeToEmail(emailDto);
         return ResponseEntity.status(HttpStatus.OK).body("인증 코드 전송 성공");
     }
 
     @PostMapping("/email-verification/verify")
-    public ResponseEntity<String> verifyEmailCode(@RequestParam("email") String email,
-                                                  @RequestParam("authCode") String authCode) {
-        userService.verifyEmailCode(email, authCode);
+    public ResponseEntity<String>verifyEmailCode(@RequestBody UserDto.EmailVerificationRequest emailVerificationDto){
+        userService.verifyEmailCode(emailVerificationDto);
         return ResponseEntity.status(HttpStatus.OK).body("인증 성공");
     }
 
@@ -57,7 +56,7 @@ public class UserController {
     @PostMapping("/token/reissue")
     public ResponseEntity<String> reissueAccessToken(HttpServletResponse response, HttpServletRequest request) {
         String refresh = CookieUtil.getCookieValue(request, "refresh");
-        TokenDTO tokenDTO = userService.reissueAccessToken(refresh);
+        TokenDto tokenDTO = userService.reissueAccessToken(refresh);
         response.setHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + tokenDTO.getAccess());
         response.addCookie(CookieUtil.createCookie("refresh", tokenDTO.getRefresh()));
         return ResponseEntity.status(HttpStatus.OK).body("access 토콘 재발급 성공");

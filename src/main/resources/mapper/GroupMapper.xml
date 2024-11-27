@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.planu.group_meeting.dao.GroupDAO">
+    <insert id="insertGroup" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO GROUP_ (NAME, PROFILE)
+        VALUES (#{name}, #{groupImageUrl})
+    </insert>
+
+    <select id="findUserIdByUserName" resultType="java.lang.Long">
+        SELECT id
+        FROM USER
+        WHERE username = #{userName}
+    </select>
+
+    <insert id="insertGroupUser">
+        INSERT INTO GROUP_USER (user_id, group_id, group_role, group_state)
+        VALUES (#{userId}, #{groupId}, #{groupRole}, #{groupState})
+    </insert>
+
+</mapper>
