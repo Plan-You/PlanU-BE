@@ -6,7 +6,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class GroupDTO {
+public class GroupResponseDTO {
     private Long groupId;
     private String groupName;
     private String leaderUserName;

@@ -1,10 +1,10 @@
 package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.dao.GroupDAO;
-import com.planu.group_meeting.dto.GroupDTO;
+import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.entity.Group;
 import com.planu.group_meeting.entity.GroupUser;
-import com.planu.group_meeting.jwt.JwtUtil;
+import com.planu.group_meeting.service.file.S3Uploader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,19 +12,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class GroupService {
-
-    private final JwtUtil jwtUtil;
     private final GroupDAO groupDAO;
+    private final S3Uploader s3Uploader;
 
     @Autowired
-    public GroupService(JwtUtil jwtUtil, GroupDAO groupDAO){
-        this.jwtUtil = jwtUtil;
+    public GroupService(GroupDAO groupDAO, S3Uploader s3Uploader){
         this.groupDAO = groupDAO;
+        this.s3Uploader = s3Uploader;
     }
 
     @Transactional
-    public GroupDTO createGroup(String userName, String groupName, MultipartFile groupImage) {
-        String imageUrl = "";
+    public GroupResponseDTO createGroup(String userName, String groupName, MultipartFile groupImage) {
+        String imageUrl = s3Uploader.uploadFile(groupImage);
 
         Group group = Group.builder()
                 .name(groupName)
@@ -42,7 +41,7 @@ public class GroupService {
                         .build());
 
 
-        return GroupDTO.builder()
+        return GroupResponseDTO.builder()
                 .groupId(group.getId())
                 .groupName(groupName)
                 .leaderUserName(userName)

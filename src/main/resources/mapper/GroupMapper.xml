@@ -5,8 +5,8 @@
 
 <mapper namespace="com.planu.group_meeting.dao.GroupDAO">
     <insert id="insertGroup" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO GROUP_ (NAME, PROFILE, CREATED_DATE, UPDATED_DATE)
-        VALUES (#{name}, #{groupImageUrl}, #{createdDate}, #{updatedDate})
+        INSERT INTO GROUP_ (NAME, PROFILE)
+        VALUES (#{name}, #{groupImageUrl})
     </insert>
 
     <select id="findUserIdByUserName" resultType="java.lang.Long">
@@ -16,8 +16,8 @@
     </select>
 
     <insert id="insertGroupUser">
-        INSERT INTO GROUP_USER (user_id, group_id, group_role, group_state, created_date, updated_date)
-        VALUES (#{userId}, #{groupId}, #{groupRole}, #{groupState}, #{createdDate}, #{updatedDate})
+        INSERT INTO GROUP_USER (user_id, group_id, group_role, group_state)
+        VALUES (#{userId}, #{groupId}, #{groupRole}, #{groupState})
     </insert>
 
 </mapper>

@@ -1,7 +1,7 @@
 package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
-import com.planu.group_meeting.dto.GroupDTO;
+import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.service.GroupService;
 import com.planu.group_meeting.valid.InputValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +24,9 @@ public class GroupController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<GroupDTO> createGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                @RequestParam("groupName")String groupName,
-                                                @RequestParam("groupImage")MultipartFile groupImage){
+    public ResponseEntity<GroupResponseDTO> createGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                        @RequestParam("groupName")String groupName,
+                                                        @RequestParam("groupImage")MultipartFile groupImage){
         inputValidator.groupNameValid(groupName);
         inputValidator.groupImageValid(groupImage);
         return ResponseEntity.ok(groupService.createGroup(userDetails.getUsername(), groupName, groupImage));
