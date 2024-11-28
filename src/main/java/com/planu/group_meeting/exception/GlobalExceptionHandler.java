@@ -1,6 +1,7 @@
 package com.planu.group_meeting.exception;
 
 import com.planu.group_meeting.exception.Group.InvalidInputException;
+import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
 import com.planu.group_meeting.exception.user.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,10 +32,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 이메일 입니다.");
     }
 
-    @ExceptionHandler(InvalidTokenException.class)
-    public final ResponseEntity<String>handleInvalidTokenException(InvalidTokenException e){
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public final ResponseEntity<String>handleInvalidTokenException(InvalidRefreshTokenException e){
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("유효하지 않은 토큰입니다");
     }
+
+//    @ExceptionHandler(ExpiredTokenException.class)
+//    public final ResponseEntity<String>handleExpiredTokenException(ExpiredTokenException e){
+//        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("만료된 토큰입니다.");
+//    }
 
     @ExceptionHandler(ExpiredAuthCodeException.class)
     public final ResponseEntity<String>handleExpiredAuthCodeException(ExpiredAuthCodeException e){
@@ -52,6 +58,11 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(InvalidInputException.class)
     public ResponseEntity<String> handleInvalidInputException(InvalidInputException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+    @ExceptionHandler(ScheduleNotFoundException.class)
+    public ResponseEntity<String> handleScheduleNotFoundException(ScheduleNotFoundException e){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 }

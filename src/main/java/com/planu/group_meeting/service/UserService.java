@@ -67,7 +67,7 @@ public class UserService {
         String username = jwtUtil.getUsername(refresh);
         String storedRefresh = redisTemplate.opsForValue().get(REFRESH_TOKEN_PREFIX + username);
         if (storedRefresh == null || !storedRefresh.equals(refresh)) {
-            throw new InvalidTokenException();
+            throw new InvalidRefreshTokenException();
         }
         redisTemplate.delete(username);
         String role = jwtUtil.getRole(refresh);
