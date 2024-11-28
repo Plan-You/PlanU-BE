@@ -1,6 +1,5 @@
 package com.planu.group_meeting.dao;
 
-import com.planu.group_meeting.dto.UserDto;
 import com.planu.group_meeting.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 

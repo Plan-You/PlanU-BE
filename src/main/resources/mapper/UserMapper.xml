@@ -6,7 +6,7 @@
 <mapper namespace="com.planu.group_meeting.dao.UserDAO">
 
     <insert id="insertUser" parameterType="com.planu.group_meeting.entity.User">
-        INSERT INTO USER (username, email, password, name, createdAt, updatedAt, role)
+        INSERT INTO USER (USERNAME, EMAIL, PASSWORD, NAME, CREATE_DATE, UPDATE_DATE, ROLE)
         VALUES (#{username}, #{email}, #{password}, #{name}, #{createdAt}, #{updatedAt}, #{role})
     </insert>
 
@@ -14,36 +14,36 @@
     <select id="existsByUsername" parameterType="String" resultType="boolean">
         SELECT COUNT(*) > 0
         FROM USER
-        WHERE username = #{username}
+        WHERE USERNAME = #{username}
     </select>
 
     <select id="existsByEmail" parameterType="String" resultType="boolean">
         SELECT COUNT(*) > 0
         FROM USER
-        WHERE email = #{email}
+        WHERE EMAIL = #{email}
     </select>
 
     <select id="findByUsername" parameterType="String">
-        SELECT id, username,
-        email,
-        password,
-        name,
-        role,
-        profileImgUrl,
-        birthDate,
-        createdAt,
-        updatedAt
+        SELECT ID, USERNAME,
+        EMAIL,
+        PASSWORD,
+        NAME,
+        ROLE,
+        PROFILE_IMG_URL,
+        BIRTH_DATE,
+        CREATE_DATE,
+        UPDATE_DATE
         FROM USER
-        WHERE username = #{username}
+        WHERE USERNAME = #{username}
     </select>
 
     <update id="updateUserProfile" parameterType="com.planu.group_meeting.entity.User">
         UPDATE USER
-        SET profileImgUrl = #{profileImgUrl},
-        birthDate = #{birthDate},
-        gender = #{gender},
-        updatedAt = NOW()
-        WHERE username = #{username}
+        SET PROFILE_IMG_URL = #{profileImgUrl},
+        BIRTH_DATE = #{birthDate},
+        GENDER = #{gender},
+        UPDATE_DATE = NOW()
+        WHERE USERNAME = #{username}
     </update>
 
 </mapper>
