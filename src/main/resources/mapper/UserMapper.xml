@@ -31,6 +31,7 @@
         ROLE,
         PROFILE_IMG_URL,
         BIRTH_DATE,
+        PROFILE_COMPLETED,
         CREATE_DATE,
         UPDATE_DATE
         FROM USER
@@ -39,9 +40,9 @@
 
     <update id="updateUserProfile" parameterType="com.planu.group_meeting.entity.User">
         UPDATE USER
-        SET PROFILE_IMG_URL = #{profileImgUrl},
-        BIRTH_DATE = #{birthDate},
+        SET BIRTH_DATE = #{birthDate},
         GENDER = #{gender},
+        PROFILE_COMPLETED = #{profileCompleted},
         UPDATE_DATE = NOW()
         WHERE USERNAME = #{username}
     </update>
