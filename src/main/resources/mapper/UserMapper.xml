@@ -46,4 +46,9 @@
         WHERE USERNAME = #{username}
     </update>
 
+    <update id="updateUserProfileImage" parameterType="map">
+            UPDATE USER
+            SET PROFILE_IMG_URL = #{profileImageUrl}
+            WHERE USERNAME = #{username}
+    </update>
 </mapper>

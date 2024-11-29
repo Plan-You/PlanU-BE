@@ -4,10 +4,13 @@ import com.planu.group_meeting.entity.common.Gender;
 import com.planu.group_meeting.entity.common.Role;
 import com.planu.group_meeting.entity.User;
 import jakarta.validation.constraints.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class UserDto {
@@ -50,16 +53,19 @@ public class UserDto {
     public static class UserProfileRequest {
         private String username;
 
-        private String profileImgUrl;
-
         @NotNull(message = "생년월일을 입력해주세요")
-        private LocalDateTime birthDate;
+        private LocalDate birthDate;
 
         @NotNull(message = "성별을 입력해주세요.")
         private Gender gender;
-
-
     }
+    @Data
+    public static class UserProfileImageRequest{
+        private String username;
+        private MultipartFile profileImage;
+    }
+
+
     @Getter
     public static class EmailRequest{
         private String email;

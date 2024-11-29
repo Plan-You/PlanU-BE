@@ -3,14 +3,17 @@ package com.planu.group_meeting.service;
 import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dto.TokenDto;
 import com.planu.group_meeting.dto.UserDto;
+import com.planu.group_meeting.dto.UserDto.UserProfileImageRequest;
 import com.planu.group_meeting.entity.User;
 import com.planu.group_meeting.exception.user.*;
 import com.planu.group_meeting.jwt.JwtUtil;
+import com.planu.group_meeting.service.file.S3Uploader;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +29,7 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, String> redisTemplate;
     private final MailService mailService;
+    private final S3Uploader s3Uploader;
 
     public boolean isDuplicatedUsername(String username) {
         return userDAO.existsByUsername(username);
@@ -56,10 +60,15 @@ public class UserService {
     public void createUserProfile(UserDto.UserProfileRequest userDto) {
         String username = userDto.getUsername();
         User user = userDAO.findByUsername(username);
-        user.setProfileImgUrl(userDto.getProfileImgUrl());
-        user.setBirthDate(String.valueOf(userDto.getBirthDate()));
+        user.setBirthDate(userDto.getBirthDate());
         user.setGender(userDto.getGender());
         userDAO.updateUserProfile(user);
+    }
+
+    public String updateUserProfileImage(UserProfileImageRequest userDto){
+        String profileImageUrl = s3Uploader.uploadFile(userDto.getProfileImage());
+        userDAO.updateUserProfileImage(userDto.getUsername(), profileImageUrl);
+        return profileImageUrl;
     }
 
     public TokenDto reissueAccessToken(String refresh) {

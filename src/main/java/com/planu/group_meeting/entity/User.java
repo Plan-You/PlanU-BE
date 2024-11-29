@@ -4,6 +4,7 @@ import com.planu.group_meeting.entity.common.Gender;
 import com.planu.group_meeting.entity.common.Role;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -20,7 +21,7 @@ public class User {
     private Role role;
     private Gender gender;
     private String profileImgUrl;
-    private String birthDate;
+    private LocalDate birthDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
