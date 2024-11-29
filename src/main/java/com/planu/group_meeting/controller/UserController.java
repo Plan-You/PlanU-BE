@@ -2,7 +2,9 @@ package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.dto.TokenDto;
 import com.planu.group_meeting.dto.UserDto;
+import com.planu.group_meeting.dto.UserDto.UserProfileImageRequest;
 import com.planu.group_meeting.service.UserService;
+import com.planu.group_meeting.service.file.S3Uploader;
 import com.planu.group_meeting.util.CookieUtil;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,13 +38,13 @@ public class UserController {
     }
 
     @PostMapping("/email-verification/sends")
-    public ResponseEntity<String>sendEmailCode(@RequestBody UserDto.EmailRequest emailDto) throws MessagingException {
+    public ResponseEntity<String> sendEmailCode(@RequestBody UserDto.EmailRequest emailDto) throws MessagingException {
         userService.sendCodeToEmail(emailDto);
         return ResponseEntity.status(HttpStatus.OK).body("인증 코드 전송 성공");
     }
 
     @PostMapping("/email-verification/verify")
-    public ResponseEntity<String>verifyEmailCode(@RequestBody UserDto.EmailVerificationRequest emailVerificationDto){
+    public ResponseEntity<String> verifyEmailCode(@RequestBody UserDto.EmailVerificationRequest emailVerificationDto) {
         userService.verifyEmailCode(emailVerificationDto);
         return ResponseEntity.status(HttpStatus.OK).body("인증 성공");
     }
@@ -52,6 +54,12 @@ public class UserController {
         userService.createUserProfile(userDto);
         return ResponseEntity.status(HttpStatus.CREATED).body("프로필 등록 성공");
     }
+
+    @PutMapping("/profile-image")
+    public ResponseEntity<String> updateProfileImage(@ModelAttribute UserProfileImageRequest userDto) {
+        return ResponseEntity.ok(userService.updateUserProfileImage(userDto));
+    }
+
 
     @PostMapping("/token/reissue")
     public ResponseEntity<String> reissueAccessToken(HttpServletResponse response, HttpServletRequest request) {
