@@ -62,6 +62,8 @@ public class UserService {
         User user = userDAO.findByUsername(username);
         user.setBirthDate(userDto.getBirthDate());
         user.setGender(userDto.getGender());
+        user.setProfileCompleted(true);
+        System.out.println(user.isProfileCompleted());
         userDAO.updateUserProfile(user);
     }
 
@@ -69,6 +71,12 @@ public class UserService {
         String profileImageUrl = s3Uploader.uploadFile(userDto.getProfileImage());
         userDAO.updateUserProfileImage(userDto.getUsername(), profileImageUrl);
         return profileImageUrl;
+    }
+
+    public boolean isUserProfileCompleted(String username){
+        User user = userDAO.findByUsername(username);
+        System.out.println(user.isProfileCompleted());
+        return user.isProfileCompleted();
     }
 
     public TokenDto reissueAccessToken(String refresh) {

@@ -1,5 +1,6 @@
 package com.planu.group_meeting.controller;
 
+import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dto.TokenDto;
 import com.planu.group_meeting.dto.UserDto;
 import com.planu.group_meeting.dto.UserDto.UserProfileImageRequest;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import static com.planu.group_meeting.jwt.JwtFilter.AUTHORIZATION_HEADER;
@@ -60,6 +62,10 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUserProfileImage(userDto));
     }
 
+    @GetMapping("/profile/exists")
+    public ResponseEntity<Boolean> checkProfileExists(@AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok(userService.isUserProfileCompleted(userDetails.getUsername()));
+    }
 
     @PostMapping("/token/reissue")
     public ResponseEntity<String> reissueAccessToken(HttpServletResponse response, HttpServletRequest request) {

@@ -22,6 +22,7 @@ public class User {
     private Gender gender;
     private String profileImgUrl;
     private LocalDate birthDate;
+    private boolean profileCompleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
