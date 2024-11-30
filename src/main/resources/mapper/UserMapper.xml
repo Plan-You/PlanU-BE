@@ -5,6 +5,22 @@
 
 <mapper namespace="com.planu.group_meeting.dao.UserDAO">
 
+    <resultMap id="userResultMap" type="com.planu.group_meeting.entity.User">
+        <id column="ID" property="id"/>
+        <result column="USERNAME" property="username"/>
+        <result column="EMAIL" property="email"/>
+        <result column="PASSWORD" property="password"/>
+        <result column="NAME" property="name"/>
+        <result column="ROLE" property="role" javaType="com.planu.group_meeting.entity.common.Role"/>
+        <result column="GENDER" property="gender" javaType="com.planu.group_meeting.entity.common.Gender"/>
+        <result column="PROFILE_IMG_URL" property="profileImgUrl"/>
+        <result column="BIRTH_DATE" property="birthDate"/>
+        <result column="PROFILE_STATUS" property="profileStatus" javaType="com.planu.group_meeting.entity.common.ProfileStatus"/>
+        <result column="CREATE_DATE" property="createdAt"/>
+        <result column="UPDATE_DATE" property="updatedAt"/>
+    </resultMap>
+
+
     <insert id="insertUser" parameterType="com.planu.group_meeting.entity.User">
         INSERT INTO USER (USERNAME, EMAIL, PASSWORD, NAME, CREATE_DATE, UPDATE_DATE, ROLE)
         VALUES (#{username}, #{email}, #{password}, #{name}, #{createdAt}, #{updatedAt}, #{role})
@@ -23,26 +39,27 @@
         WHERE EMAIL = #{email}
     </select>
 
-    <select id="findByUsername" parameterType="String">
+    <select id="findByUsername" parameterType="String" resultMap="userResultMap">
         SELECT ID, USERNAME,
         EMAIL,
         PASSWORD,
         NAME,
         ROLE,
+        GENDER,
         PROFILE_IMG_URL,
         BIRTH_DATE,
-        PROFILE_COMPLETED,
+        PROFILE_STATUS,
         CREATE_DATE,
         UPDATE_DATE
         FROM USER
         WHERE USERNAME = #{username}
     </select>
 
-    <update id="updateUserProfile" parameterType="com.planu.group_meeting.entity.User">
+    <update id="updateUserProfile" parameterType="com.planu.group_meeting.dto.UserDto$UserProfileRequest">
         UPDATE USER
         SET BIRTH_DATE = #{birthDate},
         GENDER = #{gender},
-        PROFILE_COMPLETED = #{profileCompleted},
+        PROFILE_STATUS = #{profileStatus},
         UPDATE_DATE = NOW()
         WHERE USERNAME = #{username}
     </update>

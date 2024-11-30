@@ -50,23 +50,21 @@ public class JwtFilter extends OncePerRequestFilter {
             if (!"access".equals(category)) {
                 throw new InvalidTokenException("토큰 유형이 올바르지 않습니다.");
             }
-
             User user = userDAO.findByUsername(jwtUtil.getUsername(accessToken));
             CustomUserDetails userDetails = new CustomUserDetails(user);
-
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authToken);
-
             filterChain.doFilter(request, response);
 
         } catch (ExpiredTokenException e) {
             jwtExceptionHandler(response, e.getMessage(), HttpServletResponse.SC_UNAUTHORIZED);
         } catch (InvalidTokenException e) {
             jwtExceptionHandler(response, e.getMessage(), HttpServletResponse.SC_FORBIDDEN);
-        } catch (Exception e) {
-            jwtExceptionHandler(response, "서버 오류가 발생했습니다.", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+//        catch (Exception e) {
+//            jwtExceptionHandler(response, "서버 오류가 발생했습니다.", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+//        }
     }
 
     private void jwtExceptionHandler(HttpServletResponse response, String message, int statusCode) {
