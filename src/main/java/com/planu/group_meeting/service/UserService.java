@@ -5,6 +5,7 @@ import com.planu.group_meeting.dto.TokenDto;
 import com.planu.group_meeting.dto.UserDto;
 import com.planu.group_meeting.dto.UserDto.UserProfileImageRequest;
 import com.planu.group_meeting.entity.User;
+import com.planu.group_meeting.entity.common.ProfileStatus;
 import com.planu.group_meeting.exception.user.*;
 import com.planu.group_meeting.jwt.JwtUtil;
 import com.planu.group_meeting.service.file.S3Uploader;
@@ -13,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -58,13 +58,8 @@ public class UserService {
     }
 
     public void createUserProfile(UserDto.UserProfileRequest userDto) {
-        String username = userDto.getUsername();
-        User user = userDAO.findByUsername(username);
-        user.setBirthDate(userDto.getBirthDate());
-        user.setGender(userDto.getGender());
-        user.setProfileCompleted(true);
-        System.out.println(user.isProfileCompleted());
-        userDAO.updateUserProfile(user);
+        userDto.setProfileStatus(ProfileStatus.COMPLETED);
+        userDAO.updateUserProfile(userDto);
     }
 
     public String updateUserProfileImage(UserProfileImageRequest userDto){
@@ -75,8 +70,8 @@ public class UserService {
 
     public boolean isUserProfileCompleted(String username){
         User user = userDAO.findByUsername(username);
-        System.out.println(user.isProfileCompleted());
-        return user.isProfileCompleted();
+        System.out.println(user.getProfileStatus());
+        return user.getProfileStatus().equals(ProfileStatus.COMPLETED);
     }
 
     public TokenDto reissueAccessToken(String refresh) {

@@ -1,6 +1,7 @@
 package com.planu.group_meeting.entity;
 
 import com.planu.group_meeting.entity.common.Gender;
+import com.planu.group_meeting.entity.common.ProfileStatus;
 import com.planu.group_meeting.entity.common.Role;
 import lombok.*;
 
@@ -22,8 +23,7 @@ public class User {
     private Gender gender;
     private String profileImgUrl;
     private LocalDate birthDate;
-    private boolean profileCompleted;
+    private ProfileStatus profileStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
 }
