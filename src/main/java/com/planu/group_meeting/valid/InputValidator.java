@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
+import java.util.Objects;
+
 @Component
 public class InputValidator {
 
@@ -33,6 +35,12 @@ public class InputValidator {
         String contentType = file.getContentType();
         if (contentType == null || !Arrays.asList(ACCEPTED_FILE_TYPES).contains(contentType)) {
             throw new InvalidInputException("허용된 이미지 파일 형식은 JPEG, PNG, GIF 입니다.");
+        }
+    }
+
+    public void invalidUserNameEquls(String name1, String name2){
+        if(Objects.equals(name1, name2)){
+            throw new InvalidInputException("자기 자신을 초대할 수 없습니다.");
         }
     }
 }

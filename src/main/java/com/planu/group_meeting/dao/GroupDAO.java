@@ -11,5 +11,9 @@ public interface GroupDAO {
 
     void insertGroupUser(GroupUser groupUser);
 
+    Group findGroupById(Long groupId);
+
     Long findUserIdByUserName(String userName);
+
+    GroupUser findGroupUserByUserIdAndGroupId(Long userId, Long groupId);
 }

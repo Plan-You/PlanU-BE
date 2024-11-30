@@ -1,6 +1,7 @@
 package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.dto.GroupInviteResponseDTO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.service.GroupService;
 import com.planu.group_meeting.valid.InputValidator;
@@ -30,5 +31,14 @@ public class GroupController {
         inputValidator.groupNameValid(groupName);
         inputValidator.groupImageValid(groupImage);
         return ResponseEntity.ok(groupService.createGroup(userDetails.getUsername(), groupName, groupImage));
+    }
+
+    @PostMapping("/invite")
+    public ResponseEntity<GroupInviteResponseDTO> inviteUser(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                             @RequestParam("groupId") Long id,
+                                                             @RequestParam("userName") String userName){
+        inputValidator.invalidUserNameEquls(userName, userDetails.getUsername());
+
+        return ResponseEntity.ok(groupService.inviteUser(userDetails, userName, id));
     }
 }
