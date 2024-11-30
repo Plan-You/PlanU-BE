@@ -1,5 +1,6 @@
 package com.planu.group_meeting.service.file;
 
+import com.planu.group_meeting.exception.file.InvalidFileTypeException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -15,6 +16,8 @@ public class S3Uploader {
     private final S3Client s3Client;
     private final String bucketName;
     private final Region region; // Region 필드를 추가
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    private static final String[] ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/gif"};
 
     public S3Uploader(S3Client s3Client, String bucketName, Region region) {
         this.s3Client = s3Client;
@@ -29,6 +32,9 @@ public class S3Uploader {
      * @return 업로드된 파일의 URL
      */
     public String uploadFile(MultipartFile file) {
+        // 파일 유효성 검사
+        validateFile(file);
+
         String uniqueFileName = generateUniqueFileName(file.getOriginalFilename());
 
         try {
@@ -47,6 +53,31 @@ public class S3Uploader {
 
         } catch (Exception e) {
             throw new RuntimeException("파일 업로드 실패: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 파일 유효성 검사 (크기 및 형식)
+     *
+     * @param file 업로드할 MultipartFile
+     */
+    private void validateFile(MultipartFile file) {
+        // 파일 크기 검사
+//        if (file.getSize() > MAX_FILE_SIZE) {
+//            throw new FileSizeExceededException();
+//        }
+
+        // 파일 형식 검사
+        boolean isValidContentType = false;
+        for (String allowedContentType : ALLOWED_CONTENT_TYPES) {
+            if (allowedContentType.equals(file.getContentType())) {
+                isValidContentType = true;
+                break;
+            }
+        }
+
+        if (!isValidContentType) {
+            throw new InvalidFileTypeException();
         }
     }
 

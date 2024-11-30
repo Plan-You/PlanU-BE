@@ -3,9 +3,12 @@ package com.planu.group_meeting.service;
 import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dto.TokenDto;
 import com.planu.group_meeting.dto.UserDto;
+import com.planu.group_meeting.dto.UserDto.UserProfileImageRequest;
 import com.planu.group_meeting.entity.User;
+import com.planu.group_meeting.entity.common.ProfileStatus;
 import com.planu.group_meeting.exception.user.*;
 import com.planu.group_meeting.jwt.JwtUtil;
+import com.planu.group_meeting.service.file.S3Uploader;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -26,6 +29,7 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, String> redisTemplate;
     private final MailService mailService;
+    private final S3Uploader s3Uploader;
 
     public boolean isDuplicatedUsername(String username) {
         return userDAO.existsByUsername(username);
@@ -54,12 +58,20 @@ public class UserService {
     }
 
     public void createUserProfile(UserDto.UserProfileRequest userDto) {
-        String username = userDto.getUsername();
+        userDto.setProfileStatus(ProfileStatus.COMPLETED);
+        userDAO.updateUserProfile(userDto);
+    }
+
+    public String updateUserProfileImage(UserProfileImageRequest userDto){
+        String profileImageUrl = s3Uploader.uploadFile(userDto.getProfileImage());
+        userDAO.updateUserProfileImage(userDto.getUsername(), profileImageUrl);
+        return profileImageUrl;
+    }
+
+    public boolean isUserProfileCompleted(String username){
         User user = userDAO.findByUsername(username);
-        user.setProfileImgUrl(userDto.getProfileImgUrl());
-        user.setBirthDate(String.valueOf(userDto.getBirthDate()));
-        user.setGender(userDto.getGender());
-        userDAO.updateUserProfile(user);
+        System.out.println(user.getProfileStatus());
+        return user.getProfileStatus().equals(ProfileStatus.COMPLETED);
     }
 
     public TokenDto reissueAccessToken(String refresh) {
@@ -67,7 +79,7 @@ public class UserService {
         String username = jwtUtil.getUsername(refresh);
         String storedRefresh = redisTemplate.opsForValue().get(REFRESH_TOKEN_PREFIX + username);
         if (storedRefresh == null || !storedRefresh.equals(refresh)) {
-            throw new InvalidTokenException();
+            throw new InvalidRefreshTokenException();
         }
         redisTemplate.delete(username);
         String role = jwtUtil.getRole(refresh);

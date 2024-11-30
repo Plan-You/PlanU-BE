@@ -1,18 +1,22 @@
 package com.planu.group_meeting.dto;
 
 import com.planu.group_meeting.entity.Schedule;
+import com.planu.group_meeting.entity.ScheduleParticipant;
+import com.planu.group_meeting.entity.UnregisteredParticipant;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ScheduleDto {
     @Data
-    public static class ScheduleSaveRequest{
+    public static class ScheduleSaveRequest {
 
         @NotBlank(message = "일정 제목은 필수 입력 값입니다.")
         @Size(max = 20, message = "일정 제목은 20자 이내로 입력해주세요.")
@@ -32,9 +36,11 @@ public class ScheduleDto {
         @Size(max = 100, message = "메모는 100자 이내로 입력해주세요.")
         private String memo;
 
-        private List<Long>participants;
+        private List<Long> participants;
 
-        public Schedule toEntity(Long userId){
+        private List<String> unregisteredParticipants;
+
+        public Schedule toEntity(Long userId) {
             return Schedule.builder()
                     .title(title)
                     .startDateTime(startDateTime)
@@ -46,6 +52,18 @@ public class ScheduleDto {
                     .build();
         }
 
+    }
+    @Getter
+    public static class ScheduleDetailsResponse {
+        private Long id;
+        private String title;
+        private String color;
+        private LocalDateTime startDateTime;
+        private LocalDateTime endDateTime;
+        private String location;
+        private String memo;
+        private List<ScheduleParticipant> participants = new ArrayList<>();
+        private List<UnregisteredParticipant> unregisteredParticipants = new ArrayList<>();
     }
 
 }

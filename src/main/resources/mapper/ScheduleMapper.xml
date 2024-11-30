@@ -4,6 +4,23 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.planu.group_meeting.dao.ScheduleDAO">
+    <resultMap id="ScheduleDetailsResponseMap" type="com.planu.group_meeting.dto.ScheduleDto$ScheduleDetailsResponse">
+        <id property="id" column="scheduleId"/>
+        <result property="title" column="title"/>
+        <result property="startDateTime" column="startDateTime"/>
+        <result property="endDateTime" column="endDateTime"/>
+        <result property="color" column="color"/>
+        <result property="location" column="location"/>
+        <result property="memo" column="memo"/>
+        <collection property="participants" ofType="com.planu.group_meeting.dto.ParticipantDto$ScheduleParticipantResponse">
+            <result property="id" column="participantId"/>
+            <result property="name" column="participantName"/>
+        </collection>
+        <collection property="unregisteredParticipants" ofType="com.planu.group_meeting.dto.ParticipantDto$UnregisteredParticipantResponse">
+            <result property="name" column="unregisteredParticipantName"/>
+        </collection>
+    </resultMap>
+
 
     <insert id="insertSchedule" parameterType="com.planu.group_meeting.entity.Schedule"
             useGeneratedKeys="true" keyProperty="id">
@@ -11,12 +28,40 @@
         VALUES (#{title}, #{startDateTime}, #{endDateTime}, #{color}, #{memo}, #{location}, #{userId})
     </insert>
 
-    <insert id="insertScheduleParticipants">
-        INSERT INTO SCHEDULE_PARTICIPANT (SCHEDULE_ID,USER_ID)
+    <insert id="insertScheduleParticipants" parameterType="list">
+        INSERT INTO SCHEDULE_PARTICIPANT (SCHEDULE_ID, USER_ID)
         VALUES
-        <foreach collection="participantIds" item="userId" separator=",">
-            (#{scheduleId}, #{userId})
+        <foreach collection="list" item="participant" separator=",">
+            (#{participant.scheduleId}, #{participant.userId})
         </foreach>
     </insert>
+
+    <insert id="insertUnregisteredParticipants" parameterType="list">
+        INSERT INTO UNREGISTERED_PARTICIPANT (SCHEDULE_ID, PARTICIPANT_NAME)
+        VALUES
+        <foreach collection="list" item="participant" separator=",">
+            (#{participant.scheduleId}, #{participant.participantName})
+        </foreach>
+    </insert>
+
+    <select id="getScheduleDetails" resultMap="ScheduleDetailsResponseMap">
+        SELECT
+        s.ID AS scheduleId,
+        s.TITLE AS title,
+        s.START_DATETIME AS startDateTime,
+        s.END_DATETIME AS endDateTime,
+        s.COLOR AS color,
+        s.LOCATION AS location,
+        s.MEMO AS memo,
+        u.ID AS participantId,
+        u.NAME AS participantName,
+        up.PARTICIPANT_NAME AS unregisteredParticipantName
+        FROM SCHEDULE s
+        LEFT JOIN SCHEDULE_PARTICIPANT sp ON s.ID = sp.SCHEDULE_ID
+        LEFT JOIN USER u ON sp.USER_ID = u.ID
+        LEFT JOIN UNREGISTERED_PARTICIPANT up ON s.ID = up.SCHEDULE_ID
+        WHERE s.ID = #{scheduleId}
+    </select>
+
 
 </mapper>

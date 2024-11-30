@@ -1,12 +1,15 @@
 package com.planu.group_meeting.exception;
 
 import com.planu.group_meeting.exception.Group.InvalidInputException;
+import com.planu.group_meeting.exception.file.InvalidFileTypeException;
+import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
 import com.planu.group_meeting.exception.user.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -31,8 +34,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 이메일 입니다.");
     }
 
-    @ExceptionHandler(InvalidTokenException.class)
-    public final ResponseEntity<String>handleInvalidTokenException(InvalidTokenException e){
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public final ResponseEntity<String>handleInvalidTokenException(InvalidRefreshTokenException e){
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("유효하지 않은 토큰입니다");
     }
 
@@ -50,8 +53,24 @@ public class GlobalExceptionHandler {
     public final ResponseEntity<String>handleUnverifiedEmailException(UnverifiedEmailException e){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이메일 인증이 완료되지 않았습니다.");
     }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public final ResponseEntity<String> handleFileSizeExceededException(MaxUploadSizeExceededException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("파일 크기는 5MB를 초과할 수 없습니다.");
+    }
+
+    @ExceptionHandler(InvalidFileTypeException.class)
+    public final ResponseEntity<String> handleInvalidFileTypeException(InvalidFileTypeException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("허용되지 않는 파일 형식입니다. JPEG, PNG, GIF 형식만 지원됩니다.");
+    }
+
     @ExceptionHandler(InvalidInputException.class)
     public ResponseEntity<String> handleInvalidInputException(InvalidInputException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+    @ExceptionHandler(ScheduleNotFoundException.class)
+    public ResponseEntity<String> handleScheduleNotFoundException(ScheduleNotFoundException e){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 }
