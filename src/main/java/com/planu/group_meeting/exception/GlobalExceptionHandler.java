@@ -56,16 +56,21 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public final ResponseEntity<String> handleFileSizeExceededException(MaxUploadSizeExceededException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("파일 크기는 5MB를 초과할 수 없습니다.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("");
     }
 
     @ExceptionHandler(InvalidFileTypeException.class)
     public final ResponseEntity<String> handleInvalidFileTypeException(InvalidFileTypeException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("허용되지 않는 파일 형식입니다. JPEG, PNG, GIF 형식만 지원됩니다.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("");
     }
 
     @ExceptionHandler(InvalidInputException.class)
     public ResponseEntity<String> handleInvalidInputException(InvalidInputException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 
