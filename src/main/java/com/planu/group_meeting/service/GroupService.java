@@ -85,4 +85,24 @@ public class GroupService {
                 .groupImageUrl(group.getGroupImageUrl())
                 .build();
     }
+
+    @Transactional
+    public void joinGroup(CustomUserDetails customUserDetails, Long groupId){
+        Group group = groupDAO.findGroupById(groupId);
+        if(group == null) {
+            throw new IllegalArgumentException("해당 그룹이 존재하지 않습니다.");
+        }
+
+        GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(customUserDetails.getId(), groupId);
+        if(groupUser == null){
+            throw new IllegalArgumentException("초대 받지 않았습니다.");
+        }
+
+        if(groupUser.getGroupState() == 1){
+            throw  new IllegalArgumentException("이미 그룹에 속해 있습니다.");
+        }
+
+        groupDAO.UpdateGroupUserGroupStatus(customUserDetails.getId(), groupId);
+
+    }
 }

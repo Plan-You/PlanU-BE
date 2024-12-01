@@ -44,4 +44,10 @@
         WHERE USER_ID = #{userId} AND GROUP_ID = #{groupId}
     </select>
 
+    <update id="updateGroupUserGroupStatus">
+        UPDATE GROUP_USER
+        SET GROUP_STATE = 1, UPDATED_DATE = CURRENT_TIMESTAMP
+        WHERE USER_ID = #{userId} AND GROUP_ID = #{groupId}
+    </update>
+
 </mapper>
