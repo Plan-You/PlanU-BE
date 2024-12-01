@@ -16,4 +16,6 @@ public interface GroupDAO {
     Long findUserIdByUserName(String userName);
 
     GroupUser findGroupUserByUserIdAndGroupId(Long userId, Long groupId);
+
+    void UpdateGroupUserGroupStatus(Long userId, Long groupId);
 }

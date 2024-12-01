@@ -11,6 +11,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/groups")
 public class GroupController {
@@ -40,5 +43,17 @@ public class GroupController {
         inputValidator.invalidUserNameEquls(userName, userDetails.getUsername());
 
         return ResponseEntity.ok(groupService.inviteUser(userDetails, userName, id));
+    }
+
+    @PostMapping("/join")
+    public ResponseEntity<Map<String, String>> joinGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                         @RequestParam("groupId") Long id){
+
+        groupService.joinGroup(userDetails, id);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "초대 수락 하였습니다.");
+
+        return ResponseEntity.ok(response);
     }
 }
