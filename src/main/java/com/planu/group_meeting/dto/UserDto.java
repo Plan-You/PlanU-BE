@@ -58,7 +58,7 @@ public class UserDto {
 
         @NotNull(message = "성별을 입력해주세요.")
         @Pattern(regexp = "[MF]", message = "성별은 'M' 또는 'F'만 입력 가능합니다.")
-        private Gender gender;
+        private String gender;
 
         private MultipartFile profileImage;
     }
