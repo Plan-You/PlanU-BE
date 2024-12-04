@@ -56,11 +56,6 @@ public class UserController {
                                                     @AuthenticationPrincipal CustomUserDetails userDetails) {
         UserDto.UserProfileRequest userProfileRequest = userDto.getUserProfileRequest();
         UserTermsDto.TermsRequest termsRequest = userDto.getTermsRequest();
-
-        System.out.println(termsRequest.getIsTermsOfServiceAgreed());
-        System.out.println(termsRequest.getIsPrivacyPolicyAgreed());
-        System.out.println(termsRequest.getIsSnsReceiveAgreed());
-
         userService.createUserProfile(userDetails.getId(), userProfileRequest, termsRequest);
 
         return ResponseEntity.status(HttpStatus.CREATED).body("프로필 등록 성공");

@@ -6,6 +6,7 @@ import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
 import com.planu.group_meeting.exception.user.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -23,6 +24,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage.toString());
     }
+
 
     @ExceptionHandler(DuplicatedUsernameException.class)
     public final ResponseEntity<String>handleDuplicatedUsernameException(DuplicatedUsernameException e){
