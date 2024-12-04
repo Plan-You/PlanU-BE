@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -54,6 +55,8 @@ public class UserDto {
     @NoArgsConstructor
     public static class UserProfileRequest {
         @NotNull(message = "생년월일을 입력해주세요")
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        @Past(message = "생년월일은 오늘 이전 날짜여야 합니다.")
         private LocalDate birthDate;
 
         @NotNull(message = "성별을 입력해주세요.")

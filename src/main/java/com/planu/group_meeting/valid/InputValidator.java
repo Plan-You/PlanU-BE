@@ -1,6 +1,6 @@
 package com.planu.group_meeting.valid;
 
-import com.planu.group_meeting.exception.Group.InvalidInputException;
+import com.planu.group_meeting.exception.group.InvalidInputException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
