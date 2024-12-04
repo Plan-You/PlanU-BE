@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.planu.group_meeting.dao.UserTermsDAO">
+
+    <insert id="saveTerms" parameterType="com.planu.group_meeting.entity.UserTerms">
+        INSERT INTO USER_TERMS (USER_ID, IS_PRIVACY_POLICY_AGREED, IS_TERMS_OF_SERVICE_AGREED, IS_SNS_RECEIVE_AGREED)
+        VALUES (#{userId}, #{isPrivacyPolicyAgreed}, #{isTermsOfServiceAgreed}, #{isSnsReceiveAgreed})
+    </insert>
+</mapper>
