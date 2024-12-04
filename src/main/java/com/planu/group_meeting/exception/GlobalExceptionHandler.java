@@ -6,6 +6,7 @@ import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
 import com.planu.group_meeting.exception.user.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -23,6 +24,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage.toString());
     }
+
 
     @ExceptionHandler(DuplicatedUsernameException.class)
     public final ResponseEntity<String>handleDuplicatedUsernameException(DuplicatedUsernameException e){
@@ -56,16 +58,21 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public final ResponseEntity<String> handleFileSizeExceededException(MaxUploadSizeExceededException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("파일 크기는 5MB를 초과할 수 없습니다.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("");
     }
 
     @ExceptionHandler(InvalidFileTypeException.class)
     public final ResponseEntity<String> handleInvalidFileTypeException(InvalidFileTypeException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("허용되지 않는 파일 형식입니다. JPEG, PNG, GIF 형식만 지원됩니다.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("");
     }
 
     @ExceptionHandler(InvalidInputException.class)
     public ResponseEntity<String> handleInvalidInputException(InvalidInputException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 

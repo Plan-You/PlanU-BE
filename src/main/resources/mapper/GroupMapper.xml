@@ -20,4 +20,34 @@
         VALUES (#{userId}, #{groupId}, #{groupRole}, #{groupState})
     </insert>
 
+    <select id="findGroupById" resultType="com.planu.group_meeting.entity.Group">
+        SELECT
+        ID,
+        NAME,
+        PROFILE AS groupImageUrl,
+        CREATED_DATE AS createdDate,
+        UPDATED_DATE AS updatedDate
+        FROM GROUP_
+        WHERE ID = #{groupId}
+    </select>
+
+
+    <select id="findGroupUserByUserIdAndGroupId" resultType="com.planu.group_meeting.entity.GroupUser">
+        SELECT
+        USER_ID AS userId,
+        GROUP_ID AS groupId,
+        GROUP_ROLE AS groupRole,
+        GROUP_STATE AS groupState,
+        CREATED_DATE AS createdDate,
+        UPDATED_DATE AS updatedDate
+        FROM GROUP_USER
+        WHERE USER_ID = #{userId} AND GROUP_ID = #{groupId}
+    </select>
+
+    <update id="updateGroupUserGroupStatus">
+        UPDATE GROUP_USER
+        SET GROUP_STATE = 1, UPDATED_DATE = CURRENT_TIMESTAMP
+        WHERE USER_ID = #{userId} AND GROUP_ID = #{groupId}
+    </update>
+
 </mapper>

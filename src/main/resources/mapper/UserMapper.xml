@@ -26,7 +26,6 @@
         VALUES (#{username}, #{email}, #{password}, #{name}, #{createdAt}, #{updatedAt}, #{role})
     </insert>
 
-    <!-- 중복된 username 확인 -->
     <select id="existsByUsername" parameterType="String" resultType="boolean">
         SELECT COUNT(*) > 0
         FROM USER
@@ -55,18 +54,20 @@
         WHERE USERNAME = #{username}
     </select>
 
-    <update id="updateUserProfile" parameterType="com.planu.group_meeting.dto.UserDto$UserProfileRequest">
+    <update id="updateUserProfile" parameterType="com.planu.group_meeting.entity.User">
         UPDATE USER
-        SET BIRTH_DATE = #{birthDate},
-        GENDER = #{gender},
-        PROFILE_STATUS = #{profileStatus},
-        UPDATE_DATE = NOW()
-        WHERE USERNAME = #{username}
+        <set>
+            <if test="user.username != null">USERNAME = #{user.username},</if>
+            <if test="user.password != null">PASSWORD = #{user.password},</if>
+            <if test="user.name != null">NAME = #{user.name},</if>
+            <if test="user.email != null">EMAIL = #{user.email},</if>
+            <if test="user.role != null">ROLE = #{user.role},</if>
+            <if test="user.gender != null">GENDER = #{user.gender},</if>
+            <if test="user.profileImgUrl != null">PROFILE_IMG_URL = #{user.profileImgUrl},</if>
+            <if test="user.birthDate != null">BIRTH_DATE = #{user.birthDate},</if>
+            <if test="user.profileStatus != null">PROFILE_STATUS = #{user.profileStatus},</if>
+        </set>
+        WHERE ID = #{userId}
     </update>
 
-    <update id="updateUserProfileImage" parameterType="map">
-            UPDATE USER
-            SET PROFILE_IMG_URL = #{profileImageUrl}
-            WHERE USERNAME = #{username}
-    </update>
 </mapper>

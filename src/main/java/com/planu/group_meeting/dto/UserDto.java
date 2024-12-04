@@ -1,9 +1,11 @@
 package com.planu.group_meeting.dto;
 
+import com.planu.group_meeting.entity.UserTerms;
 import com.planu.group_meeting.entity.common.Gender;
 import com.planu.group_meeting.entity.common.ProfileStatus;
 import com.planu.group_meeting.entity.common.Role;
 import com.planu.group_meeting.entity.User;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.Getter;
@@ -48,26 +50,28 @@ public class UserDto {
                     .build();
         }
     }
-    @Getter
-    @Setter
+    @Data
     @NoArgsConstructor
     public static class UserProfileRequest {
-        private String username;
-
         @NotNull(message = "생년월일을 입력해주세요")
         private LocalDate birthDate;
 
         @NotNull(message = "성별을 입력해주세요.")
-        private Gender gender;
+        @Pattern(regexp = "[MF]", message = "성별은 'M' 또는 'F'만 입력 가능합니다.")
+        private String gender;
 
-        private ProfileStatus profileStatus;
-    }
-    @Data
-    public static class UserProfileImageRequest{
-        private String username;
         private MultipartFile profileImage;
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class UserRegistrationRequest {
+        @Valid
+        private UserProfileRequest userProfileRequest;
+        @Valid
+        private UserTermsDto.TermsRequest termsRequest;
+    }
 
     @Getter
     public static class EmailRequest{

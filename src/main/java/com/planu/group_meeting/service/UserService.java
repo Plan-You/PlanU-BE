@@ -1,10 +1,12 @@
 package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.dao.UserDAO;
+import com.planu.group_meeting.dao.UserTermsDAO;
 import com.planu.group_meeting.dto.TokenDto;
 import com.planu.group_meeting.dto.UserDto;
-import com.planu.group_meeting.dto.UserDto.UserProfileImageRequest;
+import com.planu.group_meeting.dto.UserTermsDto;
 import com.planu.group_meeting.entity.User;
+import com.planu.group_meeting.entity.UserTerms;
 import com.planu.group_meeting.entity.common.ProfileStatus;
 import com.planu.group_meeting.exception.user.*;
 import com.planu.group_meeting.jwt.JwtUtil;
@@ -14,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +28,7 @@ import static com.planu.group_meeting.jwt.JwtUtil.REFRESH_TOKEN_PREFIX;
 public class UserService {
 
     private final UserDAO userDAO;
+    private final UserTermsDAO userTermsDAO;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, String> redisTemplate;
@@ -57,20 +61,21 @@ public class UserService {
         userDAO.insertUser(userDto.toEntity());
     }
 
-    public void createUserProfile(UserDto.UserProfileRequest userDto) {
-        userDto.setProfileStatus(ProfileStatus.COMPLETED);
-        userDAO.updateUserProfile(userDto);
+    @Transactional
+    public void createUserProfile(Long userId, UserDto.UserProfileRequest userProfileRequest,
+                                  UserTermsDto.TermsRequest termsRequest) {
+        String profileImageUrl = s3Uploader.uploadFile(userProfileRequest.getProfileImage());
+        User user = new User();
+        user.updateProfile(profileImageUrl, userProfileRequest.getGender(), userProfileRequest.getBirthDate());
+        userDAO.updateUserProfile(userId, user);
+
+        UserTerms userTerms = termsRequest.toEntity(userId);
+        userTermsDAO.saveTerms(userTerms);
     }
 
-    public String updateUserProfileImage(UserProfileImageRequest userDto){
-        String profileImageUrl = s3Uploader.uploadFile(userDto.getProfileImage());
-        userDAO.updateUserProfileImage(userDto.getUsername(), profileImageUrl);
-        return profileImageUrl;
-    }
 
-    public boolean isUserProfileCompleted(String username){
+    public boolean isUserProfileCompleted(String username) {
         User user = userDAO.findByUsername(username);
-        System.out.println(user.getProfileStatus());
         return user.getProfileStatus().equals(ProfileStatus.COMPLETED);
     }
 

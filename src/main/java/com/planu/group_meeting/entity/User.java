@@ -26,4 +26,11 @@ public class User {
     private ProfileStatus profileStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public void updateProfile(String profileImgUrl, String gender, LocalDate birthDate) {
+        this.profileImgUrl = profileImgUrl;
+        this.gender = Gender.valueOf(gender);
+        this.birthDate = birthDate;
+        this.profileStatus = ProfileStatus.COMPLETED;
+    }
 }

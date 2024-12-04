@@ -3,9 +3,9 @@ package com.planu.group_meeting.controller;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dto.TokenDto;
 import com.planu.group_meeting.dto.UserDto;
-import com.planu.group_meeting.dto.UserDto.UserProfileImageRequest;
+import com.planu.group_meeting.dto.UserDto.UserRegistrationRequest;
+import com.planu.group_meeting.dto.UserTermsDto;
 import com.planu.group_meeting.service.UserService;
-import com.planu.group_meeting.service.file.S3Uploader;
 import com.planu.group_meeting.util.CookieUtil;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,18 +52,17 @@ public class UserController {
     }
 
     @PostMapping("/profile")
-    public ResponseEntity<String> createUserProfile(@RequestBody UserDto.UserProfileRequest userDto) {
-        userService.createUserProfile(userDto);
+    public ResponseEntity<String> createUserProfile(@ModelAttribute @Valid UserRegistrationRequest userDto,
+                                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
+        UserDto.UserProfileRequest userProfileRequest = userDto.getUserProfileRequest();
+        UserTermsDto.TermsRequest termsRequest = userDto.getTermsRequest();
+        userService.createUserProfile(userDetails.getId(), userProfileRequest, termsRequest);
+
         return ResponseEntity.status(HttpStatus.CREATED).body("프로필 등록 성공");
     }
 
-    @PutMapping("/profile-image")
-    public ResponseEntity<String> updateProfileImage(@ModelAttribute UserProfileImageRequest userDto) {
-        return ResponseEntity.ok(userService.updateUserProfileImage(userDto));
-    }
-
     @GetMapping("/profile/exists")
-    public ResponseEntity<Boolean> checkProfileExists(@AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseEntity<Boolean> checkProfileExists(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(userService.isUserProfileCompleted(userDetails.getUsername()));
     }
 
