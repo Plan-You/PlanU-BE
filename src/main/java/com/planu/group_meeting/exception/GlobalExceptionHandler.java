@@ -1,15 +1,16 @@
 package com.planu.group_meeting.exception;
 
-import com.planu.group_meeting.exception.Group.InvalidInputException;
+import com.planu.group_meeting.exception.group.InvalidInputException;
 import com.planu.group_meeting.exception.file.InvalidFileTypeException;
 import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
 import com.planu.group_meeting.exception.user.*;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
@@ -24,7 +25,6 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage.toString());
     }
-
 
     @ExceptionHandler(DuplicatedUsernameException.class)
     public final ResponseEntity<String>handleDuplicatedUsernameException(DuplicatedUsernameException e){

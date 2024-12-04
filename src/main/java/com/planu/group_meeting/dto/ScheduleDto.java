@@ -66,4 +66,14 @@ public class ScheduleDto {
         private List<UnregisteredParticipant> unregisteredParticipants = new ArrayList<>();
     }
 
+    @Getter
+    public static class ScheduleListResponse{
+        private Long id;
+        private String title;
+        private String location;
+        private LocalDateTime startDateTime;
+        private LocalDateTime endDateTime;
+        private String color;
+    }
+
 }
