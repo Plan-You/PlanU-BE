@@ -13,4 +13,6 @@ public class AvailableDateDto {
         private List<LocalDate> availableDates;
     }
 
+
+
 }

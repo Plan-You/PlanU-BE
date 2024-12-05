@@ -1,6 +1,7 @@
 package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.dao.AvailableDateDAO;
+import com.planu.group_meeting.dto.AvailableDateDto;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDatesRequest;
 import com.planu.group_meeting.entity.AvailableDate;
 import com.planu.group_meeting.exception.schedule.PastDateValidationException;
@@ -47,6 +48,10 @@ public class AvailableDateService {
                 throw new PastDateValidationException();
             }
         }
+    }
+
+    public List<LocalDate>findAvailableDates(Long userId, LocalDate startDate, LocalDate endDate){
+        return availableDateDAO.findAvailableDatesByUserIdInRange(userId, startDate, endDate);
     }
 
 }
