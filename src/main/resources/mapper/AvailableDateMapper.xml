@@ -23,9 +23,16 @@
     </delete>
 
     <select id = "findAvailableDatesByUserId" resultType="java.time.LocalDate">
-            SELECT POSSIBLE_DATE
-            FROM AVAILABLE_DATE
-            WHERE USER_ID = #{userId}
+        SELECT POSSIBLE_DATE
+        FROM AVAILABLE_DATE
+        WHERE USER_ID = #{userId}
+    </select>
+
+    <select id="findAvailableDatesByUserIdInRange" resultType="java.time.LocalDate">
+        SELECT POSSIBLE_DATE
+        FROM AVAILABLE_DATE
+        WHERE USER_ID = #{userId}
+        AND POSSIBLE_DATE BETWEEN #{startDate} AND #{endDate}
     </select>
 
 </mapper>
