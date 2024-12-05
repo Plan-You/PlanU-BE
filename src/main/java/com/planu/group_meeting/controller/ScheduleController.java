@@ -46,5 +46,4 @@ public class ScheduleController {
         return ResponseEntity.ok(scheduleService.findScheduleList(userDetails.getId(), startDate, endDate));
     }
 
-
 }

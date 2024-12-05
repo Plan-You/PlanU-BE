@@ -2,6 +2,7 @@ package com.planu.group_meeting.exception;
 
 import com.planu.group_meeting.exception.group.InvalidInputException;
 import com.planu.group_meeting.exception.file.InvalidFileTypeException;
+import com.planu.group_meeting.exception.schedule.PastDateValidationException;
 import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
 import com.planu.group_meeting.exception.user.*;
 import org.springframework.core.convert.ConversionFailedException;
@@ -58,12 +59,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public final ResponseEntity<String> handleFileSizeExceededException(MaxUploadSizeExceededException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("파일 크기는 5MB를 초과할 수 없습니다.");
     }
 
     @ExceptionHandler(InvalidFileTypeException.class)
     public final ResponseEntity<String> handleInvalidFileTypeException(InvalidFileTypeException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("허용되지 않는 파일 형식입니다. JPEG, PNG, GIF 형식만 지원됩니다.");
     }
 
     @ExceptionHandler(InvalidInputException.class)
@@ -79,5 +80,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ScheduleNotFoundException.class)
     public ResponseEntity<String> handleScheduleNotFoundException(ScheduleNotFoundException e){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+    @ExceptionHandler(PastDateValidationException.class)
+    public ResponseEntity<String>handlePastDateValidationException(PastDateValidationException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("지난 날짜는 선택할 수 없습니다.");
     }
 }
