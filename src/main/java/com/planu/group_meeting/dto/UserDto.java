@@ -35,7 +35,7 @@ public class UserDto {
         @Pattern(regexp = "^[가-힣]{2,6}$", message = "이름은 2자 이상 6자 이하의 한글만 입력 가능합니다.")
         private String name;
 
-        @NotBlank(message = "이메일 주소를 입력해주세요!")
+        @NotBlank(message = "이메일 주소를 입력해주세요")
         @Email(message = "올바른 이메일 주소를 입력해주세요")
         private String email;
 
@@ -75,15 +75,34 @@ public class UserDto {
         @Valid
         private UserTermsDto.TermsRequest termsRequest;
     }
-
     @Getter
-    public static class EmailRequest{
+    public static class EmailSendRequest{
+        @NotBlank(message = "이메일 주소를 입력해주세요")
+        @Email(message = "올바른 이메일 주소를 입력해주세요")
         private String email;
+
+        @NotBlank(message = "이메일 인증 목적을 입력해주세요. (register, findUsername, findPassword)")
+        private String purpose;
     }
     @Getter
     public static class EmailVerificationRequest{
+        @NotBlank(message = "이메일 주소를 입력해주세요")
+        @Email(message = "올바른 이메일 주소를 입력해주세요")
         private String email;
+
+        @NotBlank(message = "인증코드를 입력해주세요")
         private String verificationCode;
+
+        @NotBlank(message = "이메일 인증 목적을 입력해주세요. (register, findUsername, findPassword)")
+        private String purpose;
     }
+
+    @Getter
+    public static class EmailRequest{
+        @NotBlank(message = "이메일 주소를 입력해주세요")
+        @Email(message = "이메일 주소 형식이 아닙니다")
+        private String email;
+    }
+
 
 }

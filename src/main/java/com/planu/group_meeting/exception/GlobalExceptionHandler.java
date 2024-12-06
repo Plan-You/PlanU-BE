@@ -57,6 +57,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이메일 인증이 완료되지 않았습니다.");
     }
 
+    @ExceptionHandler(NotFoundUserException.class)
+    public final ResponseEntity<String>handleNotFoundUserException(NotFoundUserException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("사용자를 찾을 수 없습니다.");
+    }
+
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public final ResponseEntity<String> handleFileSizeExceededException(MaxUploadSizeExceededException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("파일 크기는 5MB를 초과할 수 없습니다.");

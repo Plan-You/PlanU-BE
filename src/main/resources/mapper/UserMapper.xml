@@ -27,6 +27,12 @@
         VALUES (#{username}, #{email}, #{password}, #{name}, #{role})
     </insert>
 
+    <select id="findUsernameByEmail" parameterType="String" resultType="String">
+        SELECT USERNAME
+        FROM USER
+        WHERE EMAIL = #{email}
+    </select>
+
     <select id="existsByUsername" parameterType="String" resultType="boolean">
         SELECT COUNT(*) > 0
         FROM USER
