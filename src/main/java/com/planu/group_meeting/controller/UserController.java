@@ -3,6 +3,7 @@ package com.planu.group_meeting.controller;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dto.TokenDto;
 import com.planu.group_meeting.dto.UserDto;
+import com.planu.group_meeting.dto.UserDto.EmailRequest;
 import com.planu.group_meeting.dto.UserDto.UserRegistrationRequest;
 import com.planu.group_meeting.dto.UserTermsDto;
 import com.planu.group_meeting.service.UserService;
@@ -40,13 +41,13 @@ public class UserController {
     }
 
     @PostMapping("/email-verification/sends")
-    public ResponseEntity<String> sendEmailCode(@RequestBody UserDto.EmailRequest emailDto) throws MessagingException {
-        userService.sendCodeToEmail(emailDto);
+    public ResponseEntity<String> sendEmailCode(@Valid @RequestBody UserDto.EmailSendRequest emailRequest) throws MessagingException {
+        userService.sendCodeToEmail(emailRequest);
         return ResponseEntity.status(HttpStatus.OK).body("인증 코드 전송 성공");
     }
 
     @PostMapping("/email-verification/verify")
-    public ResponseEntity<String> verifyEmailCode(@RequestBody UserDto.EmailVerificationRequest emailVerificationDto) {
+    public ResponseEntity<String> verifyEmailCode(@Valid @RequestBody UserDto.EmailVerificationRequest emailVerificationDto) {
         userService.verifyEmailCode(emailVerificationDto);
         return ResponseEntity.status(HttpStatus.OK).body("인증 성공");
     }
@@ -64,6 +65,11 @@ public class UserController {
     @GetMapping("/profile/exists")
     public ResponseEntity<Boolean> checkProfileExists(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(userService.isUserProfileCompleted(userDetails.getUsername()));
+    }
+
+    @PostMapping("/find-username")
+    public ResponseEntity<String> findUsername(@Valid @RequestBody EmailRequest emailRequest) {
+        return ResponseEntity.ok(userService.findUsername(emailRequest));
     }
 
     @PostMapping("/token/reissue")

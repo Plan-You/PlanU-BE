@@ -4,6 +4,7 @@ import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dao.UserTermsDAO;
 import com.planu.group_meeting.dto.TokenDto;
 import com.planu.group_meeting.dto.UserDto;
+import com.planu.group_meeting.dto.UserDto.EmailRequest;
 import com.planu.group_meeting.dto.UserTermsDto;
 import com.planu.group_meeting.entity.User;
 import com.planu.group_meeting.entity.UserTerms;
@@ -52,11 +53,11 @@ public class UserService {
             throw new DuplicatedEmailException();
         }
 
-        String emailVerificationStatus = redisTemplate.opsForValue().get("verifiedEmail: " + userDto.getEmail());
+        String emailVerificationStatus = redisTemplate.opsForValue().get("verifiedEmail : " + userDto.getEmail() + " : register");
         if (emailVerificationStatus == null || !emailVerificationStatus.equals("true")) {
             throw new UnverifiedEmailException();
         }
-        redisTemplate.delete("VerifiedEmail: " + userDto.getEmail());
+        redisTemplate.delete("verifiedEmail : " + userDto.getEmail() + " : register");
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         userDAO.insertUser(userDto.toEntity());
     }
@@ -71,6 +72,20 @@ public class UserService {
 
         UserTerms userTerms = termsRequest.toEntity(userId);
         userTermsDAO.saveTerms(userTerms);
+    }
+
+    public String findUsername(EmailRequest emailRequest){
+        String email = emailRequest.getEmail();
+        String emailVerificationStatus = redisTemplate.opsForValue().get("verifiedEmail : " + emailRequest.getEmail() + " : findUsername");
+        if (emailVerificationStatus == null || !emailVerificationStatus.equals("true")) {
+            throw new UnverifiedEmailException();
+        }
+        redisTemplate.delete("verifiedEmail : " + email + " : findUsername");
+        String username = userDAO.findUsernameByEmail(email);
+        if(username==null){
+            throw new NotFoundUserException();
+        }
+        return userDAO.findUsernameByEmail(email);
     }
 
 
@@ -93,30 +108,57 @@ public class UserService {
         return new TokenDto(newAccess, newRefresh);
     }
 
-    public void sendCodeToEmail(UserDto.EmailRequest emailDto) throws MessagingException {
+    //    public void sendCodeToEmail(UserDto.EmailRequest emailDto) throws MessagingException {
+//        String email = emailDto.getEmail();
+//        if (isDuplicatedEmail(email)) {
+//            throw new DuplicatedEmailException();
+//        }
+//        String authCode = generateRandomCode();
+//        Long expirationTime = 300000L; // 5분
+//        redisTemplate.opsForValue().set("authCode: " + email, authCode, expirationTime, TimeUnit.MILLISECONDS);
+//        mailService.sendVerificationCode(email, authCode);
+//    }
+    public void sendCodeToEmail(UserDto.EmailSendRequest emailDto) throws MessagingException {
         String email = emailDto.getEmail();
-        if (isDuplicatedEmail(email)) {
+        String purpose = emailDto.getPurpose();
+        if (purpose.equals("register") && isDuplicatedEmail(email)) {
             throw new DuplicatedEmailException();
         }
+        redisTemplate.delete("authCode : " + email + " : " + purpose);
         String authCode = generateRandomCode();
         Long expirationTime = 300000L; // 5분
-        redisTemplate.opsForValue().set("authCode: " + email, authCode, expirationTime, TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set("authCode : " + email + " : " + purpose, authCode, expirationTime, TimeUnit.MILLISECONDS);
         mailService.sendVerificationCode(email, authCode);
     }
 
     public void verifyEmailCode(UserDto.EmailVerificationRequest emailVerificationDto) {
         String email = emailVerificationDto.getEmail();
         String authCode = emailVerificationDto.getVerificationCode();
-        String storedCode = redisTemplate.opsForValue().get("authCode: " + email);
+        String purpose = emailVerificationDto.getPurpose();
+        String storedCode = redisTemplate.opsForValue().get("authCode : " + email + " : " + purpose);
         if (storedCode == null) {
             throw new ExpiredAuthCodeException();
         }
         if (!storedCode.equals(authCode)) {
             throw new InvalidAuthCodeException();
         }
-        redisTemplate.opsForValue().set("verifiedEmail: " + email, "true");
-        redisTemplate.delete("authCode:" + email);
+        redisTemplate.opsForValue().set("verifiedEmail : " + email + " : " + purpose, "true");
+        redisTemplate.delete("authCode : " + email + " : " + purpose);
     }
+
+//    public void verifyEmailCode(UserDto.EmailVerificationRequest emailVerificationDto) {
+//        String email = emailVerificationDto.getEmail();
+//        String authCode = emailVerificationDto.getVerificationCode();
+//        String storedCode = redisTemplate.opsForValue().get("authCode: " + email);
+//        if (storedCode == null) {
+//            throw new ExpiredAuthCodeException();
+//        }
+//        if (!storedCode.equals(authCode)) {
+//            throw new InvalidAuthCodeException();
+//        }
+//        redisTemplate.opsForValue().set("verifiedEmail: " + email, "true");
+//        redisTemplate.delete("authCode:" + email);
+//    }
 
     public void logout(String refresh) {
         validateRefreshToken(refresh);
