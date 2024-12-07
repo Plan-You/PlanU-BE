@@ -17,6 +17,8 @@ public class Schedule {
     private String color;
     private String memo;
     private String location;
+    private String latitude;
+    private String longitude;
     ScheduleVisibility visibility;
 
     private LocalDateTime createdAt;
