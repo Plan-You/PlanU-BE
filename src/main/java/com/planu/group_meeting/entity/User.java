@@ -33,4 +33,5 @@ public class User {
         this.birthDate = birthDate;
         this.profileStatus = ProfileStatus.COMPLETED;
     }
+
 }

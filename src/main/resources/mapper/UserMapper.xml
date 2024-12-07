@@ -77,4 +77,10 @@
         WHERE ID = #{userId}
     </update>
 
+    <update id="updatePasswordByUsername">
+        UPDATE USER
+        SET PASSWORD = #{newPassword}
+        WHERE USERNAME = #{username}
+    </update>
+
 </mapper>
