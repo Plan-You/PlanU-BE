@@ -59,7 +59,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundUserException.class)
     public final ResponseEntity<String>handleNotFoundUserException(NotFoundUserException e){
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("사용자를 찾을 수 없습니다.");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("사용자를 찾을 수 없습니다.");
+    }
+
+    @ExceptionHandler(EmailMismatchException.class)
+    public final ResponseEntity<String>handleEmailMismatchException(EmailMismatchException e){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("입력한 아이디와 이메일이 사용자 정보와 일치하지 않습니다.");
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)

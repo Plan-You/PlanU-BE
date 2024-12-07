@@ -3,6 +3,7 @@ package com.planu.group_meeting.controller;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dto.TokenDto;
 import com.planu.group_meeting.dto.UserDto;
+import com.planu.group_meeting.dto.UserDto.ChangePasswordRequest;
 import com.planu.group_meeting.dto.UserDto.EmailRequest;
 import com.planu.group_meeting.dto.UserDto.UserRegistrationRequest;
 import com.planu.group_meeting.dto.UserTermsDto;
@@ -70,6 +71,12 @@ public class UserController {
     @PostMapping("/find-username")
     public ResponseEntity<String> findUsername(@Valid @RequestBody EmailRequest emailRequest) {
         return ResponseEntity.ok(userService.findUsername(emailRequest));
+    }
+
+    @PostMapping("/find-password")
+    public ResponseEntity<String> findPassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest){
+        userService.updatePassword(changePasswordRequest);
+        return ResponseEntity.status(HttpStatus.OK).body("비밀번호 변경 성공");
     }
 
     @PostMapping("/token/reissue")

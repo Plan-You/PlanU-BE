@@ -4,6 +4,7 @@ import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dao.UserTermsDAO;
 import com.planu.group_meeting.dto.TokenDto;
 import com.planu.group_meeting.dto.UserDto;
+import com.planu.group_meeting.dto.UserDto.ChangePasswordRequest;
 import com.planu.group_meeting.dto.UserDto.EmailRequest;
 import com.planu.group_meeting.dto.UserTermsDto;
 import com.planu.group_meeting.entity.User;
@@ -28,6 +29,10 @@ import static com.planu.group_meeting.jwt.JwtUtil.REFRESH_TOKEN_PREFIX;
 @RequiredArgsConstructor
 public class UserService {
 
+    private static final String VERIFIED_EMAIL_KEY = "verifiedEmail : %s : %s";
+    private static final String AUTH_CODE_KEY = "authCode : %s : %s";
+    private static final long AUTH_CODE_EXPIRATION_TIME = 300000L; // 5분
+
     private final UserDAO userDAO;
     private final UserTermsDAO userTermsDAO;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -44,20 +49,11 @@ public class UserService {
         return userDAO.existsByEmail(email);
     }
 
+    @Transactional
     public void createUser(UserDto.SignUpRequest userDto) {
-        if (isDuplicatedUsername(userDto.getUsername())) {
-            throw new DuplicatedUsernameException();
-        }
+        validateDuplicateUser(userDto.getUsername(), userDto.getEmail());
+        validateEmailVerification(userDto.getEmail(), "register");
 
-        if (isDuplicatedEmail(userDto.getEmail())) {
-            throw new DuplicatedEmailException();
-        }
-
-        String emailVerificationStatus = redisTemplate.opsForValue().get("verifiedEmail : " + userDto.getEmail() + " : register");
-        if (emailVerificationStatus == null || !emailVerificationStatus.equals("true")) {
-            throw new UnverifiedEmailException();
-        }
-        redisTemplate.delete("verifiedEmail : " + userDto.getEmail() + " : register");
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         userDAO.insertUser(userDto.toEntity());
     }
@@ -74,91 +70,74 @@ public class UserService {
         userTermsDAO.saveTerms(userTerms);
     }
 
-    public String findUsername(EmailRequest emailRequest){
-        String email = emailRequest.getEmail();
-        String emailVerificationStatus = redisTemplate.opsForValue().get("verifiedEmail : " + emailRequest.getEmail() + " : findUsername");
-        if (emailVerificationStatus == null || !emailVerificationStatus.equals("true")) {
-            throw new UnverifiedEmailException();
-        }
-        redisTemplate.delete("verifiedEmail : " + email + " : findUsername");
-        String username = userDAO.findUsernameByEmail(email);
-        if(username==null){
+    public String findUsername(EmailRequest emailRequest) {
+        validateEmailVerification(emailRequest.getEmail(), "findUsername");
+
+        String username = userDAO.findUsernameByEmail(emailRequest.getEmail());
+        if (username == null) {
             throw new NotFoundUserException();
         }
-        return userDAO.findUsernameByEmail(email);
+        return username;
     }
 
+    @Transactional
+    public void updatePassword(ChangePasswordRequest changePasswordRequest) {
+        validateUsernameAndEmail(changePasswordRequest.getUsername(), changePasswordRequest.getEmail());
+        validateEmailVerification(changePasswordRequest.getEmail(), "findPassword");
+
+        String encodedPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
+        userDAO.updatePasswordByUsername(changePasswordRequest.getUsername(), encodedPassword);
+    }
 
     public boolean isUserProfileCompleted(String username) {
         User user = userDAO.findByUsername(username);
-        return user.getProfileStatus().equals(ProfileStatus.COMPLETED);
+        return ProfileStatus.COMPLETED.equals(user.getProfileStatus());
     }
 
     public TokenDto reissueAccessToken(String refresh) {
         validateRefreshToken(refresh);
+
         String username = jwtUtil.getUsername(refresh);
         String storedRefresh = redisTemplate.opsForValue().get(REFRESH_TOKEN_PREFIX + username);
         if (storedRefresh == null || !storedRefresh.equals(refresh)) {
             throw new InvalidRefreshTokenException();
         }
         redisTemplate.delete(username);
+
         String role = jwtUtil.getRole(refresh);
         String newAccess = jwtUtil.createAccessToken(username, role);
         String newRefresh = jwtUtil.createRefreshToken(username, role);
+
         return new TokenDto(newAccess, newRefresh);
     }
 
-    //    public void sendCodeToEmail(UserDto.EmailRequest emailDto) throws MessagingException {
-//        String email = emailDto.getEmail();
-//        if (isDuplicatedEmail(email)) {
-//            throw new DuplicatedEmailException();
-//        }
-//        String authCode = generateRandomCode();
-//        Long expirationTime = 300000L; // 5분
-//        redisTemplate.opsForValue().set("authCode: " + email, authCode, expirationTime, TimeUnit.MILLISECONDS);
-//        mailService.sendVerificationCode(email, authCode);
-//    }
     public void sendCodeToEmail(UserDto.EmailSendRequest emailDto) throws MessagingException {
-        String email = emailDto.getEmail();
-        String purpose = emailDto.getPurpose();
-        if (purpose.equals("register") && isDuplicatedEmail(email)) {
+        if ("register".equals(emailDto.getPurpose()) && isDuplicatedEmail(emailDto.getEmail())) {
             throw new DuplicatedEmailException();
         }
-        redisTemplate.delete("authCode : " + email + " : " + purpose);
+
         String authCode = generateRandomCode();
-        Long expirationTime = 300000L; // 5분
-        redisTemplate.opsForValue().set("authCode : " + email + " : " + purpose, authCode, expirationTime, TimeUnit.MILLISECONDS);
-        mailService.sendVerificationCode(email, authCode);
+        String key = String.format(AUTH_CODE_KEY, emailDto.getEmail(), emailDto.getPurpose());
+        redisTemplate.opsForValue().set(key, authCode, AUTH_CODE_EXPIRATION_TIME, TimeUnit.MILLISECONDS);
+
+        mailService.sendVerificationCode(emailDto.getEmail(), authCode);
     }
 
     public void verifyEmailCode(UserDto.EmailVerificationRequest emailVerificationDto) {
-        String email = emailVerificationDto.getEmail();
-        String authCode = emailVerificationDto.getVerificationCode();
-        String purpose = emailVerificationDto.getPurpose();
-        String storedCode = redisTemplate.opsForValue().get("authCode : " + email + " : " + purpose);
+        String key = String.format(AUTH_CODE_KEY, emailVerificationDto.getEmail(), emailVerificationDto.getPurpose());
+        String storedCode = redisTemplate.opsForValue().get(key);
+
         if (storedCode == null) {
             throw new ExpiredAuthCodeException();
         }
-        if (!storedCode.equals(authCode)) {
+        if (!storedCode.equals(emailVerificationDto.getVerificationCode())) {
             throw new InvalidAuthCodeException();
         }
-        redisTemplate.opsForValue().set("verifiedEmail : " + email + " : " + purpose, "true");
-        redisTemplate.delete("authCode : " + email + " : " + purpose);
-    }
 
-//    public void verifyEmailCode(UserDto.EmailVerificationRequest emailVerificationDto) {
-//        String email = emailVerificationDto.getEmail();
-//        String authCode = emailVerificationDto.getVerificationCode();
-//        String storedCode = redisTemplate.opsForValue().get("authCode: " + email);
-//        if (storedCode == null) {
-//            throw new ExpiredAuthCodeException();
-//        }
-//        if (!storedCode.equals(authCode)) {
-//            throw new InvalidAuthCodeException();
-//        }
-//        redisTemplate.opsForValue().set("verifiedEmail: " + email, "true");
-//        redisTemplate.delete("authCode:" + email);
-//    }
+        String verifiedKey = String.format(VERIFIED_EMAIL_KEY, emailVerificationDto.getEmail(), emailVerificationDto.getPurpose());
+        redisTemplate.opsForValue().set(verifiedKey, "true");
+        redisTemplate.delete(key);
+    }
 
     public void logout(String refresh) {
         validateRefreshToken(refresh);
@@ -166,17 +145,44 @@ public class UserService {
         redisTemplate.delete(username);
     }
 
-    private String generateRandomCode() {
-        Random random = new Random();
-        int code = 100000 + random.nextInt(900000);
-        return String.valueOf(code);
-    }
-
-    private void validateRefreshToken(String refresh) {
-        if (refresh == null || jwtUtil.isExpired(refresh) || !jwtUtil.getCategory(refresh).equals("refresh")) {
-            throw new InvalidTokenException();
+    private void validateDuplicateUser(String username, String email) {
+        if (isDuplicatedUsername(username)) {
+            throw new DuplicatedUsernameException();
+        }
+        if (isDuplicatedEmail(email)) {
+            throw new DuplicatedEmailException();
         }
     }
 
+    private void validateEmailVerification(String email, String purpose) {
+        String key = String.format(VERIFIED_EMAIL_KEY, email, purpose);
+        String emailVerificationStatus = redisTemplate.opsForValue().get(key);
 
+        if (!"true".equals(emailVerificationStatus)) {
+            throw new UnverifiedEmailException();
+        }
+        redisTemplate.delete(key);
+    }
+
+    private void validateUsernameAndEmail(String username, String email) {
+        if (!isDuplicatedUsername(username)) {
+            throw new NotFoundUserException();
+        }
+
+        String storedUsername = userDAO.findUsernameByEmail(email);
+        if (storedUsername == null || !storedUsername.equals(username)) {
+            throw new EmailMismatchException();
+        }
+    }
+
+    private String generateRandomCode() {
+        return String.valueOf(100000 + new Random().nextInt(900000));
+    }
+
+    private void validateRefreshToken(String refresh) {
+        if (refresh == null || jwtUtil.isExpired(refresh) || !"refresh".equals(jwtUtil.getCategory(refresh))) {
+            throw new InvalidTokenException();
+        }
+    }
 }
+
