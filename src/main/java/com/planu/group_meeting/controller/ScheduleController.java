@@ -1,6 +1,7 @@
 package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.dto.ScheduleDto;
 import com.planu.group_meeting.dto.ScheduleDto.ScheduleListResponse;
 import com.planu.group_meeting.dto.ScheduleDto.ScheduleDetailsResponse;
@@ -25,10 +26,10 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     @PostMapping
-    public ResponseEntity<String> createSchedules(@Valid @RequestBody ScheduleSaveRequest scheduleDto,
+    public ResponseEntity<BaseResponse> createSchedules(@Valid @RequestBody ScheduleSaveRequest scheduleDto,
                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
         scheduleService.createSchedule(userDetails.getId(), scheduleDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body("일정 생성 성공");
+        return BaseResponse.toResponseEntity(HttpStatus.CREATED,"일정 생성 성공");
     }
 
     @GetMapping("/{scheduleId}")

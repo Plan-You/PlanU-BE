@@ -68,22 +68,6 @@
         WHERE s.ID = #{scheduleId}
     </select>
 
-    <!--    <select id="getScheduleList" resultType="com.planu.group_meeting.dto.ScheduleDto$ScheduleListResponse">-->
-    <!--        <![CDATA[-->
-    <!--        SELECT-->
-    <!--            ID,-->
-    <!--            TITLE,-->
-    <!--            LOCATION,-->
-    <!--            START_DATETIME AS startDateTime,-->
-    <!--            END_DATETIME AS endDateTime,-->
-    <!--            COLOR-->
-    <!--        FROM SCHEDULE-->
-    <!--        WHERE USER_ID = #{userId}-->
-    <!--        AND START_DATETIME >= #{startDateTime}-->
-    <!--        AND END_DATETIME <= #{endDateTime}-->
-    <!--        ORDER BY START_DATETIME-->
-    <!--        ]]>-->
-    <!--    </select>-->
     <select id="getScheduleList" resultType="com.planu.group_meeting.dto.ScheduleDto$ScheduleListResponse">
         <![CDATA[
     SELECT

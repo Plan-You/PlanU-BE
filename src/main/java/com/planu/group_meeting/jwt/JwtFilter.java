@@ -82,8 +82,8 @@ public class JwtFilter extends OncePerRequestFilter {
     @Getter
     @RequiredArgsConstructor
     public static class ErrorResponse {
-        private final int code;
-        private final String message;
+        private final int resultCode;
+        private final String resultMsg;
     }
 }
 

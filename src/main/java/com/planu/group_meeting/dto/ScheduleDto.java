@@ -10,6 +10,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ScheduleDto {
+
     @Data
     public static class ScheduleSaveRequest {
 
@@ -57,7 +60,6 @@ public class ScheduleDto {
                     .userId(userId)
                     .build();
         }
-
     }
 
     @Getter
@@ -73,6 +75,8 @@ public class ScheduleDto {
         private String memo;
         private List<ScheduleParticipant> participants = new ArrayList<>();
         private List<UnregisteredParticipant> unregisteredParticipants = new ArrayList<>();
+
+
     }
 
     @Getter
@@ -88,6 +92,7 @@ public class ScheduleDto {
         private String startTime;
         private String endTime;
         private String color;
+
 
     }
 
