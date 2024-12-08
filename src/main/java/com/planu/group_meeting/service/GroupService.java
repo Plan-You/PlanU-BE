@@ -21,7 +21,7 @@ public class GroupService {
     private final S3Uploader s3Uploader;
 
     @Autowired
-    public GroupService(GroupDAO groupDAO, UserDAO userDAO, S3Uploader s3Uploader){
+    public GroupService(GroupDAO groupDAO, UserDAO userDAO, S3Uploader s3Uploader) {
         this.groupDAO = groupDAO;
         this.userDAO = userDAO;
         this.s3Uploader = s3Uploader;
@@ -40,11 +40,11 @@ public class GroupService {
 
 
         groupDAO.insertGroupUser(GroupUser.builder()
-                        .userId(groupDAO.findUserIdByUserName(userName))
-                        .groupId(group.getId())
-                        .groupRole(GroupUser.GroupRole.LEADER)
-                        .groupState(1)
-                        .build());
+                .userId(groupDAO.findUserIdByUserName(userName))
+                .groupId(group.getId())
+                .groupRole(GroupUser.GroupRole.LEADER)
+                .groupState(1)
+                .build());
 
 
         return GroupResponseDTO.builder()
@@ -56,18 +56,18 @@ public class GroupService {
     }
 
     @Transactional
-    public GroupInviteResponseDTO inviteUser(CustomUserDetails customUserDetails, String userName, Long groupId){
-        if(groupDAO.findGroupUserByUserIdAndGroupId(customUserDetails.getId(), groupId) == null){
+    public GroupInviteResponseDTO inviteUser(CustomUserDetails customUserDetails, String userName, Long groupId) {
+        if (groupDAO.findGroupUserByUserIdAndGroupId(customUserDetails.getId(), groupId) == null) {
             throw new IllegalArgumentException("초대 권한이 없습니다.");
         }
 
         Group group = groupDAO.findGroupById(groupId);
-        if(group == null) {
+        if (group == null) {
             throw new IllegalArgumentException("해당 그룹이 존재하지 않습니다.");
         }
 
         User user = userDAO.findByUsername(userName);
-        if(user == null){
+        if (user == null) {
             throw new IllegalArgumentException("사용자 '" + userName + "'을 찾을 수 없습니다.");
         }
 
@@ -87,22 +87,27 @@ public class GroupService {
     }
 
     @Transactional
-    public void joinGroup(CustomUserDetails customUserDetails, Long groupId){
+    public void joinGroup(CustomUserDetails customUserDetails, Long groupId) {
         Group group = groupDAO.findGroupById(groupId);
-        if(group == null) {
+        if (group == null) {
             throw new IllegalArgumentException("해당 그룹이 존재하지 않습니다.");
         }
 
         GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(customUserDetails.getId(), groupId);
-        if(groupUser == null){
+        if (groupUser == null) {
             throw new IllegalArgumentException("초대 받지 않았습니다.");
         }
 
-        if(groupUser.getGroupState() == 1){
-            throw  new IllegalArgumentException("이미 그룹에 속해 있습니다.");
+        if (groupUser.getGroupState() == 1) {
+            throw new IllegalArgumentException("이미 그룹에 속해 있습니다.");
         }
 
         groupDAO.UpdateGroupUserGroupStatus(customUserDetails.getId(), groupId);
 
+    }
+
+    @Transactional
+    public String findNameByGroupId(Long groupId) {
+        return groupDAO.findNameByGroupId(groupId);
     }
 }
