@@ -50,4 +50,9 @@
         WHERE USER_ID = #{userId} AND GROUP_ID = #{groupId}
     </update>
 
+    <select id="findNameByGroupId" resultType="String">
+        select name
+        from GROUP_
+        where id = #{groupId}
+    </select>
 </mapper>
