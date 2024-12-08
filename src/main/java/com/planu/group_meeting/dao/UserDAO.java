@@ -10,13 +10,13 @@ public interface UserDAO {
 
     void updateUserProfile(@Param("userId") Long userId, @Param("user") User user);
 
-    //void updateUserProfileImage(@Param("username")String username, @Param("profileImageUrl")String profileImageUrl);
-
-    //void updateUserTerms(@Param("username")String username, @Param("termsRequest")UserDto.TermsRequest termsRequest);
-
     User findByUsername(String username);
+
+    String findUsernameByEmail(String email);
 
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
+
+    void updatePasswordByUsername(@Param("username") String username, @Param("newPassword") String newPassword);
 }

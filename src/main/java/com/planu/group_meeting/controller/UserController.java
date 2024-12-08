@@ -1,8 +1,12 @@
 package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.dto.TokenDto;
 import com.planu.group_meeting.dto.UserDto;
+import com.planu.group_meeting.dto.UserDto.UserProfileRequest;
+import com.planu.group_meeting.dto.UserDto.ChangePasswordRequest;
+import com.planu.group_meeting.dto.UserDto.EmailRequest;
 import com.planu.group_meeting.dto.UserDto.UserRegistrationRequest;
 import com.planu.group_meeting.dto.UserTermsDto;
 import com.planu.group_meeting.service.UserService;
@@ -29,58 +33,72 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<String> createUser(@Valid @RequestBody UserDto.SignUpRequest userDto) {
+    public ResponseEntity<BaseResponse> createUser(@Valid @RequestBody UserDto.SignUpRequest userDto) {
         userService.createUser(userDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body("회원가입 성공");
+        return BaseResponse.toResponseEntity(HttpStatus.CREATED, "회원가입 성공");
     }
 
     @GetMapping("/username/{username}/exists")
-    public ResponseEntity<Boolean> checkDuplicatedUsername(@PathVariable("username") String username) {
-        return ResponseEntity.ok(userService.isDuplicatedUsername(username));
+    public ResponseEntity<BaseResponse> checkDuplicatedUsername(@PathVariable("username") String username) {
+        String resultMsg = Boolean.toString(userService.isDuplicatedUsername(username)); // Boolean -> String 변환
+        return BaseResponse.toResponseEntity(HttpStatus.OK, resultMsg);
     }
 
     @PostMapping("/email-verification/sends")
-    public ResponseEntity<String> sendEmailCode(@RequestBody UserDto.EmailRequest emailDto) throws MessagingException {
-        userService.sendCodeToEmail(emailDto);
-        return ResponseEntity.status(HttpStatus.OK).body("인증 코드 전송 성공");
+    public ResponseEntity<BaseResponse> sendEmailCode(@Valid @RequestBody UserDto.EmailSendRequest emailRequest) throws MessagingException {
+        userService.sendCodeToEmail(emailRequest);
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "인증 코드 전송 성공");
     }
 
+
     @PostMapping("/email-verification/verify")
-    public ResponseEntity<String> verifyEmailCode(@RequestBody UserDto.EmailVerificationRequest emailVerificationDto) {
+    public ResponseEntity<BaseResponse> verifyEmailCode(@Valid @RequestBody UserDto.EmailVerificationRequest emailVerificationDto) {
         userService.verifyEmailCode(emailVerificationDto);
-        return ResponseEntity.status(HttpStatus.OK).body("인증 성공");
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "인증 성공");
     }
 
     @PostMapping("/profile")
-    public ResponseEntity<String> createUserProfile(@ModelAttribute @Valid UserRegistrationRequest userDto,
-                                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
-        UserDto.UserProfileRequest userProfileRequest = userDto.getUserProfileRequest();
+    public ResponseEntity<BaseResponse> createUserProfile(@ModelAttribute @Valid UserRegistrationRequest userDto,
+                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+        UserProfileRequest userProfileRequest = userDto.getUserProfileRequest();
         UserTermsDto.TermsRequest termsRequest = userDto.getTermsRequest();
         userService.createUserProfile(userDetails.getId(), userProfileRequest, termsRequest);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body("프로필 등록 성공");
+        return BaseResponse.toResponseEntity(HttpStatus.CREATED, "프로필 등록 성공");
     }
 
     @GetMapping("/profile/exists")
-    public ResponseEntity<Boolean> checkProfileExists(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(userService.isUserProfileCompleted(userDetails.getUsername()));
+    public ResponseEntity<BaseResponse> checkProfileExists(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        String resultMsg = Boolean.toString(userService.isUserProfileCompleted(userDetails.getUsername()));
+        return BaseResponse.toResponseEntity(HttpStatus.OK, resultMsg);
+    }
+
+    @PostMapping("/find-username")
+    public ResponseEntity<BaseResponse> findUsername(@Valid @RequestBody EmailRequest emailRequest) {
+        return BaseResponse.toResponseEntity(HttpStatus.OK, userService.findUsername(emailRequest));
+    }
+
+    @PostMapping("/find-password")
+    public ResponseEntity<BaseResponse> findPassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
+        userService.updatePassword(changePasswordRequest);
+        return BaseResponse.toResponseEntity(HttpStatus.OK,"비밀번호 변경 성공");
     }
 
     @PostMapping("/token/reissue")
-    public ResponseEntity<String> reissueAccessToken(HttpServletResponse response, HttpServletRequest request) {
+    public ResponseEntity<BaseResponse> reissueAccessToken(HttpServletResponse response, HttpServletRequest request) {
         String refresh = CookieUtil.getCookieValue(request, "refresh");
         TokenDto tokenDTO = userService.reissueAccessToken(refresh);
         response.setHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + tokenDTO.getAccess());
         response.addCookie(CookieUtil.createCookie("refresh", tokenDTO.getRefresh()));
-        return ResponseEntity.status(HttpStatus.OK).body("access 토콘 재발급 성공");
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "access 토콘 재발급 성공");
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<BaseResponse> logout(HttpServletRequest request, HttpServletResponse response) {
         String refresh = CookieUtil.getCookieValue(request, "refresh");
         userService.logout(refresh);
         response.addCookie(CookieUtil.deleteCookie("refresh"));
-        return ResponseEntity.status(HttpStatus.OK).body("로그아웃 성공");
+        return BaseResponse.toResponseEntity(HttpStatus.OK,"로그아웃 성공");
     }
 
 }

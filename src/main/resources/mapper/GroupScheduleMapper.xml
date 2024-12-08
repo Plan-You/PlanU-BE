@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.planu.group_meeting.dao.GroupScheduleDAO">
+    <select id="findTodaySchedulesByToday"
+            resultType="com.planu.group_meeting.dto.GroupScheduleDTO$todayScheduleResponse">
+        SELECT id, title, start_datetime as startDateTime, location
+        FROM GROUP_SCHEDULE
+        WHERE group_id = #{groupId}
+          and date (start_datetime) = #{today}
+    </select>
+
+    <select id="findScheduleOverViewsByToday"
+            resultType="com.planu.group_meeting.dto.GroupScheduleDTO$scheduleOverViewResponse">
+        SELECT id, title, start_datetime as startDateTIme, end_datetime as endDateTime, color
+        FROM GROUP_SCHEDULE
+        WHERE group_id = #{groupId} and year (start_datetime) = year (#{today})
+          and month (start_datetime) = month (#{today})
+    </select>
+</mapper>

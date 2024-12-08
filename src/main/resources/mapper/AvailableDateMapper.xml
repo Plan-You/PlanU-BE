@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.planu.group_meeting.dao.AvailableDateDAO">
+
+    <insert id="insertAvailableDates" parameterType="list">
+        INSERT INTO AVAILABLE_DATE (USER_ID, POSSIBLE_DATE)
+        VALUES
+        <foreach collection="list" item="availableDate" separator=",">
+            (#{availableDate.userId}, #{availableDate.possibleDate})
+        </foreach>
+    </insert>
+
+    <delete id="deleteAvailableDates">
+        DELETE FROM AVAILABLE_DATE
+        WHERE USER_ID = #{userId}
+        AND POSSIBLE_DATE IN
+        <foreach collection="datesToDelete" item="date" open="(" separator="," close=")">
+            #{date}
+        </foreach>
+    </delete>
+
+    <select id = "findAvailableDatesByUserId" resultType="java.time.LocalDate">
+        SELECT POSSIBLE_DATE
+        FROM AVAILABLE_DATE
+        WHERE USER_ID = #{userId}
+    </select>
+
+    <select id="findAvailableDatesByUserIdInRange" resultType="java.time.LocalDate">
+        SELECT POSSIBLE_DATE
+        FROM AVAILABLE_DATE
+        WHERE USER_ID = #{userId}
+        AND POSSIBLE_DATE BETWEEN #{startDate} AND #{endDate}
+    </select>
+
+</mapper>

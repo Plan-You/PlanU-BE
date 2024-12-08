@@ -12,11 +12,13 @@
         <result property="color" column="color"/>
         <result property="location" column="location"/>
         <result property="memo" column="memo"/>
-        <collection property="participants" ofType="com.planu.group_meeting.dto.ParticipantDto$ScheduleParticipantResponse">
+        <collection property="participants"
+                    ofType="com.planu.group_meeting.dto.ParticipantDto$ScheduleParticipantResponse">
             <result property="id" column="participantId"/>
             <result property="name" column="participantName"/>
         </collection>
-        <collection property="unregisteredParticipants" ofType="com.planu.group_meeting.dto.ParticipantDto$UnregisteredParticipantResponse">
+        <collection property="unregisteredParticipants"
+                    ofType="com.planu.group_meeting.dto.ParticipantDto$UnregisteredParticipantResponse">
             <result property="name" column="unregisteredParticipantName"/>
         </collection>
     </resultMap>
@@ -24,8 +26,9 @@
 
     <insert id="insertSchedule" parameterType="com.planu.group_meeting.entity.Schedule"
             useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO SCHEDULE (TITLE, START_DATETIME, END_DATETIME, COLOR, MEMO, LOCATION, USER_ID)
-        VALUES (#{title}, #{startDateTime}, #{endDateTime}, #{color}, #{memo}, #{location}, #{userId})
+        INSERT INTO SCHEDULE (TITLE, START_DATETIME, END_DATETIME, COLOR, MEMO, LOCATION, LATITUDE, LONGITUDE, USER_ID)
+        VALUES (#{title}, #{startDateTime}, #{endDateTime}, #{color}, #{memo}, #{location},
+        #{latitude},#{longitude},#{userId})
     </insert>
 
     <insert id="insertScheduleParticipants" parameterType="list">
@@ -52,6 +55,8 @@
         s.END_DATETIME AS endDateTime,
         s.COLOR AS color,
         s.LOCATION AS location,
+        s.LATITUDE AS latitude,
+        s.LONGITUDE AS longitude,
         s.MEMO AS memo,
         u.ID AS participantId,
         u.NAME AS participantName,
@@ -61,6 +66,44 @@
         LEFT JOIN USER u ON sp.USER_ID = u.ID
         LEFT JOIN UNREGISTERED_PARTICIPANT up ON s.ID = up.SCHEDULE_ID
         WHERE s.ID = #{scheduleId}
+    </select>
+
+    <select id="getScheduleList" resultType="com.planu.group_meeting.dto.ScheduleDto$ScheduleListResponse">
+        <![CDATA[
+    SELECT
+        S.ID,
+        NULL AS groupId,
+        S.TITLE,
+        S.LOCATION,
+        S.LATITUDE,
+        S.LONGITUDE,
+        DATE_FORMAT(S.START_DATETIME, '%H:%i') AS startTime,
+        DATE_FORMAT(S.END_DATETIME, '%H:%i') AS endTime,
+        S.COLOR
+    FROM SCHEDULE S
+    WHERE S.USER_ID = #{userId}
+    AND S.START_DATETIME >= #{startDateTime}
+    AND S.END_DATETIME <= #{endDateTime}
+
+    UNION
+
+    SELECT
+        GS.ID,
+        GS.GROUP_ID AS groupId,
+        GS.TITLE,
+        GS.LOCATION,
+        GS.LATITUDE,
+        GS.LONGITUDE,
+        DATE_FORMAT(GS.START_DATETIME, '%H:%i') AS startTime,
+        DATE_FORMAT(GS.END_DATETIME, '%H:%i') AS endTime,
+        GS.COLOR
+    FROM GROUP_SCHEDULE GS
+    JOIN GROUP_SCHEDULE_PARTICIPANT GSP ON GS.ID = GSP.GROUP_SCHEDULE_ID
+    WHERE GSP.USER_ID = #{userId}
+    AND GS.START_DATETIME >= #{startDateTime}
+    AND GS.END_DATETIME <= #{endDateTime}
+    ORDER BY startTime
+    ]]>
     </select>
 
 

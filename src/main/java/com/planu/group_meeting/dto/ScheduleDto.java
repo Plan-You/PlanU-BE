@@ -9,12 +9,17 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ScheduleDto {
+
     @Data
     public static class ScheduleSaveRequest {
 
@@ -32,6 +37,10 @@ public class ScheduleDto {
         private String color;
 
         private String location;
+
+        private String latitude;
+
+        private String longitude;
 
         @Size(max = 100, message = "메모는 100자 이내로 입력해주세요.")
         private String memo;
@@ -51,8 +60,8 @@ public class ScheduleDto {
                     .userId(userId)
                     .build();
         }
-
     }
+
     @Getter
     public static class ScheduleDetailsResponse {
         private Long id;
@@ -61,9 +70,30 @@ public class ScheduleDto {
         private LocalDateTime startDateTime;
         private LocalDateTime endDateTime;
         private String location;
+        private String latitude;
+        private String longitude;
         private String memo;
         private List<ScheduleParticipant> participants = new ArrayList<>();
         private List<UnregisteredParticipant> unregisteredParticipants = new ArrayList<>();
+
+
+    }
+
+    @Getter
+    @Setter
+    public static class ScheduleListResponse {
+        private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
+        private Long id;
+        private Long groupId;
+        private String title;
+        private String location;
+        private String latitude;
+        private String longitude;
+        private String startTime;
+        private String endTime;
+        private String color;
+
+
     }
 
 }

@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -34,7 +35,7 @@ public class UserDto {
         @Pattern(regexp = "^[가-힣]{2,6}$", message = "이름은 2자 이상 6자 이하의 한글만 입력 가능합니다.")
         private String name;
 
-        @NotBlank(message = "이메일 주소를 입력해주세요!")
+        @NotBlank(message = "이메일 주소를 입력해주세요")
         @Email(message = "올바른 이메일 주소를 입력해주세요")
         private String email;
 
@@ -54,6 +55,8 @@ public class UserDto {
     @NoArgsConstructor
     public static class UserProfileRequest {
         @NotNull(message = "생년월일을 입력해주세요")
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        @Past(message = "생년월일은 오늘 이전 날짜여야 합니다.")
         private LocalDate birthDate;
 
         @NotNull(message = "성별을 입력해주세요.")
@@ -72,15 +75,48 @@ public class UserDto {
         @Valid
         private UserTermsDto.TermsRequest termsRequest;
     }
-
     @Getter
-    public static class EmailRequest{
+    public static class EmailSendRequest{
+        @NotBlank(message = "이메일 주소를 입력해주세요")
+        @Email(message = "올바른 이메일 주소를 입력해주세요")
         private String email;
+
+        @NotBlank(message = "이메일 인증 목적을 입력해주세요. (register, findUsername, findPassword)")
+        private String purpose;
     }
     @Getter
     public static class EmailVerificationRequest{
+        @NotBlank(message = "이메일 주소를 입력해주세요")
+        @Email(message = "올바른 이메일 주소를 입력해주세요")
         private String email;
+
+        @NotBlank(message = "인증코드를 입력해주세요")
         private String verificationCode;
+
+        @NotBlank(message = "이메일 인증 목적을 입력해주세요. (register, findUsername, findPassword)")
+        private String purpose;
     }
+
+    @Getter
+    public static class EmailRequest{
+        @NotBlank(message = "이메일 주소를 입력해주세요")
+        @Email(message = "이메일 주소 형식이 아닙니다")
+        private String email;
+    }
+
+    @Getter
+    public static class ChangePasswordRequest{
+        @NotBlank(message = "아이디를 입력해주세요")
+        private String username;
+
+        @NotBlank(message = "이메일 주소를 입력해주세요")
+        @Email(message = "이메일 주소 형식이 아닙니다")
+        private String email;
+
+        @NotBlank(message = "비밀번호를 입력해주세요")
+        @Pattern(regexp = "(?=.*[0-9])(?=.*[a-zA-Z])(?=.*\\W)(?=\\S+$).{8,16}", message = "비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.")
+        private String newPassword;
+    }
+
 
 }

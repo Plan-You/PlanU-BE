@@ -34,7 +34,6 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String accessToken = request.getHeader(AUTHORIZATION_HEADER);
-
         if (accessToken == null || !accessToken.startsWith(BEARER_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
@@ -62,9 +61,6 @@ public class JwtFilter extends OncePerRequestFilter {
         } catch (InvalidTokenException e) {
             jwtExceptionHandler(response, e.getMessage(), HttpServletResponse.SC_FORBIDDEN);
         }
-//        catch (Exception e) {
-//            jwtExceptionHandler(response, "서버 오류가 발생했습니다.", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-//        }
     }
 
     private void jwtExceptionHandler(HttpServletResponse response, String message, int statusCode) {
@@ -86,8 +82,8 @@ public class JwtFilter extends OncePerRequestFilter {
     @Getter
     @RequiredArgsConstructor
     public static class ErrorResponse {
-        private final int code;
-        private final String message;
+        private final int resultCode;
+        private final String resultMsg;
     }
 }
 
