@@ -77,6 +77,7 @@ public class SecurityConfig {
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
+                        configuration.addExposedHeader("Authorization");
                         configuration.setMaxAge(3600L);
                         return configuration;
                     }
