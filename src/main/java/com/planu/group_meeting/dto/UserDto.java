@@ -7,10 +7,7 @@ import com.planu.group_meeting.entity.common.Role;
 import com.planu.group_meeting.entity.User;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -116,6 +113,16 @@ public class UserDto {
         @NotBlank(message = "비밀번호를 입력해주세요")
         @Pattern(regexp = "(?=.*[0-9])(?=.*[a-zA-Z])(?=.*\\W)(?=\\S+$).{8,16}", message = "비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.")
         private String newPassword;
+    }
+
+    @Getter
+    @Builder
+    public static class UserInfoResponse{
+        private String name;
+        private String profileImage;
+        private String username;
+        private String email;
+        private LocalDate birthday;
     }
 
 

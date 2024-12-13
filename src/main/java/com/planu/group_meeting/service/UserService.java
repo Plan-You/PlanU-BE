@@ -184,5 +184,19 @@ public class UserService {
             throw new InvalidTokenException();
         }
     }
+
+    public UserDto.UserInfoResponse getUserInfo(String username){
+        if(!isDuplicatedUsername(username)){
+            throw new NotFoundUserException();
+        }
+        User user = userDAO.findByUsername(username);
+        return UserDto.UserInfoResponse.builder()
+                .name(user.getName())
+                .profileImage(user.getProfileImgUrl())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .birthday(user.getBirthDate())
+                .build();
+    }
 }
 

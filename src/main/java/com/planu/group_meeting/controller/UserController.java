@@ -101,4 +101,10 @@ public class UserController {
         return BaseResponse.toResponseEntity(HttpStatus.OK,"로그아웃 성공");
     }
 
+    @GetMapping("/my-info")
+    public ResponseEntity<UserDto.UserInfoResponse>getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok(userService.getUserInfo(userDetails.getUsername()));
+    }
+
+
 }
