@@ -19,4 +19,5 @@ public interface UserDAO {
     boolean existsByEmail(String email);
 
     void updatePasswordByUsername(@Param("username") String username, @Param("newPassword") String newPassword);
+
 }
