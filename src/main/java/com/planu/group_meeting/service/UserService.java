@@ -19,6 +19,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -57,18 +58,20 @@ public class UserService {
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         userDAO.insertUser(userDto.toEntity());
     }
-
     @Transactional
-    public void createUserProfile(Long userId, UserDto.UserProfileRequest userProfileRequest,
-                                  UserTermsDto.TermsRequest termsRequest) {
-        String profileImageUrl = s3Uploader.uploadFile(userProfileRequest.getProfileImage());
+    public void createUserProfile(Long userId, UserDto.UserRegistrationRequest registrationRequest, MultipartFile profileImage) {
+        String profileImageUrl = s3Uploader.uploadFile(profileImage);
+        //String profileImageUrl = s3Uploader.uploadFile(registrationRequest.getProfileImage());
         User user = new User();
-        user.updateProfile(profileImageUrl, userProfileRequest.getGender(), userProfileRequest.getBirthDate());
+        user.updateProfile(profileImageUrl, registrationRequest.getGender(), registrationRequest.getBirthDate());
         userDAO.updateUserProfile(userId, user);
+
+        UserTermsDto.TermsRequest termsRequest = registrationRequest.getTermsRequest();
 
         UserTerms userTerms = termsRequest.toEntity(userId);
         userTermsDAO.saveTerms(userTerms);
     }
+
 
     public String findUsername(EmailRequest emailRequest) {
         validateEmailVerification(emailRequest.getEmail(), "findUsername");
