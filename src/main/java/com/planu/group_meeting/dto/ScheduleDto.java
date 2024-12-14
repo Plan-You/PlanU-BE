@@ -13,6 +13,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -76,7 +77,6 @@ public class ScheduleDto {
         private List<ScheduleParticipant> participants = new ArrayList<>();
         private List<UnregisteredParticipant> unregisteredParticipants = new ArrayList<>();
 
-
     }
 
     @Getter
@@ -92,8 +92,17 @@ public class ScheduleDto {
         private String startTime;
         private String endTime;
         private String color;
-
-
     }
+    @Getter
+    public static class ScheduleCheckResponse{
+        private LocalDate date;
+        private List<ScheduleType>scheduleTypes;
+
+        public static class ScheduleType{
+            private String type;
+        }
+    }
+
+
 
 }

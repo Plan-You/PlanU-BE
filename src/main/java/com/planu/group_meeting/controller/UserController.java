@@ -4,7 +4,6 @@ import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.dto.TokenDto;
 import com.planu.group_meeting.dto.UserDto;
-import com.planu.group_meeting.dto.UserDto.UserProfileRequest;
 import com.planu.group_meeting.dto.UserDto.ChangePasswordRequest;
 import com.planu.group_meeting.dto.UserDto.EmailRequest;
 import com.planu.group_meeting.dto.UserDto.UserRegistrationRequest;
@@ -21,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import static com.planu.group_meeting.jwt.JwtFilter.AUTHORIZATION_HEADER;
 import static com.planu.group_meeting.jwt.JwtFilter.BEARER_PREFIX;
@@ -59,10 +59,10 @@ public class UserController {
 
     @PostMapping("/profile")
     public ResponseEntity<BaseResponse> createUserProfile(@ModelAttribute @Valid UserRegistrationRequest userDto,
+                                                          @RequestParam("profileImage") MultipartFile profileImage,
                                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
-        UserProfileRequest userProfileRequest = userDto.getUserProfileRequest();
-        UserTermsDto.TermsRequest termsRequest = userDto.getTermsRequest();
-        userService.createUserProfile(userDetails.getId(), userProfileRequest, termsRequest);
+
+        userService.createUserProfile(userDetails.getId(),userDto, profileImage);
 
         return BaseResponse.toResponseEntity(HttpStatus.CREATED, "프로필 등록 성공");
     }
