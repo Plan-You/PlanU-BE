@@ -59,9 +59,14 @@ public class GroupController {
 
     @GetMapping("/list")
     public ResponseEntity<List<GroupResponseDTO>> groupList(@AuthenticationPrincipal CustomUserDetails userDetails){
-
         return ResponseEntity.ok(groupService.getGroupList(userDetails.getId()));
     }
+
+    @GetMapping("inviteList")
+    public ResponseEntity<List<GroupResponseDTO>> groupInviteList(@AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok(groupService.getGroupInviteList(userDetails.getId()));
+    }
+
 
     @GetMapping("/{groupId}/detail")
     public ResponseEntity<GroupDetailResponse> groupDetail(@AuthenticationPrincipal CustomUserDetails userDetails,
