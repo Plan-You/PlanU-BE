@@ -55,4 +55,21 @@
         from GROUP_
         where id = #{groupId}
     </select>
+
+    <select id="findGroupsByUserId" resultType="com.planu.group_meeting.dto.GroupResponseDTO">
+        SELECT
+        g.ID AS groupId,
+        g.NAME AS groupName,
+        g.PROFILE AS groupImageUrl,
+        COUNT(gu.USER_ID) AS participant
+        FROM
+        GROUP_USER gu
+        JOIN
+        GROUP_ g ON gu.GROUP_ID = g.ID
+        WHERE
+        gu.USER_ID = #{userId}
+        GROUP BY
+        g.ID, g.NAME, g.PROFILE;
+    </select>
+
 </mapper>
