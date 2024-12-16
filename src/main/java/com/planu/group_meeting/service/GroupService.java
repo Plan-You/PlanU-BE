@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class GroupService {
     private final GroupDAO groupDAO;
@@ -106,6 +109,23 @@ public class GroupService {
 
     }
 
+    @Transactional
+    public List<GroupResponseDTO> getGroupInviteList(Long userId){
+        List<GroupResponseDTO> groupResponseDTOList = groupDAO.findGroupsByUserId(userId);
+        List<GroupResponseDTO> groupList = new ArrayList<>();
+        for(GroupResponseDTO list : groupResponseDTOList){
+            groupList.add(GroupResponseDTO.builder()
+                    .groupId(list.getGroupId())
+                    .groupName(list.getGroupName())
+                    .groupImageUrl(list.getGroupImageUrl()).build());
+        }
+        return groupList;
+    }
+
+    @Transactional
+    public List<GroupResponseDTO> getGroupList(Long userId) {
+        return groupDAO.findGroupsByUserId(userId);
+    }
     @Transactional
     public String findNameByGroupId(Long groupId) {
         return groupDAO.findNameByGroupId(groupId);

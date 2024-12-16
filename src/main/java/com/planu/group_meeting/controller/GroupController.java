@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -55,6 +56,17 @@ public class GroupController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/list")
+    public ResponseEntity<List<GroupResponseDTO>> groupList(@AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok(groupService.getGroupList(userDetails.getId()));
+    }
+
+    @GetMapping("inviteList")
+    public ResponseEntity<List<GroupResponseDTO>> groupInviteList(@AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok(groupService.getGroupInviteList(userDetails.getId()));
+    }
+
 
     @GetMapping("/{groupId}/detail")
     public ResponseEntity<GroupDetailResponse> groupDetail(@AuthenticationPrincipal CustomUserDetails userDetails,
