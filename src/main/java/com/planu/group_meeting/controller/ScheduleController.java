@@ -3,7 +3,8 @@ package com.planu.group_meeting.controller;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.dto.ScheduleDto;
-import com.planu.group_meeting.dto.ScheduleDto.ScheduleListResponse;
+import com.planu.group_meeting.dto.ScheduleDto.DailyScheduleResponse;
+import com.planu.group_meeting.dto.ScheduleDto.ScheduleCheckResponse;
 import com.planu.group_meeting.dto.ScheduleDto.ScheduleDetailsResponse;
 import com.planu.group_meeting.dto.ScheduleDto.ScheduleSaveRequest;
 import com.planu.group_meeting.service.ScheduleService;
@@ -16,6 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @RestController
@@ -39,12 +41,19 @@ public class ScheduleController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<ScheduleListResponse>> getScheduleList(
+    public ResponseEntity<DailyScheduleResponse> getScheduleList(
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         return ResponseEntity.ok(scheduleService.findScheduleList(userDetails.getId(), startDate, endDate));
+    }
+
+    @GetMapping("/check-events")
+    public ResponseEntity<List<ScheduleCheckResponse>>checkScheduleList(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth requestDate,
+            @AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok(scheduleService.getSchedulesForMonth(userDetails.getId(), requestDate));
     }
 
 }

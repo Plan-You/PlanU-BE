@@ -19,4 +19,13 @@
         WHERE group_id = #{groupId} and year (start_datetime) = year (#{today})
           and month (start_datetime) = month (#{today})
     </select>
+
+    <select id="existsScheduleByDate" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM GROUP_SCHEDULE GS
+            JOIN GROUP_SCHEDULE_PARTICIPANT GSP ON GS.ID = GSP.GROUP_SCHEDULE_ID
+            WHERE GSP.USER_ID = #{userId} AND DATE(GS.START_DATETIME) = #{date}
+        )
+    </select>
 </mapper>

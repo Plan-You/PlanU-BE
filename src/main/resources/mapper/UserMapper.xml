@@ -21,7 +21,6 @@
         <result column="UPDATED_DATE" property="updatedAt"/>
     </resultMap>
 
-
     <insert id="insertUser" parameterType="com.planu.group_meeting.entity.User">
         INSERT INTO USER (USERNAME, EMAIL, PASSWORD, NAME, ROLE)
         VALUES (#{username}, #{email}, #{password}, #{name}, #{role})
@@ -82,5 +81,32 @@
         SET PASSWORD = #{newPassword}
         WHERE USERNAME = #{username}
     </update>
+
+    <select id="existsBirthdayByDate">
+        SELECT EXISTS (
+        SELECT 1
+        FROM FRIEND F
+        JOIN USER U ON F.FROM_USER_ID = U.ID
+        WHERE F.FRIEND_STATUS = 1 AND
+        TO_USER_ID = ${userId} AND MONTH(U.BIRTH_DATE) = MONTH(#{date}) AND DAY(U.BIRTH_DATE) = DAY(#{date})
+        )
+    </select>
+
+    <select id="findBirthdayByDate">
+        <![CDATA[
+        SELECT DATE_FORMAT(U.BIRTH_DATE, '%m-%d') AS date,
+               GROUP_CONCAT(U.NAME SEPARATOR ', ') AS names
+        FROM FRIEND F
+        JOIN USER U ON F.FROM_USER_ID = U.ID
+        WHERE F.FRIEND_STATUS = 1
+          AND TO_USER_ID = #{userId}
+          AND (
+            DATE_FORMAT(CONCAT(DATE_FORMAT(#{startDate}, '%Y'), DATE_FORMAT(U.BIRTH_DATE, '-%m-%d')), '%Y-%m-%d')
+            BETWEEN DATE_FORMAT(#{startDate}, '%Y-%m-%d')
+            AND DATE_FORMAT(#{endDate}, '%Y-%m-%d')
+          )
+        GROUP BY DATE_FORMAT(U.BIRTH_DATE, '%m-%d')
+    ]]>
+    </select>
 
 </mapper>
