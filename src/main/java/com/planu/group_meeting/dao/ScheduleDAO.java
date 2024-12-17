@@ -9,6 +9,7 @@ import com.planu.group_meeting.entity.UnregisteredParticipant;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,7 +23,10 @@ public interface ScheduleDAO {
 
     ScheduleDetailsResponse getScheduleDetails(Long scheduleId);
 
-    List<ScheduleListResponse> getScheduleList(@Param("userId")Long userId,
-                                               @Param("startDateTime")LocalDateTime startDateTime,
-                                               @Param("endDateTime")LocalDateTime endDateTime);
+    List<ScheduleListResponse> getScheduleList(@Param("userId") Long userId,
+                                               @Param("startDateTime") LocalDateTime startDateTime,
+                                               @Param("endDateTime") LocalDateTime endDateTime);
+
+    boolean existsScheduleByDate(Long userId, LocalDate date);
+
 }

@@ -48,20 +48,6 @@ public class UserDto {
                     .build();
         }
     }
-//    @Data
-//    @NoArgsConstructor
-//    public static class UserProfileRequest {
-//        @NotNull(message = "생년월일을 입력해주세요")
-//        @DateTimeFormat(pattern = "yyyy-MM-dd")
-//        @Past(message = "생년월일은 오늘 이전 날짜여야 합니다.")
-//        private LocalDate birthDate;
-//
-//        @NotNull(message = "성별을 입력해주세요.")
-//        @Pattern(regexp = "[MF]", message = "성별은 'M' 또는 'F'만 입력 가능합니다.")
-//        private String gender;
-//
-//        private MultipartFile profileImage;
-//    }
 
     @Getter
     @Setter
@@ -75,8 +61,6 @@ public class UserDto {
         @NotNull(message = "성별을 입력해주세요.")
         @Pattern(regexp = "[MF]", message = "성별은 'M' 또는 'F'만 입력 가능합니다.")
         private String gender;
-
-        //private MultipartFile profileImage;
 
         @Valid
         private UserTermsDto.TermsRequest termsRequest;

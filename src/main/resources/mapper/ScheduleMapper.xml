@@ -47,6 +47,14 @@
         </foreach>
     </insert>
 
+    <select id="existsScheduleByDate" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM SCHEDULE
+            WHERE DATE(START_DATETIME) = #{date} AND USER_ID = #{userId}
+        )
+    </select>
+
     <select id="getScheduleDetails" resultMap="ScheduleDetailsResponseMap">
         SELECT
         s.ID AS scheduleId,
@@ -70,7 +78,7 @@
 
     <select id="getScheduleList" resultType="com.planu.group_meeting.dto.ScheduleDto$ScheduleListResponse">
         <![CDATA[
-    SELECT
+        SELECT
         S.ID,
         NULL AS groupId,
         S.TITLE,
@@ -105,6 +113,8 @@
     ORDER BY startTime
     ]]>
     </select>
+
+
 
 
 </mapper>

@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ScheduleDto {
@@ -81,6 +82,13 @@ public class ScheduleDto {
 
     @Getter
     @Setter
+    public static class DailyScheduleResponse {
+        private List<ScheduleListResponse> schedules = new ArrayList<>();
+        private List<BirthdayFriend> birthdayFriends;
+    }
+
+    @Getter
+    @Setter
     public static class ScheduleListResponse {
         private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
         private Long id;
@@ -93,16 +101,20 @@ public class ScheduleDto {
         private String endTime;
         private String color;
     }
-    @Getter
-    public static class ScheduleCheckResponse{
-        private LocalDate date;
-        private List<ScheduleType>scheduleTypes;
 
-        public static class ScheduleType{
-            private String type;
-        }
+    @Getter
+    @Setter
+    public static class BirthdayFriend {
+        private String date;
+        private String names;
     }
 
+    @Getter
+    @Setter
+    public static class ScheduleCheckResponse {
+        private LocalDate date;
+        private List<String> scheduleTypes = new ArrayList<>();
+    }
 
 
 }
