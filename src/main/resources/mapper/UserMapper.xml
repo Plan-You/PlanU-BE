@@ -21,12 +21,6 @@
         <result column="UPDATED_DATE" property="updatedAt"/>
     </resultMap>
 
-    <resultMap id="BirthdayFriendMap" type="com.planu.group_meeting.dto.ScheduleDto$BirthdayFriend">
-        <result property="date" column="date"/>
-        <result property="names" column="names"/>
-    </resultMap>
-
-
     <insert id="insertUser" parameterType="com.planu.group_meeting.entity.User">
         INSERT INTO USER (USERNAME, EMAIL, PASSWORD, NAME, ROLE)
         VALUES (#{username}, #{email}, #{password}, #{name}, #{role})
@@ -98,7 +92,7 @@
         )
     </select>
 
-    <select id="findBirthdayByDate" resultMap="BirthdayFriendMap">
+    <select id="findBirthdayByDate">
         <![CDATA[
         SELECT DATE_FORMAT(U.BIRTH_DATE, '%m-%d') AS date,
                GROUP_CONCAT(U.NAME SEPARATOR ', ') AS names

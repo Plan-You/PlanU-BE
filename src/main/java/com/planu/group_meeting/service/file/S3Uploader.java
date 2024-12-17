@@ -62,10 +62,6 @@ public class S3Uploader {
      * @param file 업로드할 MultipartFile
      */
     private void validateFile(MultipartFile file) {
-        // 파일 크기 검사
-//        if (file.getSize() > MAX_FILE_SIZE) {
-//            throw new FileSizeExceededException();
-//        }
 
         // 파일 형식 검사
         boolean isValidContentType = false;
