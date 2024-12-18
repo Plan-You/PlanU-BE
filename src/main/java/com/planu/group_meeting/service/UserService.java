@@ -33,7 +33,7 @@ public class UserService {
     private static final String VERIFIED_EMAIL_KEY = "verifiedEmail : %s : %s";
     private static final String AUTH_CODE_KEY = "authCode : %s : %s";
     private static final long AUTH_CODE_EXPIRATION_TIME = 300000L; // 5분
-    private static final String BASE_PROFILE_IMAGE = "https://planu-storage-main.s3.ap-northeast-2.amazonaws.com/BaseImage.jpg";
+    private static final String BASE_PROFILE_IMAGE = "https://planu-storage-main.s3.ap-northeast-2.amazonaws.com/defaultProfile.png";
 
     private final UserDAO userDAO;
     private final UserTermsDAO userTermsDAO;
