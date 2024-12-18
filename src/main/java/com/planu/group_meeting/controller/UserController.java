@@ -57,16 +57,16 @@ public class UserController {
         return BaseResponse.toResponseEntity(HttpStatus.OK, "인증 성공");
     }
 
-    @PostMapping("/profile")
-    public ResponseEntity<BaseResponse> createUserProfile(@ModelAttribute @Valid UserRegistrationRequest userDto,
-                                                          @RequestParam("profileImage") MultipartFile profileImage,
+   @PostMapping("/profile")
+   public ResponseEntity<BaseResponse> createUserProfile(@ModelAttribute @Valid UserRegistrationRequest userDto,
+                                                          @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
                                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         userService.createUserProfile(userDetails.getId(),userDto, profileImage);
 
         return BaseResponse.toResponseEntity(HttpStatus.CREATED, "프로필 등록 성공");
     }
-
+    
     @GetMapping("/profile/exists")
     public ResponseEntity<BaseResponse> checkProfileExists(@AuthenticationPrincipal CustomUserDetails userDetails) {
         String resultMsg = Boolean.toString(userService.isUserProfileCompleted(userDetails.getUsername()));
