@@ -46,6 +46,11 @@
         ID = #{id}
     </update>
 
+    <delete id = "deleteScheduleById" parameterType="long">
+        DELETE FROM SCHEDULE
+        WHERE ID = #{scheduleId}
+    </delete>
+
     <select id="findById" resultType="com.planu.group_meeting.entity.Schedule">
         SELECT
         ID,
