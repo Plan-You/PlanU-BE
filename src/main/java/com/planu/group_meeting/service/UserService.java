@@ -62,7 +62,7 @@ public class UserService {
     @Transactional
     public void createUserProfile(Long userId, UserDto.UserRegistrationRequest registrationRequest, MultipartFile profileImage) {
         String profileImageUrl = BASE_PROFILE_IMAGE;
-        if(!profileImage.isEmpty()){
+        if(profileImage!=null && !profileImage.isEmpty()){
             profileImageUrl = s3Uploader.uploadFile(profileImage);
         }
         User user = new User();

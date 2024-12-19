@@ -28,10 +28,18 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     @PostMapping
-    public ResponseEntity<BaseResponse> createSchedules(@Valid @RequestBody ScheduleSaveRequest scheduleDto,
+    public ResponseEntity<BaseResponse> createSchedules(@Valid @RequestBody ScheduleSaveRequest scheduleSaveRequest,
                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
-        scheduleService.createSchedule(userDetails.getId(), scheduleDto);
+        scheduleService.createSchedule(userDetails.getId(), scheduleSaveRequest);
         return BaseResponse.toResponseEntity(HttpStatus.CREATED,"일정 생성 성공");
+    }
+
+    @PutMapping("/{scheduleId}")
+    public ResponseEntity<BaseResponse> updateSchedule(@PathVariable("scheduleId")Long scheduleId,
+                                                       @Valid @RequestBody ScheduleSaveRequest scheduleSaveRequest,
+                                                       @AuthenticationPrincipal CustomUserDetails userDetails){
+        scheduleService.updateSchedule(userDetails.getId(),scheduleId,scheduleSaveRequest);
+        return BaseResponse.toResponseEntity(HttpStatus.OK,"일정 수정 성공");
     }
 
     @GetMapping("/{scheduleId}")

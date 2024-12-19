@@ -12,14 +12,15 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Mapper
 public interface ScheduleDAO {
     void insertSchedule(Schedule schedule);
 
-    void insertScheduleParticipants(List<ScheduleParticipant> participants);
+    void updateSchedule(Schedule schedule);
 
-    void insertUnregisteredParticipants(List<UnregisteredParticipant> unregisteredParticipants);
+    Optional<Schedule> findById(Long scheduleId);
 
     ScheduleDetailsResponse getScheduleDetails(Long scheduleId);
 
