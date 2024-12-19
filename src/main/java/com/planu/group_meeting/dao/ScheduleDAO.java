@@ -20,9 +20,11 @@ public interface ScheduleDAO {
 
     void updateSchedule(Schedule schedule);
 
+    void deleteScheduleById(Long scheduleId);
+
     Optional<Schedule> findById(Long scheduleId);
 
-    ScheduleDetailsResponse getScheduleDetails(Long scheduleId);
+    Optional<ScheduleDetailsResponse> getScheduleDetails(Long scheduleId);
 
     List<ScheduleListResponse> getScheduleList(@Param("userId") Long userId,
                                                @Param("startDateTime") LocalDateTime startDateTime,

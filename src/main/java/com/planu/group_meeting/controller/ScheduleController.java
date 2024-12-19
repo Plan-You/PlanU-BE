@@ -42,6 +42,13 @@ public class ScheduleController {
         return BaseResponse.toResponseEntity(HttpStatus.OK,"일정 수정 성공");
     }
 
+    @DeleteMapping("/{scheduleId}")
+    public ResponseEntity<BaseResponse>deleteSchedule(@PathVariable("scheduleId")Long scheduleId,
+                                                      @AuthenticationPrincipal CustomUserDetails userDetails){
+        scheduleService.deleteSchedule(userDetails.getId(),scheduleId);
+        return BaseResponse.toResponseEntity(HttpStatus.OK,"일정 삭제 성공");
+    }
+
     @GetMapping("/{scheduleId}")
     public ResponseEntity<ScheduleDetailsResponse> getScheduleDetails(@PathVariable("scheduleId") Long scheduleId) {
         ScheduleDetailsResponse response = scheduleService.findScheduleDetails(scheduleId);

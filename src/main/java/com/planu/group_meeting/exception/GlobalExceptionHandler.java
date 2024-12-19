@@ -77,6 +77,11 @@ public class GlobalExceptionHandler {
         return BaseResponse.toResponseEntity(HttpStatus.BAD_REQUEST, "허용되지 않는 파일 형식입니다. JPEG, PNG, GIF 형식만 지원됩니다.");
     }
 
+    @ExceptionHandler(UnauthorizedResourceException.class)
+    public ResponseEntity<BaseResponse>handleUnauthorizedResourceException(UnauthorizedResourceException e){
+        return BaseResponse.toResponseEntity(HttpStatus.UNAUTHORIZED,"변경 권한이 없습니다.");
+    }
+
     @ExceptionHandler(ScheduleNotFoundException.class)
     public ResponseEntity<BaseResponse> handleScheduleNotFoundException(ScheduleNotFoundException e) {
         return BaseResponse.toResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -96,4 +101,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
+
+
 }

@@ -2,15 +2,12 @@ package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.dao.*;
 import com.planu.group_meeting.dto.ScheduleDto;
-import com.planu.group_meeting.dto.ScheduleDto.ScheduleSaveRequest;
-import com.planu.group_meeting.dto.ScheduleDto.DailyScheduleResponse;
-import com.planu.group_meeting.dto.ScheduleDto.ScheduleCheckResponse;
-import com.planu.group_meeting.dto.ScheduleDto.ScheduleListResponse;
-import com.planu.group_meeting.dto.ScheduleDto.ScheduleDetailsResponse;
+import com.planu.group_meeting.dto.ScheduleDto.*;
 import com.planu.group_meeting.entity.Schedule;
 import com.planu.group_meeting.entity.ScheduleParticipant;
 import com.planu.group_meeting.entity.UnregisteredParticipant;
 import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
+import com.planu.group_meeting.exception.user.UnauthorizedResourceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +23,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
+
     private final ScheduleDAO scheduleDAO;
     private final GroupScheduleDAO groupScheduleDAO;
     private final UserDAO userDAO;
@@ -36,63 +34,47 @@ public class ScheduleService {
     public void createSchedule(Long userId, ScheduleSaveRequest scheduleDto) {
         Schedule schedule = scheduleDto.toEntity(userId);
         scheduleDAO.insertSchedule(schedule);
-        List<Long> participantIds = scheduleDto.getParticipants();
 
-        if (participantIds != null && !participantIds.isEmpty()) {
-            List<ScheduleParticipant> participants = participantIds.stream()
-                    .map(userIds -> new ScheduleParticipant(schedule.getId(), userIds))
-                    .toList();
-            participantDAO.insertScheduleParticipants(participants);
-        }
-
-        List<String> unregisteredParticipantNames = scheduleDto.getUnregisteredParticipants();
-        if (unregisteredParticipantNames != null && !unregisteredParticipantNames.isEmpty()) {
-            List<UnregisteredParticipant> unregisteredParticipants = unregisteredParticipantNames.stream()
-                    .map(name -> new UnregisteredParticipant(schedule.getId(), name))
-                    .toList();
-            unregisteredParticipantDAO.insertUnregisteredParticipants(unregisteredParticipants);
-        }
+        insertParticipants(schedule, scheduleDto.getParticipants());
+        insertUnregisteredParticipants(schedule, scheduleDto.getUnregisteredParticipants());
     }
 
     @Transactional
-    public void updateSchedule(Long userId, Long scheduleId, ScheduleSaveRequest scheduleSaveRequest){
-        Schedule schedule = scheduleDAO.findById(scheduleId).orElseThrow(()->new ScheduleNotFoundException("scheduleId  " + scheduleId + " : 해당하는 스케줄을 찾을 수 없습니다."));
-        if(!Objects.equals(schedule.getUserId(), userId)){
-            throw new IllegalArgumentException();
+    public void updateSchedule(Long userId, Long scheduleId, ScheduleSaveRequest scheduleSaveRequest) {
+        Schedule schedule = scheduleDAO.findById(scheduleId)
+                .orElseThrow(() -> new ScheduleNotFoundException("scheduleId " + scheduleId + " : 해당 스케줄을 찾을 수 없습니다."));
+
+        if (!Objects.equals(schedule.getUserId(), userId)) {
+            throw new UnauthorizedResourceException();
         }
+
         schedule.updateSchedule(scheduleSaveRequest);
-        System.out.println(schedule.getTitle());
         scheduleDAO.updateSchedule(schedule);
 
-        // 참가자들 삭제
         participantDAO.deleteAllParticipantsByScheduleId(scheduleId);
-        // 회원아닌 참가자들 삭제
         unregisteredParticipantDAO.deleteAllParticipantsByScheduleId(scheduleId);
 
-        List<Long> participantIds = scheduleSaveRequest.getParticipants();
+        insertParticipants(schedule, scheduleSaveRequest.getParticipants());
+        insertUnregisteredParticipants(schedule, scheduleSaveRequest.getUnregisteredParticipants());
+    }
 
-        if (participantIds != null && !participantIds.isEmpty()) {
-            List<ScheduleParticipant> participants = participantIds.stream()
-                    .map(userIds -> new ScheduleParticipant(schedule.getId(), userIds))
-                    .toList();
-            participantDAO.insertScheduleParticipants(participants);
+    @Transactional
+    public void deleteSchedule(Long userId, Long scheduleId) {
+        Schedule schedule = scheduleDAO.findById(scheduleId)
+                .orElseThrow(() -> new ScheduleNotFoundException("scheduleId " + scheduleId + " : 해당 스케줄을 찾을 수 없습니다."));
+
+        if (!Objects.equals(schedule.getUserId(), userId)) {
+            throw new UnauthorizedResourceException();
         }
 
-        List<String> unregisteredParticipantNames = scheduleSaveRequest.getUnregisteredParticipants();
-        if (unregisteredParticipantNames != null && !unregisteredParticipantNames.isEmpty()) {
-            List<UnregisteredParticipant> unregisteredParticipants = unregisteredParticipantNames.stream()
-                    .map(name -> new UnregisteredParticipant(schedule.getId(), name))
-                    .toList();
-            unregisteredParticipantDAO.insertUnregisteredParticipants(unregisteredParticipants);
-        }
+        scheduleDAO.deleteScheduleById(scheduleId);
+        participantDAO.deleteAllParticipantsByScheduleId(scheduleId);
+        unregisteredParticipantDAO.deleteAllParticipantsByScheduleId(scheduleId);
     }
 
     public ScheduleDetailsResponse findScheduleDetails(Long scheduleId) {
-        ScheduleDetailsResponse scheduleDetails = scheduleDAO.getScheduleDetails(scheduleId);
-        if (scheduleDetails == null) {
-            throw new ScheduleNotFoundException("scheduleId  " + scheduleId + " : 해당하는 스케줄을 찾을 수 없습니다.");
-        }
-        return scheduleDetails;
+        return scheduleDAO.getScheduleDetails(scheduleId)
+                .orElseThrow(() -> new ScheduleNotFoundException("scheduleId " + scheduleId + " : 해당 스케줄을 찾을 수 없습니다."));
     }
 
     public DailyScheduleResponse findScheduleList(Long userId, LocalDate startDate, LocalDate endDate) {
@@ -103,13 +85,10 @@ public class ScheduleService {
         LocalDateTime startDateTime = startDate.atStartOfDay();
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
 
-        List<ScheduleListResponse>scheduleList = scheduleDAO.getScheduleList(userId, startDateTime, endDateTime);
-        List<ScheduleDto.BirthdayFriend>birthdayFriends = userDAO.findBirthdayByDate(userId,startDate,endDate);
-        DailyScheduleResponse response = new DailyScheduleResponse();
-        response.setSchedules(scheduleList);
-        response.setBirthdayFriends(birthdayFriends);
+        List<ScheduleListResponse> scheduleList = scheduleDAO.getScheduleList(userId, startDateTime, endDateTime);
+        List<ScheduleDto.BirthdayFriend> birthdayFriends = userDAO.findBirthdayByDate(userId, startDate, endDate);
 
-        return response;
+        return new DailyScheduleResponse(scheduleList, birthdayFriends);
     }
 
     public List<ScheduleCheckResponse> getSchedulesForMonth(Long userId, YearMonth yearMonth) {
@@ -119,33 +98,49 @@ public class ScheduleService {
         LocalDate startOfCalendar = firstDayOfMonth.minusDays(firstDayOfMonth.getDayOfWeek().getValue() % 7);
         LocalDate endOfCalendar = lastDayOfMonth.plusDays(6 - lastDayOfMonth.getDayOfWeek().getValue());
 
-        LocalDate current = startOfCalendar;
-
         List<ScheduleCheckResponse> scheduleCheckResponse = new ArrayList<>();
-
-        while (!current.isAfter(endOfCalendar)) {
-            ScheduleCheckResponse response = new ScheduleCheckResponse();
-            response.setDate(current);
-            // 개인일정 추가
-            if (scheduleDAO.existsScheduleByDate(userId, current)) {
-                response.getScheduleTypes().add("personal");
-            }
-            // 그룹일정 추가
-            if (groupScheduleDAO.existsScheduleByDate(userId, current)) {
-                response.getScheduleTypes().add("group");
-            }
-            // 생일일정 추가
-            if (userDAO.existsBirthdayByDate(userId, current)) {
-                response.getScheduleTypes().add("birthday");
-            }
+        for (LocalDate current = startOfCalendar; !current.isAfter(endOfCalendar); current = current.plusDays(1)) {
+            ScheduleCheckResponse response = createScheduleCheckResponse(userId, current);
             if (!response.getScheduleTypes().isEmpty()) {
                 scheduleCheckResponse.add(response);
             }
-            current = current.plusDays(1);
         }
-        return scheduleCheckResponse;
 
+        return scheduleCheckResponse;
     }
 
+    private ScheduleCheckResponse createScheduleCheckResponse(Long userId, LocalDate current) {
+        ScheduleCheckResponse response = new ScheduleCheckResponse();
+        response.setDate(current);
 
+        if (scheduleDAO.existsScheduleByDate(userId, current)) {
+            response.getScheduleTypes().add("personal");
+        }
+        if (groupScheduleDAO.existsScheduleByDate(userId, current)) {
+            response.getScheduleTypes().add("group");
+        }
+        if (userDAO.existsBirthdayByDate(userId, current)) {
+            response.getScheduleTypes().add("birthday");
+        }
+
+        return response;
+    }
+
+    private void insertParticipants(Schedule schedule, List<Long> participantIds) {
+        if (participantIds != null && !participantIds.isEmpty()) {
+            List<ScheduleParticipant> participants = participantIds.stream()
+                    .map(userId -> new ScheduleParticipant(schedule.getId(), userId))
+                    .toList();
+            participantDAO.insertScheduleParticipants(participants);
+        }
+    }
+
+    private void insertUnregisteredParticipants(Schedule schedule, List<String> unregisteredParticipantNames) {
+        if (unregisteredParticipantNames != null && !unregisteredParticipantNames.isEmpty()) {
+            List<UnregisteredParticipant> unregisteredParticipants = unregisteredParticipantNames.stream()
+                    .map(name -> new UnregisteredParticipant(schedule.getId(), name))
+                    .toList();
+            unregisteredParticipantDAO.insertUnregisteredParticipants(unregisteredParticipants);
+        }
+    }
 }
