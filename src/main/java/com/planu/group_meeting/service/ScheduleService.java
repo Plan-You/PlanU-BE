@@ -1,9 +1,8 @@
 package com.planu.group_meeting.service;
 
-import com.planu.group_meeting.dao.GroupScheduleDAO;
-import com.planu.group_meeting.dao.ScheduleDAO;
-import com.planu.group_meeting.dao.UserDAO;
+import com.planu.group_meeting.dao.*;
 import com.planu.group_meeting.dto.ScheduleDto;
+import com.planu.group_meeting.dto.ScheduleDto.ScheduleSaveRequest;
 import com.planu.group_meeting.dto.ScheduleDto.DailyScheduleResponse;
 import com.planu.group_meeting.dto.ScheduleDto.ScheduleCheckResponse;
 import com.planu.group_meeting.dto.ScheduleDto.ScheduleListResponse;
@@ -21,8 +20,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -30,9 +29,11 @@ public class ScheduleService {
     private final ScheduleDAO scheduleDAO;
     private final GroupScheduleDAO groupScheduleDAO;
     private final UserDAO userDAO;
+    private final ParticipantDAO participantDAO;
+    private final UnregisteredParticipantDAO unregisteredParticipantDAO;
 
     @Transactional
-    public void createSchedule(Long userId, ScheduleDto.ScheduleSaveRequest scheduleDto) {
+    public void createSchedule(Long userId, ScheduleSaveRequest scheduleDto) {
         Schedule schedule = scheduleDto.toEntity(userId);
         scheduleDAO.insertSchedule(schedule);
         List<Long> participantIds = scheduleDto.getParticipants();
@@ -41,7 +42,7 @@ public class ScheduleService {
             List<ScheduleParticipant> participants = participantIds.stream()
                     .map(userIds -> new ScheduleParticipant(schedule.getId(), userIds))
                     .toList();
-            scheduleDAO.insertScheduleParticipants(participants);
+            participantDAO.insertScheduleParticipants(participants);
         }
 
         List<String> unregisteredParticipantNames = scheduleDto.getUnregisteredParticipants();
@@ -49,7 +50,40 @@ public class ScheduleService {
             List<UnregisteredParticipant> unregisteredParticipants = unregisteredParticipantNames.stream()
                     .map(name -> new UnregisteredParticipant(schedule.getId(), name))
                     .toList();
-            scheduleDAO.insertUnregisteredParticipants(unregisteredParticipants);
+            unregisteredParticipantDAO.insertUnregisteredParticipants(unregisteredParticipants);
+        }
+    }
+
+    @Transactional
+    public void updateSchedule(Long userId, Long scheduleId, ScheduleSaveRequest scheduleSaveRequest){
+        Schedule schedule = scheduleDAO.findById(scheduleId).orElseThrow(()->new ScheduleNotFoundException("scheduleId  " + scheduleId + " : 해당하는 스케줄을 찾을 수 없습니다."));
+        if(!Objects.equals(schedule.getUserId(), userId)){
+            throw new IllegalArgumentException();
+        }
+        schedule.updateSchedule(scheduleSaveRequest);
+        System.out.println(schedule.getTitle());
+        scheduleDAO.updateSchedule(schedule);
+
+        // 참가자들 삭제
+        participantDAO.deleteAllParticipantsByScheduleId(scheduleId);
+        // 회원아닌 참가자들 삭제
+        unregisteredParticipantDAO.deleteAllParticipantsByScheduleId(scheduleId);
+
+        List<Long> participantIds = scheduleSaveRequest.getParticipants();
+
+        if (participantIds != null && !participantIds.isEmpty()) {
+            List<ScheduleParticipant> participants = participantIds.stream()
+                    .map(userIds -> new ScheduleParticipant(schedule.getId(), userIds))
+                    .toList();
+            participantDAO.insertScheduleParticipants(participants);
+        }
+
+        List<String> unregisteredParticipantNames = scheduleSaveRequest.getUnregisteredParticipants();
+        if (unregisteredParticipantNames != null && !unregisteredParticipantNames.isEmpty()) {
+            List<UnregisteredParticipant> unregisteredParticipants = unregisteredParticipantNames.stream()
+                    .map(name -> new UnregisteredParticipant(schedule.getId(), name))
+                    .toList();
+            unregisteredParticipantDAO.insertUnregisteredParticipants(unregisteredParticipants);
         }
     }
 
