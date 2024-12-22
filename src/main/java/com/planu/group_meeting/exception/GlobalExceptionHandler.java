@@ -93,14 +93,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidInputException.class)
-    public ResponseEntity<String> handleInvalidInputException(InvalidInputException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    public ResponseEntity<BaseResponse> handleInvalidInputException(InvalidInputException e) {
+        return BaseResponse.toResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    public ResponseEntity<BaseResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+        return BaseResponse.toResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());
     }
-
-
 }

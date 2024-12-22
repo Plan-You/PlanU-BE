@@ -72,4 +72,11 @@
         g.ID, g.NAME, g.PROFILE;
     </select>
 
+    <delete id="deleteGroupUserByUserIdAndGroupId" parameterType="map">
+        DELETE FROM GROUP_USER
+        WHERE USER_ID = #{userId} AND GROUP_ID = #{groupId}
+    </delete>
+
+
+
 </mapper>
