@@ -1,6 +1,8 @@
 package com.planu.group_meeting.controller;
 
+import com.fasterxml.jackson.databind.ser.Serializers;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.dto.GroupDTO.GroupDetailResponse;
 import com.planu.group_meeting.dto.GroupInviteResponseDTO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
@@ -8,6 +10,7 @@ import com.planu.group_meeting.service.GroupScheduleService;
 import com.planu.group_meeting.service.GroupService;
 import com.planu.group_meeting.valid.InputValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -62,9 +65,17 @@ public class GroupController {
         return ResponseEntity.ok(groupService.getGroupList(userDetails.getId()));
     }
 
-    @GetMapping("inviteList")
+    @GetMapping("/inviteList")
     public ResponseEntity<List<GroupResponseDTO>> groupInviteList(@AuthenticationPrincipal CustomUserDetails userDetails){
         return ResponseEntity.ok(groupService.getGroupInviteList(userDetails.getId()));
+    }
+
+    @PostMapping("/groups/leave/{groupId}")
+    public ResponseEntity<BaseResponse> leaveGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                   @PathVariable("groupId") Long groupId) {
+        groupService.leaveGroup(userDetails.getId(), groupId);
+
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "그룹 탈퇴 성공");
     }
 
 

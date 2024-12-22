@@ -126,6 +126,16 @@ public class GroupService {
     public List<GroupResponseDTO> getGroupList(Long userId) {
         return groupDAO.findGroupsByUserId(userId);
     }
+
+    @Transactional
+    public void leaveGroup(Long userId, Long groupId) {
+        int deletedCount = groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
+
+        if (deletedCount == 0) {
+            throw new IllegalArgumentException("이미 그룹에 속하지 않습니다.");
+        }
+    }
+
     @Transactional
     public String findNameByGroupId(Long groupId) {
         return groupDAO.findNameByGroupId(groupId);
