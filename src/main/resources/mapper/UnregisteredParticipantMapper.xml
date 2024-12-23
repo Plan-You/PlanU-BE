@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.planu.group_meeting.dao.UnregisteredParticipantDAO">
+
+    <insert id="insertUnregisteredParticipants" parameterType="list">
+        INSERT INTO UNREGISTERED_PARTICIPANT (SCHEDULE_ID, PARTICIPANT_NAME)
+        VALUES
+        <foreach collection="list" item="participant" separator=",">
+            (#{participant.scheduleId}, #{participant.participantName})
+        </foreach>
+    </insert>
+
+    <delete id="deleteAllParticipantsByScheduleId" parameterType="long">
+        DELETE FROM UNREGISTERED_PARTICIPANT
+        WHERE SCHEDULE_ID = ${scheduleId}
+    </delete>
+
+</mapper>

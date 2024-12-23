@@ -28,4 +28,9 @@
             WHERE GSP.USER_ID = #{userId} AND DATE(GS.START_DATETIME) = #{date}
         )
     </select>
+
+    <insert id="insert" parameterType="com.planu.group_meeting.entity.GroupSchedule" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO GROUP_SCHEDULE(TITLE, START_DATETIME, END_DATETIME, COLOR, MEMO, LOCATION, LATITUDE, LONGITUDE, GROUP_ID )
+        VALUES (#{title}, #{startDateTime}, #{endDateTime}, #{color}, #{memo}, #{location}, #{latitude}, #{longitude}, #{groupId})
+    </insert>
 </mapper>

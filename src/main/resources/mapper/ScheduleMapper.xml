@@ -23,7 +23,6 @@
         </collection>
     </resultMap>
 
-
     <insert id="insertSchedule" parameterType="com.planu.group_meeting.entity.Schedule"
             useGeneratedKeys="true" keyProperty="id">
         INSERT INTO SCHEDULE (TITLE, START_DATETIME, END_DATETIME, COLOR, MEMO, LOCATION, LATITUDE, LONGITUDE, USER_ID)
@@ -31,21 +30,48 @@
         #{latitude},#{longitude},#{userId})
     </insert>
 
-    <insert id="insertScheduleParticipants" parameterType="list">
-        INSERT INTO SCHEDULE_PARTICIPANT (SCHEDULE_ID, USER_ID)
-        VALUES
-        <foreach collection="list" item="participant" separator=",">
-            (#{participant.scheduleId}, #{participant.userId})
-        </foreach>
-    </insert>
+    <update id="updateSchedule" parameterType="com.planu.group_meeting.entity.Schedule">
+        UPDATE SCHEDULE
+        SET
+        TITLE = #{title},
+        START_DATETIME = #{startDateTime},
+        END_DATETIME = #{endDateTime},
+        COLOR = #{color},
+        SCHEDULE_VISIBILITY = #{visibility},
+        MEMO = #{memo},
+        LOCATION = #{location},
+        LATITUDE = #{latitude},
+        LONGITUDE = #{longitude}
+        WHERE
+        ID = #{id}
+    </update>
 
-    <insert id="insertUnregisteredParticipants" parameterType="list">
-        INSERT INTO UNREGISTERED_PARTICIPANT (SCHEDULE_ID, PARTICIPANT_NAME)
-        VALUES
-        <foreach collection="list" item="participant" separator=",">
-            (#{participant.scheduleId}, #{participant.participantName})
-        </foreach>
-    </insert>
+    <delete id = "deleteScheduleById" parameterType="long">
+        DELETE FROM SCHEDULE
+        WHERE ID = #{scheduleId}
+    </delete>
+
+    <select id="findById" resultType="com.planu.group_meeting.entity.Schedule">
+        SELECT
+        ID,
+        USER_ID,
+        TITLE,
+        START_DATETIME AS startDateTime,
+        END_DATETIME AS endDateTime,
+        COLOR,
+        SCHEDULE_VISIBILITY AS visibility,
+        MEMO,
+        LOCATION,
+        LATITUDE,
+        LONGITUDE,
+        CREATED_DATE AS createdAt,
+        UPDATED_DATE AS updatedAt
+        FROM
+        SCHEDULE
+        WHERE
+        ID = #{scheduleId}
+    </select>
+
 
     <select id="existsScheduleByDate" resultType="boolean">
         SELECT EXISTS (
