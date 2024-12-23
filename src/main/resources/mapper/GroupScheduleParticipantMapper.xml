@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.planu.group_meeting.dao.GroupScheduleParticipantDAO">
+
+    <insert id="insert" parameterType="list">
+        INSERT INTO GROUP_SCHEDULE_PARTICIPANT (USER_ID, GROUP_ID, GROUP_SCHEDULE_ID)
+        VALUES
+            <foreach collection="list" item="participant" separator=",">
+                (#{participant.userId}, #{participant.groupId}, #{participant.groupScheduleId})
+            </foreach>
+    </insert>
+</mapper>

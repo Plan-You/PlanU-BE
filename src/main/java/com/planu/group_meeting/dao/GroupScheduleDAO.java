@@ -2,6 +2,7 @@ package com.planu.group_meeting.dao;
 
 import com.planu.group_meeting.dto.GroupScheduleDTO.scheduleOverViewResponse;
 import com.planu.group_meeting.dto.GroupScheduleDTO.todayScheduleResponse;
+import com.planu.group_meeting.entity.GroupSchedule;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.time.LocalDate;
@@ -15,4 +16,8 @@ public interface GroupScheduleDAO {
     List<scheduleOverViewResponse> findScheduleOverViewsByToday(Long groupId, LocalDateTime today);
 
     boolean existsScheduleByDate(Long userId, LocalDate date);
+
+    void insert(GroupSchedule groupSchedule);
+
+    Long findIdByEntity(GroupSchedule groupSchedule);
 }
