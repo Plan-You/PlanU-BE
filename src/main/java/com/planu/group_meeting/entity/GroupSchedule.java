@@ -20,6 +20,10 @@ public class GroupSchedule {
     private LocalDateTime endDateTime;
     private String color;
     ScheduleVisibility visibility;
+    private String memo;
+    private String location;
+    private String latitude;
+    private String longitude;
 
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
