@@ -89,7 +89,7 @@ public class UserController {
         String refresh = CookieUtil.getCookieValue(request, "refresh");
         TokenDto tokenDTO = userService.reissueAccessToken(refresh);
         response.setHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + tokenDTO.getAccess());
-        response.addCookie(CookieUtil.createCookie("refresh", tokenDTO.getRefresh()));
+        CookieUtil.createCookie(response,"refresh",tokenDTO.getRefresh());
         return BaseResponse.toResponseEntity(HttpStatus.OK, "access 토콘 재발급 성공");
     }
 

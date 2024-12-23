@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -64,8 +65,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String refresh = jwtUtil.createRefreshToken(username, role);
         System.out.println(role);
 
+
         response.addHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + access);
-        response.addCookie(CookieUtil.createCookie("refresh", refresh));
+        CookieUtil.createCookie(response,"refresh",refresh);
         response.setStatus(HttpStatus.OK.value());
     }
 
