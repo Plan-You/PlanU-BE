@@ -1,5 +1,6 @@
 package com.planu.group_meeting.service;
 
+import com.planu.group_meeting.dao.FriendDAO;
 import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dao.UserTermsDAO;
 import com.planu.group_meeting.dto.TokenDto;
@@ -9,10 +10,12 @@ import com.planu.group_meeting.dto.UserDto.EmailRequest;
 import com.planu.group_meeting.dto.UserTermsDto;
 import com.planu.group_meeting.entity.User;
 import com.planu.group_meeting.entity.UserTerms;
+import com.planu.group_meeting.entity.common.FriendStatus;
 import com.planu.group_meeting.entity.common.ProfileStatus;
 import com.planu.group_meeting.exception.user.*;
 import com.planu.group_meeting.jwt.JwtUtil;
 import com.planu.group_meeting.service.file.S3Uploader;
+import com.planu.group_meeting.util.CookieUtil;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -36,6 +39,7 @@ public class UserService {
     private static final String BASE_PROFILE_IMAGE = "https://planu-storage-main.s3.ap-northeast-2.amazonaws.com/defaultProfile.png";
 
     private final UserDAO userDAO;
+    private final FriendDAO friendDAO;
     private final UserTermsDAO userTermsDAO;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
@@ -59,10 +63,11 @@ public class UserService {
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         userDAO.insertUser(userDto.toEntity());
     }
+
     @Transactional
     public void createUserProfile(Long userId, UserDto.UserRegistrationRequest registrationRequest, MultipartFile profileImage) {
         String profileImageUrl = BASE_PROFILE_IMAGE;
-        if(profileImage!=null && !profileImage.isEmpty()){
+        if (profileImage != null && !profileImage.isEmpty()) {
             profileImageUrl = s3Uploader.uploadFile(profileImage);
         }
         User user = new User();
@@ -187,12 +192,12 @@ public class UserService {
 
     private void validateRefreshToken(String refresh) {
         if (refresh == null || jwtUtil.isExpired(refresh) || !"refresh".equals(jwtUtil.getCategory(refresh))) {
-            throw new InvalidTokenException();
+            throw new InvalidRefreshTokenException();
         }
     }
 
-    public UserDto.UserInfoResponse getUserInfo(String username){
-        if(!isDuplicatedUsername(username)){
+    public UserDto.UserInfoResponse getUserInfo(String username) {
+        if (!isDuplicatedUsername(username)) {
             throw new NotFoundUserException();
         }
         User user = userDAO.findByUsername(username);
@@ -203,6 +208,30 @@ public class UserService {
                 .email(user.getEmail())
                 .birthday(user.getBirthDate())
                 .build();
+    }
+
+    public void requestFriend(Long userId, String toUsername) {
+        if (!isDuplicatedUsername(toUsername)) {
+            throw new NotFoundUserException();
+        }
+        Long toUserId = userDAO.findByUsername(toUsername).getId();
+        FriendStatus friendStatus = friendDAO.getFriendStatus(userId, toUserId);
+        System.out.println(friendStatus.value);
+        System.out.println(friendStatus);
+        switch(friendStatus){
+            case NONE :
+                friendDAO.requestFriend(userId,toUserId);
+                break;
+            case REQUEST:
+                throw new DuplicatedRequestException("이미 친구요청을 보냈습니다.");
+            case RECEIVE:
+                throw new DuplicatedRequestException("친구 요청을 받아주세요");
+            case FRIEND:
+                throw new DuplicatedRequestException("이미 친구입니다");
+            default:
+                throw new IllegalStateException("알 수 없는 상태입니다.");
+        }
+
     }
 }
 
