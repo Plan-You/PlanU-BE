@@ -7,10 +7,12 @@ import com.planu.group_meeting.util.CookieUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -25,6 +27,8 @@ import static com.planu.group_meeting.jwt.JwtFilter.BEARER_PREFIX;
 
 @Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
+    private final static String BAD_CREDENTIALS_MSG = "비밀번호가 일치하지 않습니다.";
+    private final static String USERNAME_NOT_FOUNT_MSG = "등록된 아이디가 없습니다.";
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
@@ -75,6 +79,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
     }
+
 
 
 }

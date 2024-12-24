@@ -15,7 +15,7 @@ public class CookieUtil {
                 .secure(true)
                 .path("/")
                 .sameSite("None")
-                .domain("https://localhost:5173")
+                .domain("localhost")
                 .httpOnly(true)
                 .build();
         response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());

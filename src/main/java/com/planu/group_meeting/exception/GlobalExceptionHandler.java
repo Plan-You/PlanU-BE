@@ -82,6 +82,11 @@ public class GlobalExceptionHandler {
         return BaseResponse.toResponseEntity(HttpStatus.UNAUTHORIZED,"변경 권한이 없습니다.");
     }
 
+    @ExceptionHandler(DuplicatedRequestException.class)
+    public ResponseEntity<BaseResponse>handleDuplicatedRequestException(DuplicatedRequestException e){
+        return BaseResponse.toResponseEntity(HttpStatus.CONFLICT,e.getMessage());
+    }
+
     @ExceptionHandler(ScheduleNotFoundException.class)
     public ResponseEntity<BaseResponse> handleScheduleNotFoundException(ScheduleNotFoundException e) {
         return BaseResponse.toResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());
