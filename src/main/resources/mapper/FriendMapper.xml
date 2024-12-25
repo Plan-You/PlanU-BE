@@ -11,10 +11,17 @@
         WHERE FROM_USER_ID=#{fromUserId} AND TO_USER_ID = #{toUserId}
     </select>
 
-    <insert id = "requestFriend" parameterType="long">
+    <insert id="requestFriend" parameterType="long">
         INSERT INTO FRIEND(TO_USER_ID, FROM_USER_ID, FRIEND_STATUS)
         VALUES (#{fromUserId}, #{toUserId}, 'RECEIVE'),
-               (#{toUserId}, #{fromUserId}, 'REQUEST')
+        (#{toUserId}, #{fromUserId}, 'REQUEST')
     </insert>
+
+    <update id="acceptFriend" parameterType="long">
+        UPDATE FRIEND
+        SET FRIEND_STATUS = 'FRIEND'
+        WHERE (FROM_USER_ID=#{fromUserId} AND TO_USER_ID=#{toUserId})
+        OR (FROM_USER_ID=#{toUserId} AND TO_USER_ID=#{fromUserId})
+    </update>
 
 </mapper>

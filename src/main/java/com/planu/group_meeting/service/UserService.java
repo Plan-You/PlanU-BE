@@ -218,9 +218,9 @@ public class UserService {
         FriendStatus friendStatus = friendDAO.getFriendStatus(userId, toUserId);
         System.out.println(friendStatus.value);
         System.out.println(friendStatus);
-        switch(friendStatus){
-            case NONE :
-                friendDAO.requestFriend(userId,toUserId);
+        switch (friendStatus) {
+            case NONE:
+                friendDAO.requestFriend(userId, toUserId);
                 break;
             case REQUEST:
                 throw new DuplicatedRequestException("이미 친구요청을 보냈습니다.");
@@ -231,7 +231,15 @@ public class UserService {
             default:
                 throw new IllegalStateException("알 수 없는 상태입니다.");
         }
-
     }
+
+    public void acceptFriend(Long userId, String fromUsername) {
+        Long fromUserId = userDAO.findByUsername(fromUsername).getId();
+        if (friendDAO.getFriendStatus(fromUserId, userId) != FriendStatus.REQUEST) {
+            throw new FriendRequestNotFoundException();
+        }
+        friendDAO.acceptFriend(fromUserId, userId);
+    }
+
 }
 
