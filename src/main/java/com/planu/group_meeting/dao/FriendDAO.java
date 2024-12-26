@@ -13,5 +13,7 @@ public interface FriendDAO {
 
     void acceptFriend(Long fromUserId, Long toUserId);
 
+    void deleteFriend(Long fromUserId, Long toUserId);
+
     List<FriendInfo> getFriendsInfo(Long userId);
 }

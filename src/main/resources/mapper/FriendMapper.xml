@@ -24,6 +24,13 @@
         OR (FROM_USER_ID=#{toUserId} AND TO_USER_ID=#{fromUserId})
     </update>
 
+    <delete id="deleteFriend" parameterType="long">
+        DELETE FROM FRIEND
+        WHERE (FROM_USER_ID=#{fromUserId} AND TO_USER_ID=#{toUserId})
+        OR (FROM_USER_ID=#{toUserId} AND TO_USER_ID=#{fromUserId})
+    </delete>
+
+
     <select id="getFriendsInfo" parameterType="long" resultType="com.planu.group_meeting.dto.FriendDto$FriendInfo">
         SELECT
         u.ID AS userId,

@@ -48,6 +48,14 @@ public class FriendService {
         friendDAO.acceptFriend(fromUserId, userId);
     }
 
+    public void rejectFriend(Long userId, String fromUsername){
+        Long fromUserId = userDAO.findByUsername(fromUsername).getId();
+        if (friendDAO.getFriendStatus(fromUserId, userId) != FriendStatus.REQUEST) {
+            throw new FriendRequestNotFoundException();
+        }
+        friendDAO.deleteFriend(fromUserId,userId);
+    }
+
     public FriendListResponse getFriendList(Long userId){
         List<FriendInfo> friendsInfo = friendDAO.getFriendsInfo(userId);
         return new FriendListResponse(friendsInfo.size(), friendsInfo);
