@@ -17,14 +17,14 @@ public class FriendController {
 
     private final FriendService friendService;
 
-    @PostMapping
+    @PostMapping("/request")
     public ResponseEntity<BaseResponse> requestFriend(@RequestParam("username") String username,
                                                       @AuthenticationPrincipal CustomUserDetails userDetails) {
         friendService.requestFriend(userDetails.getId(), username);
         return BaseResponse.toResponseEntity(HttpStatus.OK, "친구요청 성공");
     }
 
-    @PostMapping("/accept")
+    @PostMapping("/request-accept")
     public ResponseEntity<BaseResponse> acceptFriend(@RequestParam("username") String username,
                                                      @AuthenticationPrincipal CustomUserDetails userDetails) {
 
@@ -32,14 +32,14 @@ public class FriendController {
         return BaseResponse.toResponseEntity(HttpStatus.OK, "친구요청 수락 성공");
     }
 
-    @DeleteMapping("/reject")
+    @DeleteMapping("/request-reject")
     public ResponseEntity<BaseResponse>rejectFriend(@RequestParam("username")String username,
                                                     @AuthenticationPrincipal CustomUserDetails userDetails){
         friendService.rejectFriend(userDetails.getId(), username);
         return BaseResponse.toResponseEntity(HttpStatus.OK, "친구요청 거절 성공");
     }
 
-    @DeleteMapping("request-cancel")
+    @DeleteMapping("/request-cancel")
     public ResponseEntity<BaseResponse>cancelFriendRequest(@RequestParam("username")String username,
                                                            @AuthenticationPrincipal CustomUserDetails userDetails){
         friendService.cancelFriendRequest(userDetails.getId(), username);
@@ -49,6 +49,11 @@ public class FriendController {
     @GetMapping
     public ResponseEntity<FriendListResponse> getFriendList(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(friendService.getFriendList(userDetails.getId()));
+    }
+
+    @GetMapping("/request")
+    public ResponseEntity<FriendListResponse>getFriendRequestList(@AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok(friendService.getFriendRequestList(userDetails.getId()));
     }
 
 }
