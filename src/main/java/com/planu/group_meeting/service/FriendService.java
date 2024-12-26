@@ -85,4 +85,9 @@ public class FriendService {
         List<FriendInfo> friendsInfo = friendDAO.getFriendsInfo(userId,FriendStatus.REQUEST);
         return new FriendListResponse(friendsInfo.size(),friendsInfo);
     }
+
+    public FriendListResponse getFriendReceiveList(Long userId){
+        List<FriendInfo> friendsInfo = friendDAO.getFriendsInfo(userId,FriendStatus.RECEIVE);
+        return new FriendListResponse(friendsInfo.size(),friendsInfo);
+    }
 }
