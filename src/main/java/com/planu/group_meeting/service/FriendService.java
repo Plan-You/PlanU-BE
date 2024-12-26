@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+
+
 @Service
 @RequiredArgsConstructor
 public class FriendService {
@@ -75,7 +77,12 @@ public class FriendService {
     }
 
     public FriendListResponse getFriendList(Long userId){
-        List<FriendInfo> friendsInfo = friendDAO.getFriendsInfo(userId);
+        List<FriendInfo> friendsInfo = friendDAO.getFriendsInfo(userId, FriendStatus.FRIEND);
         return new FriendListResponse(friendsInfo.size(), friendsInfo);
+    }
+
+    public FriendListResponse getFriendRequestList(Long userId){
+        List<FriendInfo> friendsInfo = friendDAO.getFriendsInfo(userId,FriendStatus.REQUEST);
+        return new FriendListResponse(friendsInfo.size(),friendsInfo);
     }
 }

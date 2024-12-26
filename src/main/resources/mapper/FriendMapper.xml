@@ -31,7 +31,7 @@
     </delete>
 
 
-    <select id="getFriendsInfo" parameterType="long" resultType="com.planu.group_meeting.dto.FriendDto$FriendInfo">
+    <select id="getFriendsInfo" parameterType="Map" resultType="com.planu.group_meeting.dto.FriendDto$FriendInfo">
         SELECT
         u.ID AS userId,
         u.NAME AS name,
@@ -39,7 +39,8 @@
         u.PROFILE_IMG_URL as profileImageUrl
         FROM FRIEND f
         JOIN USER u ON f.TO_USER_ID = u.ID
-        WHERE f.FROM_USER_ID=#{userId} AND f.FRIEND_STATUS='FRIEND'
+        WHERE f.FROM_USER_ID=#{userId} AND f.FRIEND_STATUS=#{friendStatus}
     </select>
+
 
 </mapper>
