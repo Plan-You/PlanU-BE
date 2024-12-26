@@ -39,6 +39,13 @@ public class FriendController {
         return BaseResponse.toResponseEntity(HttpStatus.OK, "친구요청 거절 성공");
     }
 
+    @DeleteMapping("request-cancel")
+    public ResponseEntity<BaseResponse>cancelFriendRequest(@RequestParam("username")String username,
+                                                           @AuthenticationPrincipal CustomUserDetails userDetails){
+        friendService.cancelFriendRequest(userDetails.getId(), username);
+        return BaseResponse.toResponseEntity(HttpStatus.OK,"친구요청 취소 성공");
+    }
+
     @GetMapping
     public ResponseEntity<FriendListResponse> getFriendList(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(friendService.getFriendList(userDetails.getId()));
