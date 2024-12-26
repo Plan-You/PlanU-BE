@@ -56,4 +56,9 @@ public class FriendController {
         return ResponseEntity.ok(friendService.getFriendRequestList(userDetails.getId()));
     }
 
+    @GetMapping("/receive")
+    public ResponseEntity<FriendListResponse>getFriendReceiveList(@AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok(friendService.getFriendReceiveList(userDetails.getId()));
+    }
+
 }
