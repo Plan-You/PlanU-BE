@@ -210,36 +210,7 @@ public class UserService {
                 .build();
     }
 
-    public void requestFriend(Long userId, String toUsername) {
-        if (!isDuplicatedUsername(toUsername)) {
-            throw new NotFoundUserException();
-        }
-        Long toUserId = userDAO.findByUsername(toUsername).getId();
-        FriendStatus friendStatus = friendDAO.getFriendStatus(userId, toUserId);
-        System.out.println(friendStatus.value);
-        System.out.println(friendStatus);
-        switch (friendStatus) {
-            case NONE:
-                friendDAO.requestFriend(userId, toUserId);
-                break;
-            case REQUEST:
-                throw new DuplicatedRequestException("이미 친구요청을 보냈습니다.");
-            case RECEIVE:
-                throw new DuplicatedRequestException("친구 요청을 받아주세요");
-            case FRIEND:
-                throw new DuplicatedRequestException("이미 친구입니다");
-            default:
-                throw new IllegalStateException("알 수 없는 상태입니다.");
-        }
-    }
 
-    public void acceptFriend(Long userId, String fromUsername) {
-        Long fromUserId = userDAO.findByUsername(fromUsername).getId();
-        if (friendDAO.getFriendStatus(fromUserId, userId) != FriendStatus.REQUEST) {
-            throw new FriendRequestNotFoundException();
-        }
-        friendDAO.acceptFriend(fromUserId, userId);
-    }
 
 }
 

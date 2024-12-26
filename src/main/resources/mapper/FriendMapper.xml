@@ -24,4 +24,15 @@
         OR (FROM_USER_ID=#{toUserId} AND TO_USER_ID=#{fromUserId})
     </update>
 
+    <select id="getFriendsInfo" parameterType="long" resultType="com.planu.group_meeting.dto.FriendDto$FriendInfo">
+        SELECT
+        u.ID AS userId,
+        u.NAME AS name,
+        u.USERNAME AS username,
+        u.PROFILE_IMG_URL as profileImageUrl
+        FROM FRIEND f
+        JOIN USER u ON f.TO_USER_ID = u.ID
+        WHERE f.FROM_USER_ID=#{userId} AND f.FRIEND_STATUS='FRIEND'
+    </select>
+
 </mapper>
