@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.planu.group_meeting.dao.GroupUserDAO">
+
+    <select id="isGroupMember" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM GROUP_USER
+            WHERE group_id = #{groupId} and user_id = #{user_id}
+        );
+    </select>
+
+    <select id="isLeader" resultType="boolean">
+        SELECT CASE
+            WHEN GROUP_ROLE = 'LEADER' THEN TRUE
+            ELSE FALSE
+        END AS isLeader
+        FROM GROUP_USER
+        WHERE group_id = #{groupId} and user_id = #{userId};
+    </select>
+</mapper>

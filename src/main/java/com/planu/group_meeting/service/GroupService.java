@@ -2,6 +2,7 @@ package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dao.GroupDAO;
+import com.planu.group_meeting.dao.GroupUserDAO;
 import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dto.GroupInviteResponseDTO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
@@ -22,12 +23,14 @@ public class GroupService {
     private final GroupDAO groupDAO;
     private final UserDAO userDAO;
     private final S3Uploader s3Uploader;
+    private final GroupUserDAO groupUserDAO;
 
     @Autowired
-    public GroupService(GroupDAO groupDAO, UserDAO userDAO, S3Uploader s3Uploader) {
+    public GroupService(GroupDAO groupDAO, UserDAO userDAO, S3Uploader s3Uploader, GroupUserDAO groupUserDAO) {
         this.groupDAO = groupDAO;
         this.userDAO = userDAO;
         this.s3Uploader = s3Uploader;
+        this.groupUserDAO = groupUserDAO;
     }
 
     @Transactional
@@ -139,5 +142,10 @@ public class GroupService {
     @Transactional
     public String findNameByGroupId(Long groupId) {
         return groupDAO.findNameByGroupId(groupId);
+    }
+
+    @Transactional
+    public Boolean isGroupMember(Long userId, Long groupId) {
+        return groupUserDAO.isGroupMember(userId, groupId);
     }
 }

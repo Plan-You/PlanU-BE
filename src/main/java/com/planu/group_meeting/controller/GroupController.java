@@ -1,9 +1,7 @@
 package com.planu.group_meeting.controller;
 
-import com.fasterxml.jackson.databind.ser.Serializers;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dto.BaseResponse;
-import com.planu.group_meeting.dto.GroupDTO.GroupDetailResponse;
 import com.planu.group_meeting.dto.GroupInviteResponseDTO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.service.GroupScheduleService;
@@ -16,10 +14,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -76,21 +73,5 @@ public class GroupController {
         groupService.leaveGroup(userDetails.getId(), groupId);
 
         return BaseResponse.toResponseEntity(HttpStatus.OK, "그룹 탈퇴 성공");
-    }
-
-
-    @GetMapping("/{groupId}/detail")
-    public ResponseEntity<GroupDetailResponse> groupDetail(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                           @PathVariable("groupId") Long groupId) {
-        LocalDateTime today = LocalDateTime.now();
-        System.out.println(groupService.findNameByGroupId(groupId));
-        System.out.println(groupScheduleService.findTodaySchedulesByToday(groupId, today));
-        System.out.println(groupScheduleService.findScheduleOverViewByToday(groupId, today));
-
-        return ResponseEntity.ok(new GroupDetailResponse(
-                groupService.findNameByGroupId(groupId),
-                groupScheduleService.findTodaySchedulesByToday(groupId, today),
-                groupScheduleService.findScheduleOverViewByToday(groupId, today)
-        ));
     }
 }

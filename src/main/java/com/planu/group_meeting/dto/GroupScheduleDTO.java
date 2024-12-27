@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 
@@ -59,7 +60,7 @@ public class GroupScheduleDTO {
     public static class todayScheduleResponse {
         private Long id;
         private String title;
-        private LocalDateTime startDateTime;
+        private String startDateTime;
         private String location;
     }
 
@@ -70,5 +71,18 @@ public class GroupScheduleDTO {
         private LocalDateTime startDateTime;
         private LocalDateTime endDateTime;
         private String color;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class GroupTodayScheduleResponse {
+        private String GroupName;
+        private List<todayScheduleResponse> todaySchedules;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class groupOverViewsResponse {
+        private List<scheduleOverViewResponse> groupSchedules;
     }
 }

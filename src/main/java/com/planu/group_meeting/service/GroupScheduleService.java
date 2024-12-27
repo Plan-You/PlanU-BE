@@ -15,7 +15,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 @Service
@@ -32,8 +34,13 @@ public class GroupScheduleService {
     }
 
     @Transactional
-    public List<scheduleOverViewResponse> findScheduleOverViewByToday(Long groupId, LocalDateTime today) {
-        return groupScheduleDAO.findScheduleOverViewsByToday(groupId, today);
+    public List<scheduleOverViewResponse> findScheduleOverViewByToday(Long groupId, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime today = LocalDateTime.now();
+        if(startDate == null || endDate == null) {
+            startDate = today.toLocalDate().with(TemporalAdjusters.firstDayOfMonth());
+            endDate = today.toLocalDate().with(TemporalAdjusters.lastDayOfMonth());
+        }
+        return groupScheduleDAO.findScheduleOverViewsByRange(groupId, startDate, endDate);
     }
 
     @Transactional
@@ -60,8 +67,6 @@ public class GroupScheduleService {
             List<GroupScheduleUnregisteredParticipant> unregisteredParticipants = unregisteredParticipantNames.stream()
                     .map(userName -> new GroupScheduleUnregisteredParticipant(groupSchedule.getId(), userName))
                     .toList();
-
-            System.out.println("디버그: " + unregisteredParticipants);
             groupScheduleUnregisteredParticipantDAO.insert(unregisteredParticipants);
         }
     }

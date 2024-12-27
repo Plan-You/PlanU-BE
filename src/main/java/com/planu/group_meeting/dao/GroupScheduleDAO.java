@@ -13,11 +13,10 @@ import java.util.List;
 public interface GroupScheduleDAO {
 
     List<todayScheduleResponse> findTodaySchedulesByToday(Long groupId, LocalDateTime today);
-    List<scheduleOverViewResponse> findScheduleOverViewsByToday(Long groupId, LocalDateTime today);
+
+    List<scheduleOverViewResponse> findScheduleOverViewsByRange(Long groupId, LocalDate startDate, LocalDate endDate);
 
     boolean existsScheduleByDate(Long userId, LocalDate date);
 
     void insert(GroupSchedule groupSchedule);
-
-    Long findIdByEntity(GroupSchedule groupSchedule);
 }
