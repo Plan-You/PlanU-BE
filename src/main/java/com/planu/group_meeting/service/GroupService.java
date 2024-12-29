@@ -140,6 +140,21 @@ public class GroupService {
     }
 
     @Transactional
+    public void deleteGroup(Long userId, Long groupId) {
+        GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
+        Group group = groupDAO.findGroupById(groupId);
+
+        if(group == null){
+            throw new IllegalArgumentException("해당 그룹이 존재하지 않습니다.");
+        }
+        if (groupUser.getGroupRole() != GroupUser.GroupRole.LEADER) {
+            throw new IllegalArgumentException("그룹을 삭제할 권한이 없습니다.");
+        }
+
+        groupDAO.deleteGroup(groupId);
+    }
+
+    @Transactional
     public String findNameByGroupId(Long groupId) {
         return groupDAO.findNameByGroupId(groupId);
     }

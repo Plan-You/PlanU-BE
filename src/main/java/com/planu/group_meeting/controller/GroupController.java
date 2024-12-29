@@ -25,7 +25,6 @@ public class GroupController {
 
     private final GroupService groupService;
     private final InputValidator inputValidator;
-    private final GroupScheduleService groupScheduleService;
 
     @PostMapping("/create")
     public ResponseEntity<GroupResponseDTO> createGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
@@ -67,11 +66,19 @@ public class GroupController {
         return ResponseEntity.ok(groupService.getGroupInviteList(userDetails.getId()));
     }
 
-    @PostMapping("/groups/leave/{groupId}")
+    @PostMapping("/leave/{groupId}")
     public ResponseEntity<BaseResponse> leaveGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                    @PathVariable("groupId") Long groupId) {
         groupService.leaveGroup(userDetails.getId(), groupId);
 
         return BaseResponse.toResponseEntity(HttpStatus.OK, "그룹 탈퇴 성공");
+    }
+
+    @DeleteMapping("/delete/{groupId}")
+    public ResponseEntity<BaseResponse> deleteGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                    @PathVariable("groupId") Long groupId){
+        groupService.deleteGroup(userDetails.getId(), groupId);
+
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "그룹 삭제 성공");
     }
 }

@@ -27,4 +27,6 @@ public interface GroupDAO {
     String findNameByGroupId(Long groupId);
 
     List<GroupResponseDTO> findGroupsByUserId(Long userId);
+
+    void deleteGroup(Long groupId);
 }
