@@ -143,7 +143,25 @@ public class GroupService {
             throw new IllegalArgumentException("그룹을 삭제할 권한이 없습니다.");
         }
 
+
         groupDAO.deleteGroup(groupId);
+    }
+
+    @Transactional
+    public void declineInvitation(Long userId, Long groupId){
+        Group group = groupDAO.findGroupById(groupId);
+
+        if(group == null){
+            throw new IllegalArgumentException("해당 그룹이 존재하지 않습니다.");
+        }
+        GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
+        if (groupUser == null) {
+            throw new IllegalArgumentException("초대 받지 않았습니다.");
+        }
+        if (groupUser.getGroupState() == 1) {
+            throw new IllegalArgumentException("이미 그룹에 속해 있습니다.");
+        }
+        groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
     }
 
     @Transactional
