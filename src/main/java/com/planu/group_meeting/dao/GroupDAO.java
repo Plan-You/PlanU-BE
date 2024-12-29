@@ -29,4 +29,6 @@ public interface GroupDAO {
     List<GroupResponseDTO> findGroupsByUserId(Long userId);
 
     void deleteGroup(Long groupId);
+
+    List<GroupResponseDTO> getGroupInviteList(Long userId);
 }

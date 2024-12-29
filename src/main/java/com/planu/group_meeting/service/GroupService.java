@@ -114,15 +114,7 @@ public class GroupService {
 
     @Transactional
     public List<GroupResponseDTO> getGroupInviteList(Long userId){
-        List<GroupResponseDTO> groupResponseDTOList = groupDAO.findGroupsByUserId(userId);
-        List<GroupResponseDTO> groupList = new ArrayList<>();
-        for(GroupResponseDTO list : groupResponseDTOList){
-            groupList.add(GroupResponseDTO.builder()
-                    .groupId(list.getGroupId())
-                    .groupName(list.getGroupName())
-                    .groupImageUrl(list.getGroupImageUrl()).build());
-        }
-        return groupList;
+        return groupDAO.getGroupInviteList(userId);
     }
 
     @Transactional

@@ -100,5 +100,13 @@
         DELETE FROM GROUP_ WHERE ID = #{groupId};
     </delete>
 
-
+    <select id="getGroupInviteList" resultType="com.planu.group_meeting.dto.GroupResponseDTO">
+        SELECT g.ID AS groupId,
+        g.NAME AS groupName,
+        g.PROFILE AS groupImageUrl
+        FROM GROUP_USER gu
+        JOIN GROUP_ g ON gu.GROUP_ID = g.ID
+        WHERE gu.USER_ID = #{userId}
+        AND (gu.GROUP_STATE = 0 OR gu.GROUP_STATE IS NULL)
+    </select>
 </mapper>
