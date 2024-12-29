@@ -44,7 +44,7 @@ public class GroupController {
         return ResponseEntity.ok(groupService.inviteUser(userDetails, userName, id));
     }
 
-    @PostMapping("/join")
+    @PutMapping("/join")
     public ResponseEntity<Map<String, String>> joinGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                          @RequestParam("groupId") Long id) {
 
@@ -66,7 +66,7 @@ public class GroupController {
         return ResponseEntity.ok(groupService.getGroupInviteList(userDetails.getId()));
     }
 
-    @PostMapping("/leave/{groupId}")
+    @DeleteMapping("/leave/{groupId}")
     public ResponseEntity<BaseResponse> leaveGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                    @PathVariable("groupId") Long groupId) {
         groupService.leaveGroup(userDetails.getId(), groupId);
@@ -80,5 +80,13 @@ public class GroupController {
         groupService.deleteGroup(userDetails.getId(), groupId);
 
         return BaseResponse.toResponseEntity(HttpStatus.OK, "그룹 삭제 성공");
+    }
+
+    @DeleteMapping("/decline/{groupId}")
+    public ResponseEntity<BaseResponse> declineInvitation(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                          @PathVariable("groupId") Long groupId){
+        groupService.declineInvitation(userDetails.getId(), groupId);
+
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "초대 거절 성공");
     }
 }
