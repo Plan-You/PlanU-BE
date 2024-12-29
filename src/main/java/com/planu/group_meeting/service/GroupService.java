@@ -165,6 +165,21 @@ public class GroupService {
     }
 
     @Transactional
+    public void forceExpelMember(Long leaderId, Long groupId, String username){
+        Long userId = groupDAO.findUserIdByUserName(username);
+        GroupUser leaderGroupUser = groupDAO.findGroupUserByUserIdAndGroupId(leaderId, groupId);
+        if(leaderGroupUser.getGroupRole() != GroupUser.GroupRole.LEADER){
+            throw new IllegalArgumentException("강제 퇴출시킬 권한이 없습니다.");
+        }
+        GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
+        if(groupUser == null || groupUser.getGroupState() == 0){
+            throw new IllegalArgumentException("그룹에 속해 있지 않은 멤버입니다.");
+        }
+
+        groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
+    }
+
+    @Transactional
     public String findNameByGroupId(Long groupId) {
         return groupDAO.findNameByGroupId(groupId);
     }

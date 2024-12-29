@@ -89,4 +89,14 @@ public class GroupController {
 
         return BaseResponse.toResponseEntity(HttpStatus.OK, "초대 거절 성공");
     }
+
+    @DeleteMapping("/groups/{groupId}/members/{username}")
+    public ResponseEntity<BaseResponse> forceExpelMember(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                         @PathVariable("groupId") Long groupId,
+                                                         @PathVariable("username") String username){
+        groupService.forceExpelMember(userDetails.getId(), groupId, username);
+
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "강제 퇴출 성공");
+    }
+
 }
