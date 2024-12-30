@@ -2,6 +2,7 @@ package com.planu.group_meeting.dao;
 
 import com.planu.group_meeting.dto.GroupScheduleDTO.scheduleOverViewResponse;
 import com.planu.group_meeting.dto.GroupScheduleDTO.todayScheduleResponse;
+import com.planu.group_meeting.dto.GroupScheduleDTO.GroupSchedulesDetailResponse;
 import com.planu.group_meeting.entity.GroupSchedule;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -19,4 +20,6 @@ public interface GroupScheduleDAO {
     boolean existsScheduleByDate(Long userId, LocalDate date);
 
     void insert(GroupSchedule groupSchedule);
+
+    GroupSchedulesDetailResponse findByScheduleId(Long groupId, Long scheduleId);
 }

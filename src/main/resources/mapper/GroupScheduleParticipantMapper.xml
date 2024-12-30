@@ -12,4 +12,11 @@
                 (#{participant.userId}, #{participant.groupId}, #{participant.groupScheduleId})
             </foreach>
     </insert>
+
+    <select id="findByScheduleId" resultType="com.planu.group_meeting.dto.GroupScheduleDTO$ParticipantsResponse">
+        SELECT u.name, u.id as participantId, TRUE as isRegistered
+        FROM GROUP_SCHEDULE_PARTICIPANT as gsp
+        JOIN USER u ON gsp.user_id = u.id
+        WHERE gsp.group_id = #{groupId} and gsp.GROUP_SCHEDULE_ID = #{scheduleId}
+    </select>
 </mapper>

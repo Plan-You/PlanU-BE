@@ -5,9 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -84,5 +82,28 @@ public class GroupScheduleDTO {
     @AllArgsConstructor
     public static class groupOverViewsResponse {
         private List<scheduleOverViewResponse> groupSchedules;
+    }
+
+    @Getter
+    public static class ParticipantsResponse {
+        private String name;
+        private Long participantId;
+        private Boolean isRegistered;
+    }
+
+    @Getter
+    @Setter
+    @RequiredArgsConstructor
+    public static class GroupSchedulesDetailResponse {
+        private final String groupScheduleId;
+        private final String title;
+        private final String color;
+        private final String startDate;
+        private final String endDate;
+        private final String location;
+        private final String latitude;
+        private final String longitude;
+        private final String memo;
+        private List<ParticipantsResponse> participants;
     }
 }

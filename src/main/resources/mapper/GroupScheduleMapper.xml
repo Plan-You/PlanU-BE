@@ -32,4 +32,18 @@
         INSERT INTO GROUP_SCHEDULE(TITLE, START_DATETIME, END_DATETIME, COLOR, MEMO, LOCATION, LATITUDE, LONGITUDE, GROUP_ID )
         VALUES (#{title}, #{startDateTime}, #{endDateTime}, #{color}, #{memo}, #{location}, #{latitude}, #{longitude}, #{groupId})
     </insert>
+
+    <select id="findByScheduleId" resultType="com.planu.group_meeting.dto.GroupScheduleDTO$GroupSchedulesDetailResponse">
+        SELECT id as groupScheduleId,
+               title,
+               color,
+               start_datetime as startDate,
+               end_datetime as endDate,
+               location,
+               latitude,
+               longitude,
+               memo
+        FROM GROUP_SCHEDULE
+        WHERE group_id = #{groupId} and id = #{scheduleId};
+    </select>
 </mapper>

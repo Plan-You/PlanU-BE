@@ -53,5 +53,15 @@ public class GroupScheduleController {
     {
         return ResponseEntity.ok(new GroupScheduleDTO.groupOverViewsResponse(groupScheduleService.findScheduleOverViewByToday(groupId, startDate, endDate)));
     }
+
+    @GetMapping("/{groupId}/schedules/{scheduleId}")
+    public ResponseEntity<GroupScheduleDTO.GroupSchedulesDetailResponse> groupScheduleDetail(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable("groupId") Long groupId,
+            @PathVariable("scheduleId") Long scheduleId
+    )
+    {
+        return ResponseEntity.ok(groupScheduleService.findByGroupScheduleID(groupId, scheduleId));
+    }
 }
 
