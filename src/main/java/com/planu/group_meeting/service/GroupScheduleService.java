@@ -7,6 +7,7 @@ import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dto.GroupScheduleDTO;
 import com.planu.group_meeting.dto.GroupScheduleDTO.scheduleOverViewResponse;
 import com.planu.group_meeting.dto.GroupScheduleDTO.todayScheduleResponse;
+import com.planu.group_meeting.dto.GroupScheduleDTO.GroupSchedulesDetailResponse;
 import com.planu.group_meeting.entity.GroupSchedule;
 import com.planu.group_meeting.entity.GroupScheduleParticipant;
 import com.planu.group_meeting.entity.GroupScheduleUnregisteredParticipant;
@@ -36,7 +37,7 @@ public class GroupScheduleService {
     @Transactional
     public List<scheduleOverViewResponse> findScheduleOverViewByToday(Long groupId, LocalDate startDate, LocalDate endDate) {
         LocalDateTime today = LocalDateTime.now();
-        if(startDate == null || endDate == null) {
+        if (startDate == null || endDate == null) {
             startDate = today.toLocalDate().with(TemporalAdjusters.firstDayOfMonth());
             endDate = today.toLocalDate().with(TemporalAdjusters.lastDayOfMonth());
         }
@@ -54,7 +55,7 @@ public class GroupScheduleService {
 
 
     private void insertParticipants(GroupSchedule groupSchedule, List<Long> participantIds) {
-        if(participantIds != null && !participantIds.isEmpty()) {
+        if (participantIds != null && !participantIds.isEmpty()) {
             List<GroupScheduleParticipant> participants = participantIds.stream()
                     .map(userId -> new GroupScheduleParticipant(groupSchedule.getId(), userId, groupSchedule.getGroupId()))
                     .toList();
@@ -63,11 +64,24 @@ public class GroupScheduleService {
     }
 
     private void insertUnregisteredParticipants(GroupSchedule groupSchedule, List<String> unregisteredParticipantNames) {
-        if(unregisteredParticipantNames != null && !unregisteredParticipantNames.isEmpty()) {
+        if (unregisteredParticipantNames != null && !unregisteredParticipantNames.isEmpty()) {
             List<GroupScheduleUnregisteredParticipant> unregisteredParticipants = unregisteredParticipantNames.stream()
                     .map(userName -> new GroupScheduleUnregisteredParticipant(groupSchedule.getId(), userName))
                     .toList();
             groupScheduleUnregisteredParticipantDAO.insert(unregisteredParticipants);
         }
+    }
+
+    @Transactional
+    public GroupSchedulesDetailResponse findByGroupScheduleID(Long groupId, Long scheduleId) {
+        GroupSchedulesDetailResponse response = groupScheduleDAO.findByScheduleId(groupId, scheduleId);
+        response.setParticipants(findParticipantsByScheduleId(groupId, scheduleId));
+        return response;
+    }
+
+    private List<GroupScheduleDTO.ParticipantsResponse> findParticipantsByScheduleId(Long groupId, Long scheduleId) {
+        List<GroupScheduleDTO.ParticipantsResponse> participants = groupScheduleParticipantDAO.findByScheduleId(groupId, scheduleId);
+        participants.addAll(groupScheduleUnregisteredParticipantDAO.findByScheduleId(groupId, scheduleId));
+        return participants;
     }
 }
