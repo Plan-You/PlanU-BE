@@ -21,6 +21,7 @@ public class FriendService {
     private final FriendDAO friendDAO;
     private final UserDAO userDAO;
 
+
     public void requestFriend(Long userId, String toUsername) {
         if(!userDAO.existsByUsername(toUsername)){
             throw new NotFoundUserException();
@@ -76,6 +77,17 @@ public class FriendService {
         friendDAO.deleteFriend(toUserId,userId);
     }
 
+    public void deleteFriend(Long userId, String toUsername){
+        if(!userDAO.existsByUsername(toUsername)){
+            throw new NotFoundUserException();
+        }
+        Long toUserId = userDAO.findByUsername(toUsername).getId();
+        if (friendDAO.getFriendStatus(userId,toUserId) != FriendStatus.FRIEND) {
+            throw new IllegalStateException("잘못된 요청입니다.");
+        }
+        friendDAO.deleteFriend(toUserId,userId);
+    }
+
     public FriendListResponse getFriendList(Long userId){
         List<FriendInfo> friendsInfo = friendDAO.getFriendsInfo(userId, FriendStatus.FRIEND);
         return new FriendListResponse(friendsInfo.size(), friendsInfo);
@@ -90,4 +102,6 @@ public class FriendService {
         List<FriendInfo> friendsInfo = friendDAO.getFriendsInfo(userId,FriendStatus.RECEIVE);
         return new FriendListResponse(friendsInfo.size(),friendsInfo);
     }
+
+
 }

@@ -27,6 +27,11 @@ public class GlobalExceptionHandler {
         return BaseResponse.toResponseEntity(HttpStatus.BAD_REQUEST, errorMessage.toString());
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<BaseResponse>handleIllegalStateException(IllegalStateException e){
+        return BaseResponse.toResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
     @ExceptionHandler(DuplicatedUsernameException.class)
     public ResponseEntity<BaseResponse> handleDuplicatedUsernameException(DuplicatedUsernameException e) {
         return BaseResponse.toResponseEntity(HttpStatus.CONFLICT, "사용자 아이디가 이미 존재합니다.");
