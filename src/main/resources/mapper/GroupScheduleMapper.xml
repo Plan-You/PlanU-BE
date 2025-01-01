@@ -46,4 +46,27 @@
         FROM GROUP_SCHEDULE
         WHERE group_id = #{groupId} and id = #{scheduleId};
     </select>
+
+    <delete id="deleteGroupScheduleById" parameterType="Long">
+        DELETE FROM GROUP_SCHEDULE WHERE group_id = #{groupId} and id = #{scheduleId};
+    </delete>
+
+    <select id="findById" resultType="com.planu.group_meeting.entity.GroupSchedule">
+        SELECT
+            id,
+            group_id as groupId,
+            title as title,
+            start_datetime as startDateTime,
+            end_datetime as endDateTime,
+            color,
+            schedule_visibility as visibility,
+            memo,
+            location,
+            latitude,
+            longitude,
+            created_date as createdDate,
+            updated_date as updatedDate
+        FROM GROUP_SCHEDULE
+        WHERE group_id = #{groupId} and id = #{scheduleId};
+    </select>
 </mapper>

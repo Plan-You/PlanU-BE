@@ -1,9 +1,6 @@
 package com.planu.group_meeting.service;
 
-import com.planu.group_meeting.dao.GroupScheduleDAO;
-import com.planu.group_meeting.dao.GroupScheduleParticipantDAO;
-import com.planu.group_meeting.dao.GroupScheduleUnregisteredParticipantDAO;
-import com.planu.group_meeting.dao.UserDAO;
+import com.planu.group_meeting.dao.*;
 import com.planu.group_meeting.dto.GroupScheduleDTO;
 import com.planu.group_meeting.dto.GroupScheduleDTO.scheduleOverViewResponse;
 import com.planu.group_meeting.dto.GroupScheduleDTO.todayScheduleResponse;
@@ -11,6 +8,7 @@ import com.planu.group_meeting.dto.GroupScheduleDTO.GroupSchedulesDetailResponse
 import com.planu.group_meeting.entity.GroupSchedule;
 import com.planu.group_meeting.entity.GroupScheduleParticipant;
 import com.planu.group_meeting.entity.GroupScheduleUnregisteredParticipant;
+import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +26,7 @@ public class GroupScheduleService {
     private final GroupScheduleParticipantDAO groupScheduleParticipantDAO;
     private final GroupScheduleUnregisteredParticipantDAO groupScheduleUnregisteredParticipantDAO;
     private final UserDAO userDAO;
+    private final ParticipantDAO participantDAO;
 
     @Transactional
     public List<todayScheduleResponse> findTodaySchedulesByToday(Long groupId, LocalDateTime today) {
@@ -83,5 +82,14 @@ public class GroupScheduleService {
         List<GroupScheduleDTO.ParticipantsResponse> participants = groupScheduleParticipantDAO.findByScheduleId(groupId, scheduleId);
         participants.addAll(groupScheduleUnregisteredParticipantDAO.findByScheduleId(groupId, scheduleId));
         return participants;
+    }
+
+    @Transactional
+    public void deleteGroupScheduleById(Long groupId, Long scheduleId) {
+        GroupSchedule groupSchedule = groupScheduleDAO.findById(groupId, scheduleId)
+                .orElseThrow(() -> new ScheduleNotFoundException("해당 그룹 일정을 찾을 수 없습니다."));
+        groupScheduleParticipantDAO.deleteAllByScheduleId(groupId, scheduleId);
+        groupScheduleUnregisteredParticipantDAO.deleteAllByScheduleId(groupId, scheduleId);
+        groupScheduleDAO.deleteGroupScheduleById(groupId, scheduleId);
     }
 }

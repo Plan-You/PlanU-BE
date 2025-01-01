@@ -18,4 +18,8 @@
         FROM GROUP_SCHEDULE_UNREGISTERED_PARTICIPANT
         WHERE group_schedule_id = #{scheduleId}
     </select>
+
+    <delete id="deleteAllByScheduleId" parameterType="Long">
+        DELETE FROM GROUP_SCHEDULE_UNREGISTERED_PARTICIPANT WHERE group_schedule_id = #{scheduleId};
+    </delete>
 </mapper>

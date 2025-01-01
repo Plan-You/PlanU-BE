@@ -63,5 +63,16 @@ public class GroupScheduleController {
     {
         return ResponseEntity.ok(groupScheduleService.findByGroupScheduleID(groupId, scheduleId));
     }
+
+    @DeleteMapping("/{groupId}/schedules/{scheduleId}")
+    public ResponseEntity<BaseResponse> deleteGroupSchedule(
+                    @PathVariable("groupId") Long groupId,
+                    @PathVariable("scheduleId") Long scheduleId,
+                    @AuthenticationPrincipal CustomUserDetails userDetails
+    )
+    {
+        groupScheduleService.deleteGroupScheduleById(groupId, scheduleId);
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "그룹 일정 삭제 성공");
+    }
 }
 
