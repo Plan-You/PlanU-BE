@@ -11,4 +11,6 @@ public interface GroupScheduleParticipantDAO {
     void insert(List<GroupScheduleParticipant> participants);
 
     List<GroupScheduleDTO.ParticipantsResponse> findByScheduleId(Long groupId, Long scheduleId);
+
+    void deleteAllByScheduleId(Long groupId, Long scheduleId);
 }
