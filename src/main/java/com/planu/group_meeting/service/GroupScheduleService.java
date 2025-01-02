@@ -92,4 +92,18 @@ public class GroupScheduleService {
         groupScheduleUnregisteredParticipantDAO.deleteAllByScheduleId(groupId, scheduleId);
         groupScheduleDAO.deleteGroupScheduleById(groupId, scheduleId);
     }
+
+    @Transactional
+    public void updateGroupSchedule(Long groupId, Long scheduleId, GroupScheduleDTO.@Valid GroupScheduleRequest groupScheduleRequest) {
+        GroupSchedule groupSchedule = groupScheduleDAO.findById(groupId, scheduleId)
+                .orElseThrow(() -> new ScheduleNotFoundException("해당 그룹 일정을 찾을 수 없습니다."));
+
+        groupSchedule.updateGroupSchedule(groupScheduleRequest);
+        groupScheduleParticipantDAO.deleteAllByScheduleId(groupId, scheduleId);
+        groupScheduleUnregisteredParticipantDAO.deleteAllByScheduleId(groupId, scheduleId);
+        groupScheduleDAO.updateGroupSchedule(groupSchedule);
+
+        insertParticipants(groupSchedule, groupScheduleRequest.getParticipants());
+        insertUnregisteredParticipants(groupSchedule, groupScheduleRequest.getUnregisteredParticipants());
+    }
 }

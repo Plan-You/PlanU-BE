@@ -11,14 +11,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
-import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ScheduleDto {
@@ -116,6 +113,4 @@ public class ScheduleDto {
         private LocalDate date;
         private List<String> scheduleTypes = new ArrayList<>();
     }
-
-
 }
