@@ -27,4 +27,6 @@ public interface GroupScheduleDAO {
     void deleteGroupScheduleById(Long groupId, Long scheduleId);
 
     Optional<GroupSchedule> findById(Long groupId, Long scheduleId);
+
+    void updateGroupSchedule(GroupSchedule groupSchedule);
 }

@@ -74,5 +74,17 @@ public class GroupScheduleController {
         groupScheduleService.deleteGroupScheduleById(groupId, scheduleId);
         return BaseResponse.toResponseEntity(HttpStatus.OK, "그룹 일정 삭제 성공");
     }
+
+    @PutMapping("/{groupId}/schedules/{scheduleId}")
+    public ResponseEntity<BaseResponse> updateGroupSchedule(
+            @PathVariable("groupId") Long groupId,
+            @PathVariable("scheduleId") Long scheduleId,
+            @Valid @RequestBody GroupScheduleRequest groupScheduleRequest,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    )
+    {
+        groupScheduleService.updateGroupSchedule(groupId, scheduleId, groupScheduleRequest);
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "그룹 일정 수정 성공");
+    }
 }
 

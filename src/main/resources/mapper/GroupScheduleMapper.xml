@@ -69,4 +69,19 @@
         FROM GROUP_SCHEDULE
         WHERE group_id = #{groupId} and id = #{scheduleId};
     </select>
+
+    <update id="updateGroupSchedule" parameterType="com.planu.group_meeting.entity.GroupSchedule">
+        UPDATE GROUP_SCHEDULE
+        SET
+            title = #{title},
+            start_datetime = #{startDateTime},
+            end_datetime = #{endDateTime},
+            color = #{color},
+            memo = #{memo},
+            location = #{location},
+            latitude = #{latitude},
+            longitude = #{longitude}
+        WHERE
+            group_id = #{groupId} and id = #{id}
+    </update>
 </mapper>
