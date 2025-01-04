@@ -41,6 +41,4 @@
         JOIN USER u ON f.TO_USER_ID = u.ID
         WHERE f.FROM_USER_ID=#{userId} AND f.FRIEND_STATUS=#{friendStatus}
     </select>
-
-
 </mapper>

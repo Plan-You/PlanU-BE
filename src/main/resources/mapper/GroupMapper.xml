@@ -109,4 +109,18 @@
         WHERE gu.USER_ID = #{userId}
         AND (gu.GROUP_STATE = 0 OR gu.GROUP_STATE IS NULL)
     </select>
+
+    <select id="findGroupMembers" resultType="com.planu.group_meeting.dto.GroupDTO$Member">
+        SELECT
+            u.name,
+            u.username,
+            u.profile_url_img as profileImage,
+            g.group_role
+        FROM
+            GROUP_USER as g
+        JOIN
+            USER as u ON g.user_id = u.id
+        WHERE
+            g.group_id = #{groupId};
+    </select>
 </mapper>
