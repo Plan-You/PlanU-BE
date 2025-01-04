@@ -4,6 +4,8 @@ import com.planu.group_meeting.dao.FriendDAO;
 import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dto.FriendDto.FriendInfo;
 import com.planu.group_meeting.dto.FriendDto.FriendListResponse;
+import com.planu.group_meeting.dto.GroupDTO.GroupMembersResponse;
+import com.planu.group_meeting.dto.GroupDTO.Member;
 import com.planu.group_meeting.entity.common.FriendStatus;
 import com.planu.group_meeting.exception.user.DuplicatedRequestException;
 import com.planu.group_meeting.exception.user.FriendRequestNotFoundException;
@@ -103,5 +105,15 @@ public class FriendService {
         return new FriendListResponse(friendsInfo.size(),friendsInfo);
     }
 
-
+    public void setFriendStatus(Long userId, GroupMembersResponse groupMembers, String username) {
+        for(Member member : groupMembers.getMembers()) {
+            if(member.getUsername().equals(username)) {
+                member.setFriendStatus("ME");
+                continue;
+            }
+            Long fromUserId = userDAO.findByUsername(member.getUsername()).getId();
+            FriendStatus friendStatus = friendDAO.getFriendStatus(fromUserId, userId);
+            member.setFriendStatus(friendStatus.name());
+        }
+    }
 }

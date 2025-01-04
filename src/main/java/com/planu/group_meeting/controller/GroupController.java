@@ -2,9 +2,10 @@ package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dto.BaseResponse;
+import com.planu.group_meeting.dto.GroupDTO.GroupMembersResponse;
 import com.planu.group_meeting.dto.GroupInviteResponseDTO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
-import com.planu.group_meeting.service.GroupScheduleService;
+import com.planu.group_meeting.service.FriendService;
 import com.planu.group_meeting.service.GroupService;
 import com.planu.group_meeting.valid.InputValidator;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.Map;
 public class GroupController {
 
     private final GroupService groupService;
+    private final FriendService friendService;
     private final InputValidator inputValidator;
 
     @PostMapping("/create")
@@ -97,6 +99,17 @@ public class GroupController {
         groupService.forceExpelMember(userDetails.getId(), groupId, username);
 
         return BaseResponse.toResponseEntity(HttpStatus.OK, "강제 퇴출 성공");
+    }
+
+    @GetMapping("/{groupId}/members")
+    public ResponseEntity<GroupMembersResponse> findGroupMembers (
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable("groupId") Long groupId
+    )
+    {
+        GroupMembersResponse groupMembers = new GroupMembersResponse(groupService.findGroupMembers(groupId));
+        friendService.setFriendStatus(userDetails.getId(), groupMembers, userDetails.getUsername());
+        return ResponseEntity.ok(groupMembers);
     }
 
 }
