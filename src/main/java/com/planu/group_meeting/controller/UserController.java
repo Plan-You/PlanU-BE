@@ -1,13 +1,13 @@
 package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.controller.docs.UserDocs;
 import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.dto.TokenDto;
 import com.planu.group_meeting.dto.UserDto;
 import com.planu.group_meeting.dto.UserDto.ChangePasswordRequest;
 import com.planu.group_meeting.dto.UserDto.EmailRequest;
 import com.planu.group_meeting.dto.UserDto.UserRegistrationRequest;
-import com.planu.group_meeting.dto.UserTermsDto;
 import com.planu.group_meeting.service.UserService;
 import com.planu.group_meeting.util.CookieUtil;
 import jakarta.mail.MessagingException;
@@ -29,7 +29,7 @@ import static com.planu.group_meeting.jwt.JwtFilter.BEARER_PREFIX;
 @RequiredArgsConstructor
 @RequestMapping("/users")
 @Slf4j
-public class UserController {
+public class UserController implements UserDocs {
     private final UserService userService;
 
     @PostMapping

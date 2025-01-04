@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.planu.group_meeting.dao.FriendDAO">
+
+    <select id="getFriendStatus" parameterType="long" resultType="com.planu.group_meeting.entity.common.FriendStatus">
+        SELECT IFNULL(MAX(FRIEND_STATUS), 'NONE')
+        FROM FRIEND
+        WHERE FROM_USER_ID=#{fromUserId} AND TO_USER_ID = #{toUserId}
+    </select>
+
+    <insert id="requestFriend" parameterType="long">
+        INSERT INTO FRIEND(TO_USER_ID, FROM_USER_ID, FRIEND_STATUS)
+        VALUES (#{fromUserId}, #{toUserId}, 'RECEIVE'),
+        (#{toUserId}, #{fromUserId}, 'REQUEST')
+    </insert>
+
+    <update id="acceptFriend" parameterType="long">
+        UPDATE FRIEND
+        SET FRIEND_STATUS = 'FRIEND'
+        WHERE (FROM_USER_ID=#{fromUserId} AND TO_USER_ID=#{toUserId})
+        OR (FROM_USER_ID=#{toUserId} AND TO_USER_ID=#{fromUserId})
+    </update>
+
+    <delete id="deleteFriend" parameterType="long">
+        DELETE FROM FRIEND
+        WHERE (FROM_USER_ID=#{fromUserId} AND TO_USER_ID=#{toUserId})
+        OR (FROM_USER_ID=#{toUserId} AND TO_USER_ID=#{fromUserId})
+    </delete>
+
+
+    <select id="getFriendsInfo" parameterType="Map" resultType="com.planu.group_meeting.dto.FriendDto$FriendInfo">
+        SELECT
+        u.ID AS userId,
+        u.NAME AS name,
+        u.USERNAME AS username,
+        u.PROFILE_IMG_URL as profileImageUrl
+        FROM FRIEND f
+        JOIN USER u ON f.TO_USER_ID = u.ID
+        WHERE f.FROM_USER_ID=#{userId} AND f.FRIEND_STATUS=#{friendStatus}
+    </select>
+</mapper>

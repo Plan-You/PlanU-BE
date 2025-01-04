@@ -1,21 +1,22 @@
 package com.planu.group_meeting.service;
 
-import com.planu.group_meeting.dao.GroupScheduleDAO;
-import com.planu.group_meeting.dao.GroupScheduleParticipantDAO;
-import com.planu.group_meeting.dao.GroupScheduleUnregisteredParticipantDAO;
-import com.planu.group_meeting.dao.UserDAO;
+import com.planu.group_meeting.dao.*;
 import com.planu.group_meeting.dto.GroupScheduleDTO;
 import com.planu.group_meeting.dto.GroupScheduleDTO.scheduleOverViewResponse;
 import com.planu.group_meeting.dto.GroupScheduleDTO.todayScheduleResponse;
+import com.planu.group_meeting.dto.GroupScheduleDTO.GroupSchedulesDetailResponse;
 import com.planu.group_meeting.entity.GroupSchedule;
 import com.planu.group_meeting.entity.GroupScheduleParticipant;
 import com.planu.group_meeting.entity.GroupScheduleUnregisteredParticipant;
+import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 @Service
@@ -25,6 +26,7 @@ public class GroupScheduleService {
     private final GroupScheduleParticipantDAO groupScheduleParticipantDAO;
     private final GroupScheduleUnregisteredParticipantDAO groupScheduleUnregisteredParticipantDAO;
     private final UserDAO userDAO;
+    private final ParticipantDAO participantDAO;
 
     @Transactional
     public List<todayScheduleResponse> findTodaySchedulesByToday(Long groupId, LocalDateTime today) {
@@ -32,8 +34,13 @@ public class GroupScheduleService {
     }
 
     @Transactional
-    public List<scheduleOverViewResponse> findScheduleOverViewByToday(Long groupId, LocalDateTime today) {
-        return groupScheduleDAO.findScheduleOverViewsByToday(groupId, today);
+    public List<scheduleOverViewResponse> findScheduleOverViewByToday(Long groupId, LocalDate startDate, LocalDate endDate) {
+        LocalDateTime today = LocalDateTime.now();
+        if (startDate == null || endDate == null) {
+            startDate = today.toLocalDate().with(TemporalAdjusters.firstDayOfMonth());
+            endDate = today.toLocalDate().with(TemporalAdjusters.lastDayOfMonth());
+        }
+        return groupScheduleDAO.findScheduleOverViewsByRange(groupId, startDate, endDate);
     }
 
     @Transactional
@@ -47,7 +54,7 @@ public class GroupScheduleService {
 
 
     private void insertParticipants(GroupSchedule groupSchedule, List<Long> participantIds) {
-        if(participantIds != null && !participantIds.isEmpty()) {
+        if (participantIds != null && !participantIds.isEmpty()) {
             List<GroupScheduleParticipant> participants = participantIds.stream()
                     .map(userId -> new GroupScheduleParticipant(groupSchedule.getId(), userId, groupSchedule.getGroupId()))
                     .toList();
@@ -56,13 +63,47 @@ public class GroupScheduleService {
     }
 
     private void insertUnregisteredParticipants(GroupSchedule groupSchedule, List<String> unregisteredParticipantNames) {
-        if(unregisteredParticipantNames != null && !unregisteredParticipantNames.isEmpty()) {
+        if (unregisteredParticipantNames != null && !unregisteredParticipantNames.isEmpty()) {
             List<GroupScheduleUnregisteredParticipant> unregisteredParticipants = unregisteredParticipantNames.stream()
                     .map(userName -> new GroupScheduleUnregisteredParticipant(groupSchedule.getId(), userName))
                     .toList();
-
-            System.out.println("디버그: " + unregisteredParticipants);
             groupScheduleUnregisteredParticipantDAO.insert(unregisteredParticipants);
         }
+    }
+
+    @Transactional
+    public GroupSchedulesDetailResponse findByGroupScheduleID(Long groupId, Long scheduleId) {
+        GroupSchedulesDetailResponse response = groupScheduleDAO.findByScheduleId(groupId, scheduleId);
+        response.setParticipants(findParticipantsByScheduleId(groupId, scheduleId));
+        return response;
+    }
+
+    private List<GroupScheduleDTO.ParticipantsResponse> findParticipantsByScheduleId(Long groupId, Long scheduleId) {
+        List<GroupScheduleDTO.ParticipantsResponse> participants = groupScheduleParticipantDAO.findByScheduleId(groupId, scheduleId);
+        participants.addAll(groupScheduleUnregisteredParticipantDAO.findByScheduleId(groupId, scheduleId));
+        return participants;
+    }
+
+    @Transactional
+    public void deleteGroupScheduleById(Long groupId, Long scheduleId) {
+        GroupSchedule groupSchedule = groupScheduleDAO.findById(groupId, scheduleId)
+                .orElseThrow(() -> new ScheduleNotFoundException("해당 그룹 일정을 찾을 수 없습니다."));
+        groupScheduleParticipantDAO.deleteAllByScheduleId(groupId, scheduleId);
+        groupScheduleUnregisteredParticipantDAO.deleteAllByScheduleId(groupId, scheduleId);
+        groupScheduleDAO.deleteGroupScheduleById(groupId, scheduleId);
+    }
+
+    @Transactional
+    public void updateGroupSchedule(Long groupId, Long scheduleId, GroupScheduleDTO.@Valid GroupScheduleRequest groupScheduleRequest) {
+        GroupSchedule groupSchedule = groupScheduleDAO.findById(groupId, scheduleId)
+                .orElseThrow(() -> new ScheduleNotFoundException("해당 그룹 일정을 찾을 수 없습니다."));
+
+        groupSchedule.updateGroupSchedule(groupScheduleRequest);
+        groupScheduleParticipantDAO.deleteAllByScheduleId(groupId, scheduleId);
+        groupScheduleUnregisteredParticipantDAO.deleteAllByScheduleId(groupId, scheduleId);
+        groupScheduleDAO.updateGroupSchedule(groupSchedule);
+
+        insertParticipants(groupSchedule, groupScheduleRequest.getParticipants());
+        insertUnregisteredParticipants(groupSchedule, groupScheduleRequest.getUnregisteredParticipants());
     }
 }

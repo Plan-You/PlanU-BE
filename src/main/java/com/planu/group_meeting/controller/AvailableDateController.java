@@ -1,7 +1,7 @@
 package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
-import com.planu.group_meeting.dto.AvailableDateDto;
+import com.planu.group_meeting.controller.docs.AvailableDateDocs;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDatesRequest;
 import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.service.AvailableDateService;
@@ -18,7 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/available-dates")
 @RequiredArgsConstructor
-public class AvailableDateController {
+public class AvailableDateController implements AvailableDateDocs {
 
     private final AvailableDateService availableDatesService;
 

@@ -2,7 +2,9 @@ package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dao.GroupDAO;
+import com.planu.group_meeting.dao.GroupUserDAO;
 import com.planu.group_meeting.dao.UserDAO;
+import com.planu.group_meeting.dto.GroupDTO.Member;
 import com.planu.group_meeting.dto.GroupInviteResponseDTO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.entity.Group;
@@ -14,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,12 +23,14 @@ public class GroupService {
     private final GroupDAO groupDAO;
     private final UserDAO userDAO;
     private final S3Uploader s3Uploader;
+    private final GroupUserDAO groupUserDAO;
 
     @Autowired
-    public GroupService(GroupDAO groupDAO, UserDAO userDAO, S3Uploader s3Uploader) {
+    public GroupService(GroupDAO groupDAO, UserDAO userDAO, S3Uploader s3Uploader, GroupUserDAO groupUserDAO) {
         this.groupDAO = groupDAO;
         this.userDAO = userDAO;
         this.s3Uploader = s3Uploader;
+        this.groupUserDAO = groupUserDAO;
     }
 
     @Transactional
@@ -105,21 +108,13 @@ public class GroupService {
             throw new IllegalArgumentException("이미 그룹에 속해 있습니다.");
         }
 
-        groupDAO.UpdateGroupUserGroupStatus(customUserDetails.getId(), groupId);
+        groupDAO.updateGroupUserGroupStatus(customUserDetails.getId(), groupId);
 
     }
 
     @Transactional
     public List<GroupResponseDTO> getGroupInviteList(Long userId){
-        List<GroupResponseDTO> groupResponseDTOList = groupDAO.findGroupsByUserId(userId);
-        List<GroupResponseDTO> groupList = new ArrayList<>();
-        for(GroupResponseDTO list : groupResponseDTOList){
-            groupList.add(GroupResponseDTO.builder()
-                    .groupId(list.getGroupId())
-                    .groupName(list.getGroupName())
-                    .groupImageUrl(list.getGroupImageUrl()).build());
-        }
-        return groupList;
+        return groupDAO.getGroupInviteList(userId);
     }
 
     @Transactional
@@ -137,7 +132,65 @@ public class GroupService {
     }
 
     @Transactional
+    public void deleteGroup(Long userId, Long groupId) {
+        GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
+        Group group = groupDAO.findGroupById(groupId);
+
+        if(group == null){
+            throw new IllegalArgumentException("해당 그룹이 존재하지 않습니다.");
+        }
+        if (groupUser.getGroupRole() != GroupUser.GroupRole.LEADER) {
+            throw new IllegalArgumentException("그룹을 삭제할 권한이 없습니다.");
+        }
+
+
+        groupDAO.deleteGroup(groupId);
+    }
+
+    @Transactional
+    public void declineInvitation(Long userId, Long groupId){
+        Group group = groupDAO.findGroupById(groupId);
+
+        if(group == null){
+            throw new IllegalArgumentException("해당 그룹이 존재하지 않습니다.");
+        }
+        GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
+        if (groupUser == null) {
+            throw new IllegalArgumentException("초대 받지 않았습니다.");
+        }
+        if (groupUser.getGroupState() == 1) {
+            throw new IllegalArgumentException("이미 그룹에 속해 있습니다.");
+        }
+        groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
+    }
+
+    @Transactional
+    public void forceExpelMember(Long leaderId, Long groupId, String username){
+        Long userId = groupDAO.findUserIdByUserName(username);
+        GroupUser leaderGroupUser = groupDAO.findGroupUserByUserIdAndGroupId(leaderId, groupId);
+        if(leaderGroupUser.getGroupRole() != GroupUser.GroupRole.LEADER){
+            throw new IllegalArgumentException("강제 퇴출시킬 권한이 없습니다.");
+        }
+        GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
+        if(groupUser == null || groupUser.getGroupState() == 0){
+            throw new IllegalArgumentException("그룹에 속해 있지 않은 멤버입니다.");
+        }
+
+        groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
+    }
+
+    @Transactional
     public String findNameByGroupId(Long groupId) {
         return groupDAO.findNameByGroupId(groupId);
+    }
+
+    @Transactional
+    public Boolean isGroupMember(Long userId, Long groupId) {
+        return groupUserDAO.isGroupMember(userId, groupId);
+    }
+
+    @Transactional
+    public List<Member> findGroupMembers(Long groupId) {
+        return groupDAO.findGroupMembers(groupId);
     }
 }

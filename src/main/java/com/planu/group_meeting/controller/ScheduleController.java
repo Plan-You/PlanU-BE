@@ -1,6 +1,7 @@
 package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.controller.docs.ScheduleDocs;
 import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.dto.ScheduleDto.DailyScheduleResponse;
 import com.planu.group_meeting.dto.ScheduleDto.ScheduleCheckResponse;
@@ -22,30 +23,30 @@ import java.util.List;
 @RestController
 @RequestMapping("/schedules")
 @RequiredArgsConstructor
-public class ScheduleController {
+public class ScheduleController implements ScheduleDocs {
 
     private final ScheduleService scheduleService;
 
     @PostMapping
     public ResponseEntity<BaseResponse> createSchedules(@Valid @RequestBody ScheduleSaveRequest scheduleSaveRequest,
-                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
+                                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
         scheduleService.createSchedule(userDetails.getId(), scheduleSaveRequest);
-        return BaseResponse.toResponseEntity(HttpStatus.CREATED,"일정 생성 성공");
+        return BaseResponse.toResponseEntity(HttpStatus.CREATED, "일정 생성 성공");
     }
 
     @PutMapping("/{scheduleId}")
-    public ResponseEntity<BaseResponse> updateSchedule(@PathVariable("scheduleId")Long scheduleId,
+    public ResponseEntity<BaseResponse> updateSchedule(@PathVariable("scheduleId") Long scheduleId,
                                                        @Valid @RequestBody ScheduleSaveRequest scheduleSaveRequest,
-                                                       @AuthenticationPrincipal CustomUserDetails userDetails){
-        scheduleService.updateSchedule(userDetails.getId(),scheduleId,scheduleSaveRequest);
-        return BaseResponse.toResponseEntity(HttpStatus.OK,"일정 수정 성공");
+                                                       @AuthenticationPrincipal CustomUserDetails userDetails) {
+        scheduleService.updateSchedule(userDetails.getId(), scheduleId, scheduleSaveRequest);
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "일정 수정 성공");
     }
 
     @DeleteMapping("/{scheduleId}")
-    public ResponseEntity<BaseResponse>deleteSchedule(@PathVariable("scheduleId")Long scheduleId,
-                                                      @AuthenticationPrincipal CustomUserDetails userDetails){
-        scheduleService.deleteSchedule(userDetails.getId(),scheduleId);
-        return BaseResponse.toResponseEntity(HttpStatus.OK,"일정 삭제 성공");
+    public ResponseEntity<BaseResponse> deleteSchedule(@PathVariable("scheduleId") Long scheduleId,
+                                                       @AuthenticationPrincipal CustomUserDetails userDetails) {
+        scheduleService.deleteSchedule(userDetails.getId(), scheduleId);
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "일정 삭제 성공");
     }
 
     @GetMapping("/{scheduleId}")
@@ -64,9 +65,9 @@ public class ScheduleController {
     }
 
     @GetMapping("/check-events")
-    public ResponseEntity<List<ScheduleCheckResponse>>checkScheduleList(
+    public ResponseEntity<List<ScheduleCheckResponse>> checkScheduleList(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth requestDate,
-            @AuthenticationPrincipal CustomUserDetails userDetails){
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(scheduleService.getSchedulesForMonth(userDetails.getId(), requestDate));
     }
 

@@ -6,4 +6,5 @@
 2. gradlew : 오른쪽 하단에 CRLF -> LF 로 변경
 3. .env : 빈칸 작성하기
 
+
 main에 merge 후 init.sql 변경되면 볼륨 초기화하기

@@ -1,5 +1,6 @@
 package com.planu.group_meeting.entity;
 
+import com.planu.group_meeting.dto.GroupScheduleDTO;
 import com.planu.group_meeting.entity.common.ScheduleVisibility;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,4 +28,15 @@ public class GroupSchedule {
 
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
+
+    public void updateGroupSchedule(GroupScheduleDTO.GroupScheduleRequest request) {
+        this.title = request.getTitle();
+        this.startDateTime = request.getStartDateTime();
+        this.endDateTime = request.getEndDateTime();
+        this.color = request.getColor();
+        this.memo = request.getMemo();
+        this.location = request.getLocation();
+        this.latitude = request.getLatitude();
+        this.longitude = request.getLongitude();
+    }
 }

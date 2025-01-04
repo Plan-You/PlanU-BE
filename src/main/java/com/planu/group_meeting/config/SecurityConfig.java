@@ -1,5 +1,6 @@
 package com.planu.group_meeting.config;
 
+import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.jwt.JwtFilter;
 import com.planu.group_meeting.jwt.JwtUtil;
@@ -10,11 +11,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -84,8 +88,6 @@ public class SecurityConfig {
                 })));
 
         return http.build();
-
     }
-
 
 }

@@ -13,4 +13,13 @@
             </foreach>
     </insert>
 
+    <select id="findByScheduleId" resultType="com.planu.group_meeting.dto.GroupScheduleDTO$ParticipantsResponse">
+        SELECT participant_name as name, FALSE as isRegistered
+        FROM GROUP_SCHEDULE_UNREGISTERED_PARTICIPANT
+        WHERE group_schedule_id = #{scheduleId}
+    </select>
+
+    <delete id="deleteAllByScheduleId" parameterType="Long">
+        DELETE FROM GROUP_SCHEDULE_UNREGISTERED_PARTICIPANT WHERE group_schedule_id = #{scheduleId};
+    </delete>
 </mapper>

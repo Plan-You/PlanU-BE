@@ -72,11 +72,55 @@
         g.ID, g.NAME, g.PROFILE;
     </select>
 
-    <delete id="deleteGroupUserByUserIdAndGroupId" parameterType="map">
+    <delete id="deleteGroupUserByUserIdAndGroupId">
         DELETE FROM GROUP_USER
         WHERE USER_ID = #{userId} AND GROUP_ID = #{groupId}
     </delete>
 
+    <delete id="deleteGroup" parameterType="long">
+        <!-- 1. GROUP_SCHEDULE_PARTICIPANT 삭제 -->
+        DELETE FROM GROUP_SCHEDULE_PARTICIPANT WHERE GROUP_ID = #{groupId};
 
+        <!-- 2. GROUP_SCHEDULE_UNREGISTERED_PARTICIPANT 삭제 -->
+        DELETE FROM GROUP_SCHEDULE_UNREGISTERED_PARTICIPANT WHERE GROUP_SCHEDULE_ID IN (SELECT ID FROM GROUP_SCHEDULE WHERE GROUP_ID = #{groupId});
 
+        <!-- 3. GROUP_SCHEDULE_COMMENT 삭제 -->
+        DELETE FROM GROUP_SCHEDULE_COMMENT WHERE GROUP_ID = #{groupId};
+
+        <!-- 4. GROUP_USER 삭제 -->
+        DELETE FROM GROUP_USER WHERE GROUP_ID = #{groupId};
+
+        <!-- 5. CHAT_MESSAGE 삭제 -->
+        DELETE FROM CHAT_MESSAGE WHERE GROUP_ID = #{groupId};
+
+        <!-- 6. GROUP_SCHEDULE 삭제 -->
+        DELETE FROM GROUP_SCHEDULE WHERE GROUP_ID = #{groupId};
+
+        <!-- 7. GROUP_ 삭제 -->
+        DELETE FROM GROUP_ WHERE ID = #{groupId};
+    </delete>
+
+    <select id="getGroupInviteList" resultType="com.planu.group_meeting.dto.GroupResponseDTO">
+        SELECT g.ID AS groupId,
+        g.NAME AS groupName,
+        g.PROFILE AS groupImageUrl
+        FROM GROUP_USER gu
+        JOIN GROUP_ g ON gu.GROUP_ID = g.ID
+        WHERE gu.USER_ID = #{userId}
+        AND (gu.GROUP_STATE = 0 OR gu.GROUP_STATE IS NULL)
+    </select>
+
+    <select id="findGroupMembers" resultType="com.planu.group_meeting.dto.GroupDTO$Member">
+        SELECT
+            u.name,
+            u.username,
+            u.profile_img_url as profileImage,
+            g.group_role as groupRole
+        FROM
+            GROUP_USER as g
+        JOIN
+            USER as u ON g.user_id = u.id
+        WHERE
+            g.group_id = #{groupId};
+    </select>
 </mapper>

@@ -6,18 +6,17 @@
 <mapper namespace="com.planu.group_meeting.dao.GroupScheduleDAO">
     <select id="findTodaySchedulesByToday"
             resultType="com.planu.group_meeting.dto.GroupScheduleDTO$todayScheduleResponse">
-        SELECT id, title, start_datetime as startDateTime, location
+        SELECT id, title, date_format(start_datetime, '%p %h시') as startDateTime, location
         FROM GROUP_SCHEDULE
-        WHERE group_id = #{groupId}
-          and date (start_datetime) = #{today}
+        WHERE group_id = #{groupId} and date (start_datetime) = date(#{today})
     </select>
 
-    <select id="findScheduleOverViewsByToday"
+    <select id="findScheduleOverViewsByRange"
             resultType="com.planu.group_meeting.dto.GroupScheduleDTO$scheduleOverViewResponse">
         SELECT id, title, start_datetime as startDateTIme, end_datetime as endDateTime, color
         FROM GROUP_SCHEDULE
-        WHERE group_id = #{groupId} and year (start_datetime) = year (#{today})
-          and month (start_datetime) = month (#{today})
+        WHERE group_id = #{groupId} and start_datetime >= #{startDate} and #{endDate} >= start_datetime
+        ORDER BY date(start_datetime) ASC, datediff(end_datetime, start_datetime) desc;
     </select>
 
     <select id="existsScheduleByDate" resultType="boolean">
@@ -33,4 +32,56 @@
         INSERT INTO GROUP_SCHEDULE(TITLE, START_DATETIME, END_DATETIME, COLOR, MEMO, LOCATION, LATITUDE, LONGITUDE, GROUP_ID )
         VALUES (#{title}, #{startDateTime}, #{endDateTime}, #{color}, #{memo}, #{location}, #{latitude}, #{longitude}, #{groupId})
     </insert>
+
+    <select id="findByScheduleId" resultType="com.planu.group_meeting.dto.GroupScheduleDTO$GroupSchedulesDetailResponse">
+        SELECT id as groupScheduleId,
+               title,
+               color,
+               start_datetime as startDate,
+               end_datetime as endDate,
+               location,
+               latitude,
+               longitude,
+               memo
+        FROM GROUP_SCHEDULE
+        WHERE group_id = #{groupId} and id = #{scheduleId};
+    </select>
+
+    <delete id="deleteGroupScheduleById" parameterType="Long">
+        DELETE FROM GROUP_SCHEDULE WHERE group_id = #{groupId} and id = #{scheduleId};
+    </delete>
+
+    <select id="findById" resultType="com.planu.group_meeting.entity.GroupSchedule">
+        SELECT
+            id,
+            group_id as groupId,
+            title as title,
+            start_datetime as startDateTime,
+            end_datetime as endDateTime,
+            color,
+            schedule_visibility as visibility,
+            memo,
+            location,
+            latitude,
+            longitude,
+            created_date as createdDate,
+            updated_date as updatedDate
+        FROM GROUP_SCHEDULE
+        WHERE group_id = #{groupId} and id = #{scheduleId};
+    </select>
+
+    <update id="updateGroupSchedule" parameterType="com.planu.group_meeting.entity.GroupSchedule">
+        UPDATE GROUP_SCHEDULE
+        SET
+            title = #{title},
+            start_datetime = #{startDateTime},
+            end_datetime = #{endDateTime},
+            color = #{color},
+            memo = #{memo},
+            location = #{location},
+            latitude = #{latitude},
+            longitude = #{longitude}
+        WHERE
+            group_id = #{groupId} and id = #{id}
+    </update>
 </mapper>
