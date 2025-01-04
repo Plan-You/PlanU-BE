@@ -4,6 +4,7 @@ import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dao.GroupDAO;
 import com.planu.group_meeting.dao.GroupUserDAO;
 import com.planu.group_meeting.dao.UserDAO;
+import com.planu.group_meeting.dto.GroupDTO.Member;
 import com.planu.group_meeting.dto.GroupInviteResponseDTO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.entity.Group;
@@ -186,5 +187,10 @@ public class GroupService {
     @Transactional
     public Boolean isGroupMember(Long userId, Long groupId) {
         return groupUserDAO.isGroupMember(userId, groupId);
+    }
+
+    @Transactional
+    public List<Member> findGroupMembers(Long groupId) {
+        return groupDAO.findGroupMembers(groupId);
     }
 }
