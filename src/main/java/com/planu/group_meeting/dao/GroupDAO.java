@@ -22,7 +22,7 @@ public interface GroupDAO {
 
     int deleteGroupUserByUserIdAndGroupId(Long userId, Long groupId);
 
-    void UpdateGroupUserGroupStatus(Long userId, Long groupId);
+    void updateGroupUserGroupStatus(Long userId, Long groupId);
 
     String findNameByGroupId(Long groupId);
 

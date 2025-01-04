@@ -107,7 +107,7 @@ public class GroupService {
             throw new IllegalArgumentException("이미 그룹에 속해 있습니다.");
         }
 
-        groupDAO.UpdateGroupUserGroupStatus(customUserDetails.getId(), groupId);
+        groupDAO.updateGroupUserGroupStatus(customUserDetails.getId(), groupId);
 
     }
 
