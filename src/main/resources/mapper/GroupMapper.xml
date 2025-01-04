@@ -115,7 +115,7 @@
             u.name,
             u.username,
             u.profile_url_img as profileImage,
-            g.group_role
+            g.group_role as groupRole
         FROM
             GROUP_USER as g
         JOIN
