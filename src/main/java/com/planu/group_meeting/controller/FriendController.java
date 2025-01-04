@@ -1,6 +1,7 @@
 package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.controller.docs.FriendDocs;
 import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.dto.FriendDto.FriendListResponse;
 import com.planu.group_meeting.service.FriendService;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/users/friends")
-public class FriendController {
+public class FriendController implements FriendDocs {
 
     private final FriendService friendService;
 
