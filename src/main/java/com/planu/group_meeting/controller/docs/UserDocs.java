@@ -127,9 +127,17 @@ public interface UserDocs {
                             })
             )
     })
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "프로필 등록을 위한 데이터. `form-data` 형식으로 요청해야 합니다.",
+            content = @Content(
+                    mediaType = "multipart/form-data",
+                    schema = @Schema(implementation = UserDto.UserRegistrationRequest.class)
+            )
+    )
     ResponseEntity<BaseResponse> createUserProfile(@ModelAttribute @Valid UserDto.UserRegistrationRequest userDto,
                                                   @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
                                                   @AuthenticationPrincipal CustomUserDetails userDetails);
+
 
 
     @Operation(summary = "프로필 여부 확인", description = "사용자의 프로필 등록 여부를 확인합니다.")
