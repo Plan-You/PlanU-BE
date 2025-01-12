@@ -32,7 +32,7 @@
         WHERE EMAIL = #{email}
     </select>
 
-    <select id="ByUsername" parameterType="String" resultType="boolean">
+    <select id="existsByUsername" parameterType="String" resultType="boolean">
         SELECT COUNT(*) > 0
         FROM USER
         WHERE USERNAME = #{username}
