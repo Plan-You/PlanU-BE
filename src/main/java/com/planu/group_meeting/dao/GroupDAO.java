@@ -5,6 +5,7 @@ import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.entity.Group;
 import com.planu.group_meeting.entity.GroupUser;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -29,7 +30,7 @@ public interface GroupDAO {
 
     List<GroupResponseDTO> findGroupsByUserId(Long userId);
 
-    void deleteGroup(Long groupId);
+    void deleteGroup(@Param("groupId") Long groupId);
 
     List<GroupResponseDTO> getGroupInviteList(Long userId);
 

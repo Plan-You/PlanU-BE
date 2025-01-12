@@ -121,6 +121,7 @@
         JOIN
             USER as u ON g.user_id = u.id
         WHERE
-            g.group_id = #{groupId};
+            g.group_id = #{groupId}
+            AND g.GROUP_STATE = 1;
     </select>
 </mapper>
