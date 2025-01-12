@@ -45,7 +45,20 @@ public class GroupScheduleService {
     @Transactional
     public List<todayScheduleResponse> findTodaySchedulesByToday(Long groupId, LocalDateTime today) {
         checkValidGroupId(groupId);
-        return groupScheduleDAO.findTodaySchedulesByToday(groupId, today);
+        List<todayScheduleResponse> todaySchedules = groupScheduleDAO.findTodaySchedulesByToday(groupId, today);
+
+        for(var schedule : todaySchedules) {
+            String startDate = schedule.getStartDateTime();
+            if(startDate.contains("AM")) {
+                startDate = startDate.replace("AM", "오전");
+            }
+            else if(startDate.contains("PM")) {
+                startDate = startDate.replace("PM", "오후");
+            }
+            schedule.setStartDateTime(startDate);
+        }
+
+        return todaySchedules;
     }
 
     @Transactional
