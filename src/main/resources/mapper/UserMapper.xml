@@ -32,7 +32,7 @@
         WHERE EMAIL = #{email}
     </select>
 
-    <select id="existsByUsername" parameterType="String" resultType="boolean">
+    <select id="ByUsername" parameterType="String" resultType="boolean">
         SELECT COUNT(*) > 0
         FROM USER
         WHERE USERNAME = #{username}
@@ -87,7 +87,7 @@
         SELECT 1
         FROM FRIEND F
         JOIN USER U ON F.FROM_USER_ID = U.ID
-        WHERE F.FRIEND_STATUS = 1 AND
+        WHERE F.FRIEND_STATUS = 'FRIEND' AND
         TO_USER_ID = ${userId} AND MONTH(U.BIRTH_DATE) = MONTH(#{date}) AND DAY(U.BIRTH_DATE) = DAY(#{date})
         )
     </select>
@@ -98,7 +98,7 @@
                GROUP_CONCAT(U.NAME SEPARATOR ', ') AS names
         FROM FRIEND F
         JOIN USER U ON F.FROM_USER_ID = U.ID
-        WHERE F.FRIEND_STATUS = 1
+        WHERE F.FRIEND_STATUS = 'FRIEND'
           AND TO_USER_ID = #{userId}
           AND (
             DATE_FORMAT(CONCAT(DATE_FORMAT(#{startDate}, '%Y'), DATE_FORMAT(U.BIRTH_DATE, '-%m-%d')), '%Y-%m-%d')

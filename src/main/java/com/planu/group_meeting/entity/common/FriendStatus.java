@@ -14,6 +14,7 @@ public enum FriendStatus {
             case 0 -> NONE;
             case 1 -> REQUEST;
             case 2 -> RECEIVE;
+            case 3 -> FRIEND;
             default -> throw new AssertionError("Unknown value: " + value);
         };
     }
