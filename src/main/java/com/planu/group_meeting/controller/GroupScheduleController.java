@@ -6,6 +6,7 @@ import com.planu.group_meeting.dto.GroupScheduleDTO;
 import com.planu.group_meeting.dto.GroupScheduleDTO.GroupScheduleRequest;
 import com.planu.group_meeting.service.GroupScheduleService;
 import com.planu.group_meeting.service.GroupService;
+import com.planu.group_meeting.service.GroupUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -24,11 +25,13 @@ public class GroupScheduleController {
 
     private final GroupService groupService;
     private final GroupScheduleService groupScheduleService;
+    private final GroupUserService groupUserService;
 
     @PostMapping("{groupId}/schedules")
     public ResponseEntity<BaseResponse> create(@Valid @RequestBody GroupScheduleRequest groupScheduleRequest,
                                                @PathVariable Long groupId,
                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
+        groupUserService.isGroupMember(userDetails.getId(), groupId);
         groupScheduleService.insert(groupId, groupScheduleRequest);
         return BaseResponse.toResponseEntity(HttpStatus.CREATED, "그룹 일정 생성 성공");
     }
@@ -36,6 +39,7 @@ public class GroupScheduleController {
     @GetMapping("/{groupId}/today")
     public ResponseEntity<GroupScheduleDTO.GroupTodayScheduleResponse> groupTodaySchedule(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                                                           @PathVariable("groupId") Long groupId) {
+        groupUserService.isGroupMember(userDetails.getId(), groupId);
         LocalDateTime today = LocalDateTime.now();
         return ResponseEntity.ok(new GroupScheduleDTO.GroupTodayScheduleResponse(
                 groupService.findNameByGroupId(groupId),
@@ -51,6 +55,7 @@ public class GroupScheduleController {
             @RequestParam(required = false) @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate endDate
      )
     {
+        groupUserService.isGroupMember(userDetails.getId(), groupId);
         return ResponseEntity.ok(new GroupScheduleDTO.groupOverViewsResponse(groupScheduleService.findScheduleOverViewByToday(groupId, startDate, endDate)));
     }
 
@@ -61,6 +66,7 @@ public class GroupScheduleController {
             @PathVariable("scheduleId") Long scheduleId
     )
     {
+        groupUserService.isGroupMember(userDetails.getId(), groupId);
         return ResponseEntity.ok(groupScheduleService.findByGroupScheduleID(groupId, scheduleId));
     }
 
@@ -71,6 +77,7 @@ public class GroupScheduleController {
                     @AuthenticationPrincipal CustomUserDetails userDetails
     )
     {
+        groupUserService.isGroupMember(userDetails.getId(), groupId);
         groupScheduleService.deleteGroupScheduleById(groupId, scheduleId);
         return BaseResponse.toResponseEntity(HttpStatus.OK, "그룹 일정 삭제 성공");
     }
@@ -83,6 +90,7 @@ public class GroupScheduleController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     )
     {
+        groupUserService.isGroupMember(userDetails.getId(), groupId);
         groupScheduleService.updateGroupSchedule(groupId, scheduleId, groupScheduleRequest);
         return BaseResponse.toResponseEntity(HttpStatus.OK, "그룹 일정 수정 성공");
     }

@@ -9,7 +9,7 @@
         SELECT EXISTS (
             SELECT 1
             FROM GROUP_USER
-            WHERE group_id = #{groupId} and user_id = #{user_id}
+            WHERE group_id = #{groupId} and user_id = #{userId}
         );
     </select>
 
