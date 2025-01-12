@@ -10,6 +10,7 @@ import java.util.List;
 @Mapper
 public interface FriendDAO {
     FriendStatus getFriendStatus(Long fromUserId, Long toUserId);
+
     void requestFriend(Long fromUserId, Long toUserId);
 
     void acceptFriend(Long fromUserId, Long toUserId);

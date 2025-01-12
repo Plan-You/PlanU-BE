@@ -6,7 +6,9 @@ import com.planu.group_meeting.dto.ScheduleDto.*;
 import com.planu.group_meeting.entity.Schedule;
 import com.planu.group_meeting.entity.ScheduleParticipant;
 import com.planu.group_meeting.entity.UnregisteredParticipant;
+import com.planu.group_meeting.entity.common.FriendStatus;
 import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
+import com.planu.group_meeting.exception.user.NotFoundUserException;
 import com.planu.group_meeting.exception.user.UnauthorizedResourceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ public class ScheduleService {
     private final ScheduleDAO scheduleDAO;
     private final GroupScheduleDAO groupScheduleDAO;
     private final UserDAO userDAO;
+    private final FriendDAO friendDAO;
     private final ParticipantDAO participantDAO;
     private final UnregisteredParticipantDAO unregisteredParticipantDAO;
 
@@ -91,7 +94,11 @@ public class ScheduleService {
         return new DailyScheduleResponse(scheduleList, birthdayFriends);
     }
 
-    public List<ScheduleCheckResponse> getSchedulesForMonth(Long userId, YearMonth yearMonth) {
+    public List<ScheduleCheckResponse> getSchedulesForMonth(Long currentUserId, Long userId, YearMonth yearMonth) {
+        if(!Objects.equals(userId, currentUserId) && friendDAO.getFriendStatus(currentUserId,userId) != FriendStatus.FRIEND){
+            throw new NotFoundUserException();
+        }
+
         LocalDate firstDayOfMonth = yearMonth.atDay(1);
         LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
 
@@ -101,7 +108,7 @@ public class ScheduleService {
         List<ScheduleCheckResponse> scheduleCheckResponse = new ArrayList<>();
         for (LocalDate current = startOfCalendar; !current.isAfter(endOfCalendar); current = current.plusDays(1)) {
             ScheduleCheckResponse response = createScheduleCheckResponse(userId, current);
-            if (!response.getScheduleTypes().isEmpty()) {
+            if (existsEvent(response)) {
                 scheduleCheckResponse.add(response);
             }
         }
@@ -109,18 +116,22 @@ public class ScheduleService {
         return scheduleCheckResponse;
     }
 
+    private boolean existsEvent(ScheduleCheckResponse response) {
+        return response.isSchedule() || response.isGroupSchedule() || response.isBirthday();
+    }
+
     private ScheduleCheckResponse createScheduleCheckResponse(Long userId, LocalDate current) {
         ScheduleCheckResponse response = new ScheduleCheckResponse();
         response.setDate(current);
 
         if (scheduleDAO.existsScheduleByDate(userId, current)) {
-            response.getScheduleTypes().add("personal");
+            response.setSchedule(true);
         }
         if (groupScheduleDAO.existsScheduleByDate(userId, current)) {
-            response.getScheduleTypes().add("group");
+            response.setGroupSchedule(true);
         }
         if (userDAO.existsBirthdayByDate(userId, current)) {
-            response.getScheduleTypes().add("birthday");
+            response.setBirthday(true);
         }
 
         return response;
