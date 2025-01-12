@@ -10,6 +10,7 @@ import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.entity.Group;
 import com.planu.group_meeting.entity.GroupUser;
 import com.planu.group_meeting.entity.User;
+import com.planu.group_meeting.exception.group.UnauthorizedAccessException;
 import com.planu.group_meeting.service.file.S3Uploader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -192,5 +193,11 @@ public class GroupService {
     @Transactional
     public List<Member> findGroupMembers(Long groupId) {
         return groupDAO.findGroupMembers(groupId);
+    }
+
+    public void checkAccessPermission(Long groupId, Long id) throws UnauthorizedAccessException {
+        if(!groupUserDAO.isGroupMember(id, groupId)) {
+            throw new UnauthorizedAccessException("접근 권한이 없습니다.");
+        }
     }
 }

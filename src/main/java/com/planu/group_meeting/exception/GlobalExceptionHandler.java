@@ -1,18 +1,18 @@
 package com.planu.group_meeting.exception;
 
 import com.planu.group_meeting.dto.BaseResponse;
-import com.planu.group_meeting.exception.group.InvalidInputException;
 import com.planu.group_meeting.exception.file.InvalidFileTypeException;
+import com.planu.group_meeting.exception.group.GroupNotFoundException;
+import com.planu.group_meeting.exception.group.InvalidInputException;
+import com.planu.group_meeting.exception.group.UnauthorizedAccessException;
 import com.planu.group_meeting.exception.schedule.PastDateValidationException;
 import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
 import com.planu.group_meeting.exception.user.*;
-import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
@@ -31,6 +31,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<BaseResponse>handleIllegalStateException(IllegalStateException e){
         return BaseResponse.toResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());
     }
+
 
     @ExceptionHandler(DuplicatedUsernameException.class)
     public ResponseEntity<BaseResponse> handleDuplicatedUsernameException(DuplicatedUsernameException e) {
@@ -115,5 +116,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<BaseResponse> handleIllegalArgumentException(IllegalArgumentException e) {
         return BaseResponse.toResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler(GroupNotFoundException.class)
+    public ResponseEntity<BaseResponse> handleGroupNotFoundException(GroupNotFoundException e) {
+        return BaseResponse.toResponseEntity(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<BaseResponse> handleUnauthorizedAccessException(UnauthorizedAccessException e) {
+        return BaseResponse.toResponseEntity(HttpStatus.FORBIDDEN, e.getMessage());
     }
 }

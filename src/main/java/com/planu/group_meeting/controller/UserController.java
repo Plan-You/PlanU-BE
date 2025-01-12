@@ -1,6 +1,8 @@
 package com.planu.group_meeting.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.controller.docs.UserDocs;
 import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.dto.TokenDto;
 import com.planu.group_meeting.dto.UserDto;
@@ -8,9 +10,6 @@ import com.planu.group_meeting.dto.UserDto.ChangePasswordRequest;
 import com.planu.group_meeting.dto.UserDto.EmailRequest;
 import com.planu.group_meeting.dto.UserDto.UserRegistrationRequest;
 import com.planu.group_meeting.dto.UserTermsDto;
-import com.planu.group_meeting.exception.user.InvalidRefreshTokenException;
-import com.planu.group_meeting.exception.user.InvalidTokenException;
-import com.planu.group_meeting.exception.user.NotFoundUserException;
 import com.planu.group_meeting.service.UserService;
 import com.planu.group_meeting.util.CookieUtil;
 import jakarta.mail.MessagingException;
@@ -22,8 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.beans.PropertyEditorSupport;
 
 import static com.planu.group_meeting.jwt.JwtFilter.AUTHORIZATION_HEADER;
 import static com.planu.group_meeting.jwt.JwtFilter.BEARER_PREFIX;
@@ -32,7 +34,7 @@ import static com.planu.group_meeting.jwt.JwtFilter.BEARER_PREFIX;
 @RequiredArgsConstructor
 @RequestMapping("/users")
 @Slf4j
-public class UserController {
+public class UserController implements UserDocs {
     private final UserService userService;
 
     @PostMapping
@@ -66,7 +68,6 @@ public class UserController {
                                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         userService.createUserProfile(userDetails.getId(),userDto, profileImage);
-
         return BaseResponse.toResponseEntity(HttpStatus.CREATED, "프로필 등록 성공");
     }
     
@@ -109,5 +110,18 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserInfo(userDetails.getUsername()));
     }
 
-
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(UserTermsDto.TermsRequest.class, new PropertyEditorSupport() {
+            @Override
+            public void setAsText(String text) throws IllegalArgumentException {
+                try {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    setValue(objectMapper.readValue(text, UserTermsDto.TermsRequest.class));
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Invalid format for TermsRequest");
+                }
+            }
+        });
+    }
 }
