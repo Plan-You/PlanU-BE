@@ -1,9 +1,7 @@
 package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.dao.AvailableDateDAO;
-import com.planu.group_meeting.dto.AvailableDateDto;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDatesRequest;
-import com.planu.group_meeting.entity.AvailableDate;
 import com.planu.group_meeting.exception.schedule.PastDateValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,23 +20,10 @@ public class AvailableDateService {
     public void createAvailableDates(Long userId, AvailableDatesRequest availableDatesDto) {
         List<LocalDate>requestDates = availableDatesDto.getAvailableDates();
         validateAvailableDates(requestDates);
-        List<LocalDate>availableDateList = availableDateDAO.findAvailableDatesByUserId(userId);
 
-        List<AvailableDate>datesToInsert = requestDates.stream()
-                .filter(date -> !availableDateList.contains(date))
-                .map(date -> new AvailableDate(userId, date))
-                .toList();
+        availableDateDAO.deleteAllAvailableDates(userId);
+        availableDateDAO.insertAvailableDates(userId,requestDates);
 
-        List<LocalDate>datesToDelete = requestDates.stream()
-                .filter(availableDateList::contains)
-                .toList();
-
-        if(!datesToInsert.isEmpty()){
-            availableDateDAO.insertAvailableDates(datesToInsert);
-        }
-        if(!datesToDelete.isEmpty()){
-            availableDateDAO.deleteAvailableDates(userId,datesToDelete);
-        }
     }
 
     private void validateAvailableDates(List<LocalDate> requestDates) {
