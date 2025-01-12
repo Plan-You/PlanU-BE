@@ -101,7 +101,7 @@ public class ScheduleService {
         List<ScheduleCheckResponse> scheduleCheckResponse = new ArrayList<>();
         for (LocalDate current = startOfCalendar; !current.isAfter(endOfCalendar); current = current.plusDays(1)) {
             ScheduleCheckResponse response = createScheduleCheckResponse(userId, current);
-            if (!response.getScheduleTypes().isEmpty()) {
+            if (existsEvent(response)) {
                 scheduleCheckResponse.add(response);
             }
         }
@@ -109,18 +109,22 @@ public class ScheduleService {
         return scheduleCheckResponse;
     }
 
+    private boolean existsEvent(ScheduleCheckResponse response) {
+        return response.isSchedule() || response.isGroupSchedule() || response.isBirthday();
+    }
+
     private ScheduleCheckResponse createScheduleCheckResponse(Long userId, LocalDate current) {
         ScheduleCheckResponse response = new ScheduleCheckResponse();
         response.setDate(current);
 
         if (scheduleDAO.existsScheduleByDate(userId, current)) {
-            response.getScheduleTypes().add("personal");
+            response.setSchedule(true);
         }
         if (groupScheduleDAO.existsScheduleByDate(userId, current)) {
-            response.getScheduleTypes().add("group");
+            response.setGroupSchedule(true);
         }
         if (userDAO.existsBirthdayByDate(userId, current)) {
-            response.getScheduleTypes().add("birthday");
+            response.setBirthday(true);
         }
 
         return response;

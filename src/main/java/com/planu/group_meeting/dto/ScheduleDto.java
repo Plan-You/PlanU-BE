@@ -111,6 +111,8 @@ public class ScheduleDto {
     @Setter
     public static class ScheduleCheckResponse {
         private LocalDate date;
-        private List<String> scheduleTypes = new ArrayList<>();
+        private boolean isSchedule;
+        private boolean isGroupSchedule;
+        private boolean isBirthday;
     }
 }
