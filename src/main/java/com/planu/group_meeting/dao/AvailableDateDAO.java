@@ -1,6 +1,5 @@
 package com.planu.group_meeting.dao;
-import com.planu.group_meeting.dto.AvailableDateDto;
-import com.planu.group_meeting.entity.AvailableDate;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.data.repository.query.Param;
 
@@ -9,14 +8,15 @@ import java.util.List;
 
 @Mapper
 public interface AvailableDateDAO {
-    void insertAvailableDates(List<AvailableDate> availableDates);
+    void insertAvailableDates(@Param("userId")Long userId, @Param("availableDates") List<LocalDate>availableDates);
 
-    void deleteAvailableDates(@Param("userId")Long userId, @Param("datesToDelete") List<LocalDate>datesToDelete);
-    List<LocalDate> findAvailableDatesByUserId(Long userId);
+    void deleteAllAvailableDates(Long userId);
 
     List<LocalDate> findAvailableDatesByUserIdInRange(
             @Param("userId") Long userId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
+
+
 }
