@@ -23,7 +23,7 @@ public interface AvailableDateDocs {
 
 
     @Operation(summary = "가능한 약속 날짜 저장 및 삭제",
-            description = "사용자가 약속 가능한 날짜를 선택하여 추가 및 삭제하는 API입니다. " + "이미 저장했던 날짜는 삭제되며, 추가하지 않았던 날짜 데이터를 요청하여 가능 날짜를 추가하거나 삭제합니다.")
+            description = "사용자가 약속 가능한 날짜를 선택하여 저장하는 api 입니다.")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "201",

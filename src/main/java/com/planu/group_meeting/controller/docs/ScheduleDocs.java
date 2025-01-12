@@ -149,7 +149,10 @@ public interface ScheduleDocs {
             @AuthenticationPrincipal CustomUserDetails userDetails);
 
 
-    @Operation(summary = "특정 달의 일정 확인", description = "요청한 달의 달력에 이벤트(개인일정, 그룹일정, 생일인 친구)가 있는지 확인합니다.")
+    @Operation(
+            summary = "특정 달의 일정 확인",
+            description = "요청한 달의 달력에 개인 일정, 그룹 일정, 생일인 친구가 있는지 확인합니다."
+    )
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
@@ -157,13 +160,39 @@ public interface ScheduleDocs {
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(
-                                    example = "[\n    {\n        \"date\": \"2024-01-28\",\n        \"scheduleTypes\": [\n            \"personal\",\n            \"group\",\n            \"birthday\"\n        ]\n    },\n    {\n        \"date\": \"2024-02-05\",\n        \"scheduleTypes\": [\n            \"personal\"\n        ]\n    }\n]")
+                                    example = "[\n" +
+                                            "    {\n" +
+                                            "        \"date\": \"2024-01-28\",\n" +
+                                            "        \"isScheudle\": true,\n" +
+                                            "        \"isGroupSchedule\": false,\n" +
+                                            "        \"isBirthDay\": true\n" +
+                                            "    },\n" +
+                                            "    {\n" +
+                                            "        \"date\": \"2024-02-05\",\n" +
+                                            "        \"isScheudle\": false,\n" +
+                                            "        \"isGroupSchedule\": true,\n" +
+                                            "        \"isBirthDay\": false\n" +
+                                            "    }\n" +
+                                            "]"
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "사용자가 존재하지 않거나 친구가 아닌 경우",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(
+                                    example = "{\n" +
+                                            "    \"resultCode\": 404,\n" +
+                                            "    \"resultMsg\": \"사용자를 찾을 수 없습니다.\"\n" +
+                                            "}"
+                            )
                     )
             )
     })
     ResponseEntity<List<ScheduleDto.ScheduleCheckResponse>> checkScheduleList(
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth requestDate,
-            @AuthenticationPrincipal CustomUserDetails userDetails);
+            @PathVariable Long userId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth requestDate, @AuthenticationPrincipal CustomUserDetails userDetails);
 
 
 }

@@ -6,7 +6,9 @@ import com.planu.group_meeting.dto.ScheduleDto.*;
 import com.planu.group_meeting.entity.Schedule;
 import com.planu.group_meeting.entity.ScheduleParticipant;
 import com.planu.group_meeting.entity.UnregisteredParticipant;
+import com.planu.group_meeting.entity.common.FriendStatus;
 import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
+import com.planu.group_meeting.exception.user.NotFoundUserException;
 import com.planu.group_meeting.exception.user.UnauthorizedResourceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ public class ScheduleService {
     private final ScheduleDAO scheduleDAO;
     private final GroupScheduleDAO groupScheduleDAO;
     private final UserDAO userDAO;
+    private final FriendDAO friendDAO;
     private final ParticipantDAO participantDAO;
     private final UnregisteredParticipantDAO unregisteredParticipantDAO;
 
@@ -91,7 +94,11 @@ public class ScheduleService {
         return new DailyScheduleResponse(scheduleList, birthdayFriends);
     }
 
-    public List<ScheduleCheckResponse> getSchedulesForMonth(Long userId, YearMonth yearMonth) {
+    public List<ScheduleCheckResponse> getSchedulesForMonth(Long currentUserId, Long userId, YearMonth yearMonth) {
+        if(!Objects.equals(userId, currentUserId) && friendDAO.getFriendStatus(currentUserId,userId) != FriendStatus.FRIEND){
+            throw new NotFoundUserException();
+        }
+
         LocalDate firstDayOfMonth = yearMonth.atDay(1);
         LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
 
