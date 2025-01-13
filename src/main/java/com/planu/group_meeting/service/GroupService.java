@@ -1,15 +1,21 @@
 package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.dao.FriendDAO;
 import com.planu.group_meeting.dao.GroupDAO;
 import com.planu.group_meeting.dao.GroupUserDAO;
 import com.planu.group_meeting.dao.UserDAO;
+import com.planu.group_meeting.dto.FriendDto.FriendInfo;
+import com.planu.group_meeting.dto.GroupDTO.NonGroupFriend;
 import com.planu.group_meeting.dto.GroupDTO.Member;
+import com.planu.group_meeting.dto.GroupDTO.NonGroupFriendsResponse;
 import com.planu.group_meeting.dto.GroupInviteResponseDTO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.entity.Group;
 import com.planu.group_meeting.entity.GroupUser;
 import com.planu.group_meeting.entity.User;
+import com.planu.group_meeting.entity.common.FriendStatus;
+import com.planu.group_meeting.exception.group.GroupNotFoundException;
 import com.planu.group_meeting.exception.group.UnauthorizedAccessException;
 import com.planu.group_meeting.service.file.S3Uploader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,13 +32,15 @@ public class GroupService {
     private final UserDAO userDAO;
     private final S3Uploader s3Uploader;
     private final GroupUserDAO groupUserDAO;
+    private final FriendDAO friendDAO;
 
     @Autowired
-    public GroupService(GroupDAO groupDAO, UserDAO userDAO, S3Uploader s3Uploader, GroupUserDAO groupUserDAO) {
+    public GroupService(GroupDAO groupDAO, UserDAO userDAO, S3Uploader s3Uploader, GroupUserDAO groupUserDAO, FriendDAO friendDAO) {
         this.groupDAO = groupDAO;
         this.userDAO = userDAO;
         this.s3Uploader = s3Uploader;
         this.groupUserDAO = groupUserDAO;
+        this.friendDAO = friendDAO;
     }
 
     @Transactional
@@ -199,5 +208,33 @@ public class GroupService {
         if(!groupUserDAO.isGroupMember(id, groupId)) {
             throw new UnauthorizedAccessException("접근 권한이 없습니다.");
         }
+    }
+
+    public NonGroupFriendsResponse getMemberInviteList(Long groupId, Long userId) {
+        if(groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
+        }
+        checkAccessPermission(groupId, userId);
+        List<FriendInfo> friendInfos = friendDAO.getFriendsInfo(userId, FriendStatus.FRIEND);
+        List<NonGroupFriend> nonGroupFriends = new ArrayList<>();
+        for(var friendInfo : friendInfos) {
+            String status = "NONE";
+            if(groupUserDAO.isGroupMember(friendInfo.getUserId(), groupId)) {
+                Short state = groupUserDAO.getState(friendInfo.getUserId(), groupId);
+                if(state == 1) {
+                    continue;
+                }
+                status = "RECEIVE";
+            }
+
+            nonGroupFriends.add(new NonGroupFriend(
+                    friendInfo.getName(),
+                    friendInfo.getUsername(),
+                    friendInfo.getProfileImageUrl(),
+                    status
+            ));
+        }
+
+        return new NonGroupFriendsResponse(nonGroupFriends);
     }
 }

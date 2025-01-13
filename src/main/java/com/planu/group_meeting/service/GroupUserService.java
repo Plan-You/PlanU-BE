@@ -18,4 +18,11 @@ public class GroupUserService {
         }
     }
 
+    public String setStatusById(Long userId, Long groupId) {
+        if(groupUserDAO.isGroupMember(userId, groupId)) {
+            Short status = groupUserDAO.getState(userId, groupId);
+            return (status == 0 ? "RECEIVE" : "GROUP");
+        }
+        return "NONE";
+    }
 }
