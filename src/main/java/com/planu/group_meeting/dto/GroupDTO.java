@@ -16,6 +16,12 @@ public class GroupDTO {
     }
 
     @Getter
+    @AllArgsConstructor
+    public static class NonGroupFriendsResponse {
+        List<NonGroupFriend> nonGroupFriends;
+    }
+
+    @Getter
     @Setter
     @RequiredArgsConstructor
     public static class Member {
@@ -25,4 +31,15 @@ public class GroupDTO {
         private final String profileImage;
         private String friendStatus;
     }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class NonGroupFriend {
+        private String name;
+        private String username;
+        private String profileImage;
+        private String status;
+    }
+
 }
