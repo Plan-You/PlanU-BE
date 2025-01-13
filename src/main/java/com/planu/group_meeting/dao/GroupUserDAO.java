@@ -7,4 +7,6 @@ public interface GroupUserDAO {
     Boolean isGroupMember(Long userId, Long groupId);
 
     Boolean isLeader(Long userId, Long groupId);
+
+    Short getState(Long userId, Long groupId);
 }

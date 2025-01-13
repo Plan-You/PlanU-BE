@@ -21,4 +21,10 @@
         FROM GROUP_USER
         WHERE group_id = #{groupId} and user_id = #{userId};
     </select>
+
+    <select id="getState" parameterType="long" resultType="short">
+        SELECT group_state
+        FROM GROUP_USER
+        WHERE user_id = #{userId} and group_id = #{groupId};
+    </select>
 </mapper>
