@@ -50,11 +50,11 @@ public class GroupController {
         return ResponseEntity.ok(groupService.inviteUser(userDetails, userName, id));
     }
 
-    @PutMapping("/join")
+    @PutMapping("/join/{groupId}")
     public ResponseEntity<Map<String, String>> joinGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                         @RequestParam("groupId") Long id) {
+                                                         @PathVariable("groupId") Long groupId) {
 
-        groupService.joinGroup(userDetails, id);
+        groupService.joinGroup(userDetails, groupId);
 
         Map<String, String> response = new HashMap<>();
         response.put("status", "초대 수락 하였습니다.");
