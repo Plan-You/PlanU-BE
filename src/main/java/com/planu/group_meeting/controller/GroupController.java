@@ -1,23 +1,25 @@
 package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
-import com.planu.group_meeting.dto.*;
+import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
+import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.dto.GroupDTO.GroupMembersResponse;
 import com.planu.group_meeting.dto.GroupDTO.NonGroupFriendsResponse;
+import com.planu.group_meeting.dto.GroupInviteResponseDTO;
+import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.service.FriendService;
 import com.planu.group_meeting.service.GroupService;
 import com.planu.group_meeting.service.GroupUserService;
 import com.planu.group_meeting.valid.InputValidator;
-import com.planu.group_meeting.dto.FriendDto.FriendInfo;
-import com.planu.group_meeting.dto.GroupDTO.NonGroupFriend;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
+import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,5 +124,16 @@ public class GroupController {
     ) {
         NonGroupFriendsResponse nonGroupFriends = groupService.getMemberInviteList(groupId, userDetails.getId());
         return ResponseEntity.ok(nonGroupFriends);
+    }
+
+    @GetMapping("{groupId}/available-date")
+    public ResponseEntity<AvailableDateRatios> findAvailableDateRatios(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable("groupId") Long groupId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth
+    )
+    {
+        AvailableDateRatios availableDateRatios = groupService.findAvailableDateRatios(groupId, yearMonth, userDetails.getId());
+        return ResponseEntity.ok(availableDateRatios);
     }
 }
