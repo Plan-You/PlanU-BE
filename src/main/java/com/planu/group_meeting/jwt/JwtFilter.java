@@ -4,14 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.entity.User;
-import com.planu.group_meeting.exception.user.ExpiredTokenException;
 import com.planu.group_meeting.exception.user.InvalidTokenException;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 
-
 @RequiredArgsConstructor
 @Slf4j
 public class JwtFilter extends OncePerRequestFilter {
@@ -30,6 +29,8 @@ public class JwtFilter extends OncePerRequestFilter {
     private final UserDAO userDAO;
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer ";
+    private static final String EXPIRED_JWT_TOKEN_MESSAGE = "만료된 토큰입니다.";
+    private static final String INVALID_JWT_TOKEN_MESSAGE = "유효하지 않은 토큰입니다.";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -42,12 +43,10 @@ public class JwtFilter extends OncePerRequestFilter {
         accessToken = accessToken.substring(BEARER_PREFIX.length());
 
         try {
-            jwtUtil.validateSignature(accessToken);
-            jwtUtil.isExpired(accessToken);
-
+            Claims claims = jwtUtil.parseToken(accessToken);
             String category = jwtUtil.getCategory(accessToken);
             if (!"access".equals(category)) {
-                throw new InvalidTokenException("토큰 유형이 올바르지 않습니다.");
+                throw new InvalidTokenException(INVALID_JWT_TOKEN_MESSAGE);
             }
             User user = userDAO.findByUsername(jwtUtil.getUsername(accessToken));
             CustomUserDetails userDetails = new CustomUserDetails(user);
@@ -56,10 +55,10 @@ public class JwtFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authToken);
             filterChain.doFilter(request, response);
 
-        } catch (ExpiredTokenException e) {
-            jwtExceptionHandler(response, e.getMessage(), HttpServletResponse.SC_UNAUTHORIZED);
-        } catch (InvalidTokenException e) {
-            jwtExceptionHandler(response, e.getMessage(), HttpServletResponse.SC_FORBIDDEN);
+        } catch (ExpiredJwtException e) {
+            jwtExceptionHandler(response, EXPIRED_JWT_TOKEN_MESSAGE, HttpServletResponse.SC_UNAUTHORIZED);
+        } catch (InvalidTokenException | SignatureException e) {
+            jwtExceptionHandler(response, INVALID_JWT_TOKEN_MESSAGE, HttpServletResponse.SC_FORBIDDEN);
         }
     }
 
