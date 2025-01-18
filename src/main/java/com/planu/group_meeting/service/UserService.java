@@ -10,12 +10,10 @@ import com.planu.group_meeting.dto.UserDto.EmailRequest;
 import com.planu.group_meeting.dto.UserTermsDto;
 import com.planu.group_meeting.entity.User;
 import com.planu.group_meeting.entity.UserTerms;
-import com.planu.group_meeting.entity.common.FriendStatus;
 import com.planu.group_meeting.entity.common.ProfileStatus;
 import com.planu.group_meeting.exception.user.*;
 import com.planu.group_meeting.jwt.JwtUtil;
 import com.planu.group_meeting.service.file.S3Uploader;
-import com.planu.group_meeting.util.CookieUtil;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -31,7 +29,7 @@ import static com.planu.group_meeting.jwt.JwtUtil.REFRESH_TOKEN_PREFIX;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService{
 
     private static final String VERIFIED_EMAIL_KEY = "verifiedEmail : %s : %s";
     private static final String AUTH_CODE_KEY = "authCode : %s : %s";
