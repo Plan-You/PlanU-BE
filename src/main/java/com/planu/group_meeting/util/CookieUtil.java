@@ -3,22 +3,29 @@ package com.planu.group_meeting.util;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 
 import java.util.Arrays;
 
 public class CookieUtil {
     public static void createCookie(HttpServletResponse response, String key, String value) {
-        ResponseCookie cookie = ResponseCookie.from(key,value)
-                .maxAge(24 * 60 * 60)
-                .secure(true)
-                .path("/")
-                .sameSite("None")
-                .domain("localhost")
-                .httpOnly(true)
-                .build();
-        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+//        ResponseCookie cookie = ResponseCookie.from(key,value)
+//                .maxAge(24 * 60 * 60)
+//                .secure(true)
+//                .path("/")
+//                .sameSite("None")
+//                .domain("localhost")
+//                .httpOnly(true)
+//                .build();
+        //response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        Cookie cookie = new Cookie(key, value);
+
+        cookie.setMaxAge(24 * 60 * 60);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        //cookie.setDomain("localhost");
+        cookie.setDomain("15.165.3.168.nip.io");
+        cookie.setHttpOnly(true);
+        response.addCookie(cookie);
     }
 
     public static Cookie deleteCookie(String cookieName){
