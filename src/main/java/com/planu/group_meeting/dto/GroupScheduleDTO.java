@@ -55,6 +55,7 @@ public class GroupScheduleDTO {
     }
 
     @Getter
+    @Setter
     public static class todayScheduleResponse {
         private Long id;
         private String title;
