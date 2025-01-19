@@ -8,15 +8,6 @@ import java.util.Arrays;
 
 public class CookieUtil {
     public static void createCookie(HttpServletResponse response, String key, String value) {
-//        ResponseCookie cookie = ResponseCookie.from(key,value)
-//                .maxAge(24 * 60 * 60)
-//                .secure(true)
-//                .path("/")
-//                .sameSite("None")
-//                .domain("localhost")
-//                .httpOnly(true)
-//                .build();
-        //response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         Cookie cookie = new Cookie(key, value);
 
         cookie.setMaxAge(24 * 60 * 60);

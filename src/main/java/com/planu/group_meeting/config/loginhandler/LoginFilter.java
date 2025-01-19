@@ -1,8 +1,9 @@
-package com.planu.group_meeting.jwt;
+package com.planu.group_meeting.config.loginhandler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dto.UserDto;
+import com.planu.group_meeting.jwt.JwtUtil;
 import com.planu.group_meeting.util.CookieUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
