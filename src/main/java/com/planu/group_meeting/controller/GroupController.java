@@ -1,23 +1,27 @@
 package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
-import com.planu.group_meeting.dto.*;
+import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
+import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.dto.GroupDTO.GroupMembersResponse;
 import com.planu.group_meeting.dto.GroupDTO.NonGroupFriendsResponse;
+import com.planu.group_meeting.dto.GroupInviteResponseDTO;
+import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.service.FriendService;
 import com.planu.group_meeting.service.GroupService;
 import com.planu.group_meeting.service.GroupUserService;
 import com.planu.group_meeting.valid.InputValidator;
-import com.planu.group_meeting.dto.FriendDto.FriendInfo;
-import com.planu.group_meeting.dto.GroupDTO.NonGroupFriend;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,11 +54,11 @@ public class GroupController {
         return ResponseEntity.ok(groupService.inviteUser(userDetails, userName, id));
     }
 
-    @PutMapping("/join")
+    @PutMapping("/join/{groupId}")
     public ResponseEntity<Map<String, String>> joinGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                         @RequestParam("groupId") Long id) {
+                                                         @PathVariable("groupId") Long groupId) {
 
-        groupService.joinGroup(userDetails, id);
+        groupService.joinGroup(userDetails, groupId);
 
         Map<String, String> response = new HashMap<>();
         response.put("status", "초대 수락 하였습니다.");
@@ -122,5 +126,32 @@ public class GroupController {
     ) {
         NonGroupFriendsResponse nonGroupFriends = groupService.getMemberInviteList(groupId, userDetails.getId());
         return ResponseEntity.ok(nonGroupFriends);
+    }
+
+    @GetMapping("{groupId}/available-dates")
+    public ResponseEntity<AvailableDateRatios> findAvailableDateRatios(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable("groupId") Long groupId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth
+    )
+    {
+        AvailableDateRatios availableDateRatios = groupService.findAvailableDateRatios(groupId, yearMonth, userDetails.getId());
+        return ResponseEntity.ok(availableDateRatios);
+    }
+
+    @GetMapping("{groupId}/available-dates/members")
+    public ResponseEntity<Map<String, Object>> getAvailableMembers(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable("groupId") Long groupId,
+        @RequestParam @DateTimeFormat(pattern = "yyyy-mm-dd") @Nullable LocalDate date
+    )
+    {
+        if(date == null) {
+            date = LocalDate.now();
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("availableMembers",groupService.findAvailableMembers(groupId, date, userDetails.getId()));
+        return ResponseEntity.ok(response);
     }
 }

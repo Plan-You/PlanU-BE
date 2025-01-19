@@ -1,6 +1,7 @@
 package com.planu.group_meeting.config;
 
-import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.config.auth.CustomOAuth2UserService;
+import com.planu.group_meeting.config.loginhandler.CustomOAuth2LoginSuccessHandler;
 import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.jwt.JwtFilter;
 import com.planu.group_meeting.jwt.JwtUtil;
@@ -9,22 +10,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 @Configuration
@@ -32,6 +29,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtUtil jwtUtil;
     private final UserDAO userDAO;
     @Bean
@@ -48,7 +46,7 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth)->auth
-                        .requestMatchers("/", "/users","/users/login","/users/token/reissue", "/users/username/**",
+                        .requestMatchers("/", "/users","/users/login","/users/token/reissue","/oauth2-jwt-header" ,"/users/username/**",
                                 "/users/email-verification/**","/users/find-username","/users/find-password","/profile","/swagger-ui/**","/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 );
@@ -58,6 +56,13 @@ public class SecurityConfig {
 
         http
                 .addFilterBefore(new JwtFilter(jwtUtil,userDAO), LoginFilter.class);
+
+        http
+                .oauth2Login((oauth2)->oauth2
+                        .userInfoEndpoint((userInfo)->userInfo
+                                .userService(customOAuth2UserService))
+                        .successHandler(new CustomOAuth2LoginSuccessHandler(jwtUtil))
+                        .permitAll());
 
         http
                 .csrf((auth) -> auth.disable());
@@ -77,7 +82,11 @@ public class SecurityConfig {
 
                         CorsConfiguration configuration = new CorsConfiguration();
 
-                        configuration.setAllowedOrigins(Collections.singletonList("https://localhost:5173"));
+                        configuration.setAllowedOrigins(Arrays.asList(
+                                "https://localhost:5173",
+                                "https://15.165.3.168.nip.io"
+                        ));
+
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
                         configuration.setAllowedHeaders(Collections.singletonList("*"));

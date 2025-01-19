@@ -1,7 +1,6 @@
 package com.planu.group_meeting.jwt;
 
-import com.planu.group_meeting.exception.user.InvalidTokenException;
-import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.SignatureException;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -20,7 +18,7 @@ public class JwtUtil {
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000L * 60 * 60 * 24 * 7;  // 7일
     public static final String REFRESH_TOKEN_PREFIX = "refresh: ";
     private final RedisTemplate<String, String> redisTemplate;
-    private SecretKey secretKey;
+    private final SecretKey secretKey;
 
     public JwtUtil(@Value("${spring.jwt.secret}") String secret, RedisTemplate<String, String> redisTemplate) {
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
@@ -45,12 +43,12 @@ public class JwtUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
-    public void validateSignature(String token){
-        try {
-            Jwts.parser().setSigningKey(secretKey).build().parseClaimsJws(token);
-        } catch (JwtException e) {
-            throw new InvalidTokenException();
-        }
+    public Claims parseToken(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
 

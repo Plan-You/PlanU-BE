@@ -1,13 +1,12 @@
 package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
-import com.planu.group_meeting.dao.FriendDAO;
-import com.planu.group_meeting.dao.GroupDAO;
-import com.planu.group_meeting.dao.GroupUserDAO;
-import com.planu.group_meeting.dao.UserDAO;
+import com.planu.group_meeting.dao.*;
+import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatio;
+import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
 import com.planu.group_meeting.dto.FriendDto.FriendInfo;
-import com.planu.group_meeting.dto.GroupDTO.NonGroupFriend;
 import com.planu.group_meeting.dto.GroupDTO.Member;
+import com.planu.group_meeting.dto.GroupDTO.NonGroupFriend;
 import com.planu.group_meeting.dto.GroupDTO.NonGroupFriendsResponse;
 import com.planu.group_meeting.dto.GroupInviteResponseDTO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
@@ -23,8 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.*;
 
 @Service
 public class GroupService {
@@ -33,14 +33,16 @@ public class GroupService {
     private final S3Uploader s3Uploader;
     private final GroupUserDAO groupUserDAO;
     private final FriendDAO friendDAO;
+    private final AvailableDateDAO availableDateDAO;
 
     @Autowired
-    public GroupService(GroupDAO groupDAO, UserDAO userDAO, S3Uploader s3Uploader, GroupUserDAO groupUserDAO, FriendDAO friendDAO) {
+    public GroupService(GroupDAO groupDAO, UserDAO userDAO, S3Uploader s3Uploader, GroupUserDAO groupUserDAO, FriendDAO friendDAO, AvailableDateDAO availableDateDAO) {
         this.groupDAO = groupDAO;
         this.userDAO = userDAO;
         this.s3Uploader = s3Uploader;
         this.groupUserDAO = groupUserDAO;
         this.friendDAO = friendDAO;
+        this.availableDateDAO = availableDateDAO;
     }
 
     @Transactional
@@ -123,7 +125,7 @@ public class GroupService {
     }
 
     @Transactional
-    public List<GroupResponseDTO> getGroupInviteList(Long userId){
+    public List<GroupResponseDTO> getGroupInviteList(Long userId) {
         return groupDAO.getGroupInviteList(userId);
     }
 
@@ -146,7 +148,7 @@ public class GroupService {
         GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
         Group group = groupDAO.findGroupById(groupId);
 
-        if(group == null){
+        if (group == null) {
             throw new IllegalArgumentException("해당 그룹이 존재하지 않습니다.");
         }
         if (groupUser.getGroupRole() != GroupUser.GroupRole.LEADER) {
@@ -158,10 +160,10 @@ public class GroupService {
     }
 
     @Transactional
-    public void declineInvitation(Long userId, Long groupId){
+    public void declineInvitation(Long userId, Long groupId) {
         Group group = groupDAO.findGroupById(groupId);
 
-        if(group == null){
+        if (group == null) {
             throw new IllegalArgumentException("해당 그룹이 존재하지 않습니다.");
         }
         GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
@@ -175,14 +177,14 @@ public class GroupService {
     }
 
     @Transactional
-    public void forceExpelMember(Long leaderId, Long groupId, String username){
+    public void forceExpelMember(Long leaderId, Long groupId, String username) {
         Long userId = groupDAO.findUserIdByUserName(username);
         GroupUser leaderGroupUser = groupDAO.findGroupUserByUserIdAndGroupId(leaderId, groupId);
-        if(leaderGroupUser.getGroupRole() != GroupUser.GroupRole.LEADER){
+        if (leaderGroupUser.getGroupRole() != GroupUser.GroupRole.LEADER) {
             throw new IllegalArgumentException("강제 퇴출시킬 권한이 없습니다.");
         }
         GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
-        if(groupUser == null || groupUser.getGroupState() == 0){
+        if (groupUser == null || groupUser.getGroupState() == 0) {
             throw new IllegalArgumentException("그룹에 속해 있지 않은 멤버입니다.");
         }
 
@@ -205,23 +207,23 @@ public class GroupService {
     }
 
     public void checkAccessPermission(Long groupId, Long id) throws UnauthorizedAccessException {
-        if(!groupUserDAO.isGroupMember(id, groupId)) {
+        if (!groupUserDAO.isGroupMember(id, groupId)) {
             throw new UnauthorizedAccessException("접근 권한이 없습니다.");
         }
     }
 
     public NonGroupFriendsResponse getMemberInviteList(Long groupId, Long userId) {
-        if(groupDAO.findGroupById(groupId) == null) {
+        if (groupDAO.findGroupById(groupId) == null) {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
         }
         checkAccessPermission(groupId, userId);
         List<FriendInfo> friendInfos = friendDAO.getFriendsInfo(userId, FriendStatus.FRIEND);
         List<NonGroupFriend> nonGroupFriends = new ArrayList<>();
-        for(var friendInfo : friendInfos) {
+        for (var friendInfo : friendInfos) {
             String status = "NONE";
-            if(groupUserDAO.isGroupMember(friendInfo.getUserId(), groupId)) {
+            if (groupUserDAO.isGroupMember(friendInfo.getUserId(), groupId)) {
                 Short state = groupUserDAO.getState(friendInfo.getUserId(), groupId);
-                if(state == 1) {
+                if (state == 1) {
                     continue;
                 }
                 status = "RECEIVE";
@@ -236,5 +238,57 @@ public class GroupService {
         }
 
         return new NonGroupFriendsResponse(nonGroupFriends);
+    }
+
+    public AvailableDateRatios findAvailableDateRatios(Long groupId, YearMonth yearMonth, Long userId) {
+        if (groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
+        }
+        checkAccessPermission(groupId, userId);
+
+        LocalDate firstDayOfMonth = yearMonth.atDay(1);
+        LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
+
+        LocalDate startOfCalendar = firstDayOfMonth.minusDays(firstDayOfMonth.getDayOfWeek().getValue() % 7);
+        LocalDate endOfCalendar = lastDayOfMonth.plusDays(6 - lastDayOfMonth.getDayOfWeek().getValue());
+
+        List<Long> groupMemberIds = groupUserDAO.getGroupMemberIds(groupId);
+        HashMap<LocalDate, Double> availableDateRatio = new HashMap<>();
+        for (var groupMemberId : groupMemberIds) {
+            List<LocalDate> availableDates = availableDateDAO.findAvailableDatesByUserIdInRange(groupMemberId, startOfCalendar, endOfCalendar);
+            for (var availableDate : availableDates) {
+                if(!availableDateRatio.containsKey(availableDate)) {
+                    availableDateRatio.put(availableDate, 1.0);
+                    continue;
+                }
+                availableDateRatio.put(availableDate, availableDateRatio.get(availableDate) + 1.0);
+            }
+        }
+
+        List<AvailableDateRatio> availableDateRatios = new ArrayList<>();
+        Double countOfGroupMember = (double)groupMemberIds.size();
+        for(var availableDate : availableDateRatio.entrySet()) {
+            availableDateRatios.add(new AvailableDateRatio(
+                    availableDate.getKey().toString(),
+                    availableDate.getValue() / countOfGroupMember * 100.0));
+        }
+
+        return new AvailableDateRatios(availableDateRatios);
+    }
+
+    public List<String> findAvailableMembers(Long groupId, LocalDate date, Long userId) {
+        if (groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
+        }
+        checkAccessPermission(groupId, userId);
+
+        List<Long> groupMemberIds = groupUserDAO.getGroupMemberIds(groupId);
+        List<String> availableMemberNames = new ArrayList<>();
+        for(var memberId : groupMemberIds) {
+            if(availableDateDAO.contains(memberId, date)) {
+                availableMemberNames.add(userDAO.findNameById(memberId));
+            }
+        }
+        return availableMemberNames;
     }
 }

@@ -64,7 +64,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String refresh = jwtUtil.createRefreshToken(username, role);
         System.out.println(role);
 
-
         response.addHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + access);
         CookieUtil.createCookie(response,"refresh",refresh);
         response.setStatus(HttpStatus.OK.value());
@@ -74,7 +73,5 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
     }
-
-
 
 }
