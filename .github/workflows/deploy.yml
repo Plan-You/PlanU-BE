@@ -62,6 +62,9 @@ jobs:
             echo "aws.credentials.access-key=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
             echo "aws.credentials.secret-key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
 
+            echo "KAKAO_ID=${{ secrets.KAKAO_ID }}" >> .env
+            echo "KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}" >> .env
+
             # Docker Compose 실행
             docker-compose down
             docker-compose up -d --build
