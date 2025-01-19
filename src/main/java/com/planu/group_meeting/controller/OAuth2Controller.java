@@ -18,7 +18,6 @@ import static com.planu.group_meeting.jwt.JwtFilter.BEARER_PREFIX;
 @RequiredArgsConstructor
 public class OAuth2Controller {
     private final OAuth2Service oAuth2Service;
-
     @PostMapping("/oauth2-jwt-header")
     public ResponseEntity<BaseResponse>oauth2JwtHeader(HttpServletRequest request, HttpServletResponse response){
         String access = CookieUtil.getCookieValue(request,"access");

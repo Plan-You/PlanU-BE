@@ -24,7 +24,7 @@ public class CustomOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSucc
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        System.out.println("로그인!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        System.out.println("소셜 로그인 성공");
         CustomOAuth2UserDetails userDetails = (CustomOAuth2UserDetails) authentication.getPrincipal();
         String name = userDetails.getName();
         String username = userDetails.getUsername();
@@ -35,6 +35,7 @@ public class CustomOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSucc
 
         String access = jwtUtil.createAccessToken(username, role);
         String refresh = jwtUtil.createRefreshToken(username, role);
+
 
         CookieUtil.createCookie(response, "access", access);
         CookieUtil.createCookie(response, "refresh", refresh);

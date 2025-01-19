@@ -10,12 +10,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class OAuth2Service {
     private final JwtUtil jwtUtil;
-
     public boolean isNewUser(String access){
         if(access==null){
             throw new InvalidTokenException();
         }
-
         return Role.valueOf(jwtUtil.getRole(access)) == Role.ROLE_GUEST;
 
     }
