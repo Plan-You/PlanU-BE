@@ -24,24 +24,17 @@ public class CustomOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSucc
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        System.out.println("소셜 로그인 성공");
         CustomOAuth2UserDetails userDetails = (CustomOAuth2UserDetails) authentication.getPrincipal();
-        String name = userDetails.getName();
         String username = userDetails.getUsername();
         String role = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .findFirst()
                 .orElse(null);
 
-        String access = jwtUtil.createAccessToken(username, role);
         String refresh = jwtUtil.createRefreshToken(username, role);
-
-
-        CookieUtil.createCookie(response, "access", access);
         CookieUtil.createCookie(response, "refresh", refresh);
 
-        String encodedName = URLEncoder.encode(name, StandardCharsets.UTF_8);
-        response.sendRedirect("https://localhost:5173/oauth2-jwt-header?name=" + encodedName);
+        response.sendRedirect("https://localhost:5173");
     }
 
 }
