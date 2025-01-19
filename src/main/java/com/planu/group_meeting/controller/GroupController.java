@@ -54,15 +54,13 @@ public class GroupController {
     }
 
     @PutMapping("/join/{groupId}")
-    public ResponseEntity<Map<String, String>> joinGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<BaseResponse> joinGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                          @PathVariable("groupId") Long groupId) {
 
         groupService.joinGroup(userDetails, groupId);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("status", "초대 수락 하였습니다.");
 
-        return ResponseEntity.ok(response);
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "초대 수락 하였습니다.");
     }
 
     @GetMapping("/list")
