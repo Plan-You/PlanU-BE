@@ -1,6 +1,7 @@
 package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.dto.ApiResponse;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
 import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.dto.GroupDTO.GroupMembersResponse;
@@ -65,13 +66,17 @@ public class GroupController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<GroupResponseDTO>> groupList(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(groupService.getGroupList(userDetails.getId()));
+    public ResponseEntity<ApiResponse<List<GroupResponseDTO>>> groupList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<GroupResponseDTO> groupList = groupService.getGroupList(userDetails.getId());
+        ApiResponse<List<GroupResponseDTO>> response = new ApiResponse<>(groupList);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/inviteList")
-    public ResponseEntity<List<GroupResponseDTO>> groupInviteList(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(groupService.getGroupInviteList(userDetails.getId()));
+    public ResponseEntity<ApiResponse<List<GroupResponseDTO>>> groupInviteList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<GroupResponseDTO> groupList = groupService.getGroupInviteList(userDetails.getId());
+        ApiResponse<List<GroupResponseDTO>> response = new ApiResponse<>(groupList);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/leave/{groupId}")
