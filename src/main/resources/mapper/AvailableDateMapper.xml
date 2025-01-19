@@ -26,4 +26,11 @@
         AND POSSIBLE_DATE BETWEEN #{startDate} AND #{endDate}
     </select>
 
+    <select id="contains" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM AVAILABLE_DATE
+            WHERE USER_ID = #{userId} and POSSIBLE_DATE = #{date}
+        );
+    </select>
 </mapper>

@@ -12,6 +12,7 @@ import com.planu.group_meeting.service.FriendService;
 import com.planu.group_meeting.service.GroupService;
 import com.planu.group_meeting.service.GroupUserService;
 import com.planu.group_meeting.valid.InputValidator;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
@@ -129,7 +131,7 @@ public class GroupController {
         return ResponseEntity.ok(nonGroupFriends);
     }
 
-    @GetMapping("{groupId}/available-date")
+    @GetMapping("{groupId}/available-dates")
     public ResponseEntity<AvailableDateRatios> findAvailableDateRatios(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("groupId") Long groupId,
@@ -138,5 +140,21 @@ public class GroupController {
     {
         AvailableDateRatios availableDateRatios = groupService.findAvailableDateRatios(groupId, yearMonth, userDetails.getId());
         return ResponseEntity.ok(availableDateRatios);
+    }
+
+    @GetMapping("{groupId}/available-dates/members")
+    public ResponseEntity<Map<String, Object>> getAvailableMembers(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable("groupId") Long groupId,
+        @RequestParam @DateTimeFormat(pattern = "yyyy-mm-dd") @Nullable LocalDate date
+    )
+    {
+        if(date == null) {
+            date = LocalDate.now();
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("availableMembers",groupService.findAvailableMembers(groupId, date, userDetails.getId()));
+        return ResponseEntity.ok(response);
     }
 }

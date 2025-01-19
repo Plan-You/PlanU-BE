@@ -275,4 +275,20 @@ public class GroupService {
 
         return new AvailableDateRatios(availableDateRatios);
     }
+
+    public List<String> findAvailableMembers(Long groupId, LocalDate date, Long userId) {
+        if (groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
+        }
+        checkAccessPermission(groupId, userId);
+
+        List<Long> groupMemberIds = groupUserDAO.getGroupMemberIds(groupId);
+        List<String> availableMemberNames = new ArrayList<>();
+        for(var memberId : groupMemberIds) {
+            if(availableDateDAO.contains(memberId, date)) {
+                availableMemberNames.add(userDAO.findNameById(memberId));
+            }
+        }
+        return availableMemberNames;
+    }
 }
