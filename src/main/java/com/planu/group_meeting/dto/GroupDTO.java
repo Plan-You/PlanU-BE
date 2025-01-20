@@ -1,9 +1,6 @@
 package com.planu.group_meeting.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
@@ -40,6 +37,23 @@ public class GroupDTO {
         private String username;
         private String profileImage;
         private String status;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AvailableMemberInfos {
+        private List<AvailableMemberInfo> availableMemberInfos;
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class AvailableMemberInfo {
+        private String name;
+        private String profileImage;
+        private List<String> availableDates;
     }
 
 }

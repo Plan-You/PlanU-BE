@@ -29,4 +29,6 @@ public interface UserDAO {
     List<BirthdayFriend> findBirthdayByDate(Long userId, LocalDate startDate, LocalDate endDate);
 
     String findNameById(Long userId);
+
+    String findProfileImageById(Long userId);
 }
