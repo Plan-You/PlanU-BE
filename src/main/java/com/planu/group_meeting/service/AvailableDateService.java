@@ -35,7 +35,7 @@ public class AvailableDateService {
         }
     }
 
-    public List<LocalDate>findAvailableDates(Long userId, LocalDate startDate, LocalDate endDate){
+    public List<LocalDate> findAvailableDates(Long userId, LocalDate startDate, LocalDate endDate){
         return availableDateDAO.findAvailableDatesByUserIdInRange(userId, startDate, endDate);
     }
 
