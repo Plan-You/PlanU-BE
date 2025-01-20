@@ -109,4 +109,9 @@
     ]]>
     </select>
 
+    <select id="findNameById">
+        SELECT name
+        FROM USER
+        WHERE id = #{userId};
+    </select>
 </mapper>

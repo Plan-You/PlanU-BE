@@ -19,4 +19,5 @@ public interface AvailableDateDAO {
     );
 
 
+    Boolean contains(Long userId, LocalDate date);
 }
