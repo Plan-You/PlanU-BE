@@ -61,16 +61,18 @@
         g.ID AS groupId,
         g.NAME AS groupName,
         g.PROFILE AS groupImageUrl,
-        COUNT(*) AS participant
+        (SELECT COUNT(*)
+        FROM GROUP_USER gu_sub
+        WHERE gu_sub.GROUP_ID = g.ID
+        AND gu_sub.GROUP_STATE = 1) AS participant
         FROM
-        GROUP_USER gu
-        JOIN
-        GROUP_ g ON gu.GROUP_ID = g.ID
+        GROUP_ g
         WHERE
-        gu.USER_ID = #{userId}
-        AND gu.GROUP_STATE = 1
-        GROUP BY
-        g.ID, g.NAME, g.PROFILE;
+        EXISTS (SELECT 1
+        FROM GROUP_USER gu
+        WHERE gu.USER_ID = #{userId}
+        AND gu.GROUP_ID = g.ID
+        AND gu.GROUP_STATE = 1)
     </select>
 
     <delete id="deleteGroupUserByUserIdAndGroupId">
