@@ -136,11 +136,19 @@ public class GroupService {
 
     @Transactional
     public void leaveGroup(Long userId, Long groupId) {
-        int deletedCount = groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
-
-        if (deletedCount == 0) {
+        GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
+        if(groupUser == null){
             throw new IllegalArgumentException("이미 그룹에 속하지 않습니다.");
         }
+        if(groupUser.getGroupState() == 0){
+            throw new IllegalArgumentException("초대 수락/거절을 먼저 수행하십시오.");
+        }
+        if(groupUser.getGroupRole() == GroupUser.GroupRole.LEADER){
+            throw new IllegalArgumentException("그룹 리더는 그룹을 떠날 수 없습니다.");
+        }
+
+        groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
+
     }
 
     @Transactional
@@ -151,11 +159,20 @@ public class GroupService {
         if (group == null) {
             throw new IllegalArgumentException("해당 그룹이 존재하지 않습니다.");
         }
+        if (groupUser == null){
+            throw new IllegalArgumentException("그룹을 삭제할 권한이 없습니다.");
+        }
         if (groupUser.getGroupRole() != GroupUser.GroupRole.LEADER) {
             throw new IllegalArgumentException("그룹을 삭제할 권한이 없습니다.");
         }
 
 
+        groupDAO.deleteGroupScheduleParticipant(groupId);
+        groupDAO.deleteGroupScheduleUnregisteredParticipant(groupId);
+        groupDAO.deleteGroupScheduleComment(groupId);
+        groupDAO.deleteGroupUser(groupId);
+        groupDAO.deleteChatMessage(groupId);
+        groupDAO.deleteGroupSchedule(groupId);
         groupDAO.deleteGroup(groupId);
     }
 
@@ -180,6 +197,12 @@ public class GroupService {
     public void forceExpelMember(Long leaderId, Long groupId, String username) {
         Long userId = groupDAO.findUserIdByUserName(username);
         GroupUser leaderGroupUser = groupDAO.findGroupUserByUserIdAndGroupId(leaderId, groupId);
+        if(Objects.equals(leaderId, userId)){
+            throw new IllegalArgumentException("자기자신을 퇴출시킬 수 없습니다.");
+        }
+        if(leaderGroupUser == null){
+            throw new IllegalArgumentException("강제 퇴출시킬 권한이 없습니다.");
+        }
         if (leaderGroupUser.getGroupRole() != GroupUser.GroupRole.LEADER) {
             throw new IllegalArgumentException("강제 퇴출시킬 권한이 없습니다.");
         }
