@@ -68,6 +68,7 @@
         GROUP_ g ON gu.GROUP_ID = g.ID
         WHERE
         gu.USER_ID = #{userId}
+        AND gu.GROUP_STATE = 1
         GROUP BY
         g.ID, g.NAME, g.PROFILE;
     </select>
