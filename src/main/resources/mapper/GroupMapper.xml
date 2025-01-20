@@ -61,7 +61,7 @@
         g.ID AS groupId,
         g.NAME AS groupName,
         g.PROFILE AS groupImageUrl,
-        COUNT(gu.USER_ID) AS participant
+        COUNT(*) AS participant
         FROM
         GROUP_USER gu
         JOIN
