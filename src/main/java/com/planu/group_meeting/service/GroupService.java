@@ -5,9 +5,7 @@ import com.planu.group_meeting.dao.*;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatio;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
 import com.planu.group_meeting.dto.FriendDto.FriendInfo;
-import com.planu.group_meeting.dto.GroupDTO.Member;
-import com.planu.group_meeting.dto.GroupDTO.NonGroupFriend;
-import com.planu.group_meeting.dto.GroupDTO.NonGroupFriendsResponse;
+import com.planu.group_meeting.dto.GroupDTO.*;
 import com.planu.group_meeting.dto.GroupInviteResponseDTO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.entity.Group;
@@ -257,7 +255,7 @@ public class GroupService {
         for (var groupMemberId : groupMemberIds) {
             List<LocalDate> availableDates = availableDateDAO.findAvailableDatesByUserIdInRange(groupMemberId, startOfCalendar, endOfCalendar);
             for (var availableDate : availableDates) {
-                if(!availableDateRatio.containsKey(availableDate)) {
+                if (!availableDateRatio.containsKey(availableDate)) {
                     availableDateRatio.put(availableDate, 1.0);
                     continue;
                 }
@@ -266,8 +264,8 @@ public class GroupService {
         }
 
         List<AvailableDateRatio> availableDateRatios = new ArrayList<>();
-        Double countOfGroupMember = (double)groupMemberIds.size();
-        for(var availableDate : availableDateRatio.entrySet()) {
+        Double countOfGroupMember = (double) groupMemberIds.size();
+        for (var availableDate : availableDateRatio.entrySet()) {
             availableDateRatios.add(new AvailableDateRatio(
                     availableDate.getKey().toString(),
                     availableDate.getValue() / countOfGroupMember * 100.0));
@@ -284,11 +282,38 @@ public class GroupService {
 
         List<Long> groupMemberIds = groupUserDAO.getGroupMemberIds(groupId);
         List<String> availableMemberNames = new ArrayList<>();
-        for(var memberId : groupMemberIds) {
-            if(availableDateDAO.contains(memberId, date)) {
+        for (var memberId : groupMemberIds) {
+            if (availableDateDAO.contains(memberId, date)) {
                 availableMemberNames.add(userDAO.findNameById(memberId));
             }
         }
         return availableMemberNames;
+    }
+
+    public AvailableMemberInfos getAvailableMemberInfos(Long groupId, YearMonth yearMonth, Long userId) {
+        if (groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
+        }
+        checkAccessPermission(groupId, userId);
+
+        LocalDate firstDayOfMonth = yearMonth.atDay(1);
+        LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
+
+        LocalDate startOfCalendar = firstDayOfMonth.minusDays(firstDayOfMonth.getDayOfWeek().getValue() % 7);
+        LocalDate endOfCalendar = lastDayOfMonth.plusDays(6 - lastDayOfMonth.getDayOfWeek().getValue());
+
+        List<Long> groupMemberIds = groupUserDAO.getGroupMemberIds(groupId);
+        List<AvailableMemberInfo> availableMemberInfos = new ArrayList<>();
+        for (var memberId : groupMemberIds) {
+            String name = userDAO.findNameById(memberId);
+            String profileImage = userDAO.findProfileImageById(memberId);
+            List<String> availableDates = new ArrayList<>();
+            for (var availableDate : availableDateDAO.findAvailableDatesByUserIdInRange(memberId, startOfCalendar, endOfCalendar)) {
+                availableDates.add(availableDate.toString());
+            }
+            availableMemberInfos.add(new AvailableMemberInfo(name, profileImage, availableDates));
+        }
+
+        return new AvailableMemberInfos(availableMemberInfos);
     }
 }

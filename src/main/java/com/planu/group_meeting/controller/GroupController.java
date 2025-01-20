@@ -1,13 +1,9 @@
 package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
-import com.planu.group_meeting.dto.ApiResponse;
-import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
-import com.planu.group_meeting.dto.BaseResponse;
-import com.planu.group_meeting.dto.GroupDTO.GroupMembersResponse;
-import com.planu.group_meeting.dto.GroupDTO.NonGroupFriendsResponse;
-import com.planu.group_meeting.dto.GroupInviteResponseDTO;
-import com.planu.group_meeting.dto.GroupResponseDTO;
+import com.planu.group_meeting.dto.*;
+import com.planu.group_meeting.dto.AvailableDateDto.*;
+import com.planu.group_meeting.dto.GroupDTO.*;
 import com.planu.group_meeting.service.FriendService;
 import com.planu.group_meeting.service.GroupService;
 import com.planu.group_meeting.service.GroupUserService;
@@ -156,5 +152,20 @@ public class GroupController {
         Map<String, Object> response = new HashMap<>();
         response.put("availableMembers",groupService.findAvailableMembers(groupId, date, userDetails.getId()));
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("{groupId}/available-dates/member-info")
+    public ResponseEntity<AvailableMemberInfos> getAvailableMemberInfos(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable("groupId") Long groupId,
+        @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth
+    )
+    {
+        if(yearMonth == null) {
+            yearMonth = YearMonth.now();
+        }
+
+        AvailableMemberInfos memberInfos = groupService.getAvailableMemberInfos(groupId, yearMonth, userDetails.getId());
+        return ResponseEntity.ok(memberInfos);
     }
 }
