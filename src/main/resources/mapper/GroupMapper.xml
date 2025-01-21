@@ -61,44 +61,54 @@
         g.ID AS groupId,
         g.NAME AS groupName,
         g.PROFILE AS groupImageUrl,
-        COUNT(gu.USER_ID) AS participant
+        (SELECT COUNT(*)
+        FROM GROUP_USER gu_sub
+        WHERE gu_sub.GROUP_ID = g.ID
+        AND gu_sub.GROUP_STATE = 1) AS participant
         FROM
-        GROUP_USER gu
-        JOIN
-        GROUP_ g ON gu.GROUP_ID = g.ID
+        GROUP_ g
         WHERE
-        gu.USER_ID = #{userId}
-        GROUP BY
-        g.ID, g.NAME, g.PROFILE;
+        EXISTS (SELECT 1
+        FROM GROUP_USER gu
+        WHERE gu.USER_ID = #{userId}
+        AND gu.GROUP_ID = g.ID
+        AND gu.GROUP_STATE = 1)
     </select>
+
 
     <delete id="deleteGroupUserByUserIdAndGroupId">
         DELETE FROM GROUP_USER
         WHERE USER_ID = #{userId} AND GROUP_ID = #{groupId}
     </delete>
 
-    <delete id="deleteGroup" parameterType="long">
-        <!-- 1. GROUP_SCHEDULE_PARTICIPANT 삭제 -->
-        DELETE FROM GROUP_SCHEDULE_PARTICIPANT WHERE GROUP_ID = #{groupId};
-
-        <!-- 2. GROUP_SCHEDULE_UNREGISTERED_PARTICIPANT 삭제 -->
-        DELETE FROM GROUP_SCHEDULE_UNREGISTERED_PARTICIPANT WHERE GROUP_SCHEDULE_ID IN (SELECT ID FROM GROUP_SCHEDULE WHERE GROUP_ID = #{groupId});
-
-        <!-- 3. GROUP_SCHEDULE_COMMENT 삭제 -->
-        DELETE FROM GROUP_SCHEDULE_COMMENT WHERE GROUP_ID = #{groupId};
-
-        <!-- 4. GROUP_USER 삭제 -->
-        DELETE FROM GROUP_USER WHERE GROUP_ID = #{groupId};
-
-        <!-- 5. CHAT_MESSAGE 삭제 -->
-        DELETE FROM CHAT_MESSAGE WHERE GROUP_ID = #{groupId};
-
-        <!-- 6. GROUP_SCHEDULE 삭제 -->
-        DELETE FROM GROUP_SCHEDULE WHERE GROUP_ID = #{groupId};
-
-        <!-- 7. GROUP_ 삭제 -->
-        DELETE FROM GROUP_ WHERE ID = #{groupId};
+    <delete id="deleteGroupScheduleParticipant" parameterType="long">
+        DELETE FROM GROUP_SCHEDULE_PARTICIPANT WHERE GROUP_ID = #{groupId}
     </delete>
+
+    <delete id="deleteGroupScheduleUnregisteredParticipant" parameterType="long">
+        DELETE FROM GROUP_SCHEDULE_UNREGISTERED_PARTICIPANT WHERE GROUP_SCHEDULE_ID IN (SELECT ID FROM GROUP_SCHEDULE WHERE GROUP_ID = #{groupId})
+    </delete>
+
+    <delete id="deleteGroupScheduleComment" parameterType="long">
+        DELETE FROM GROUP_SCHEDULE_COMMENT WHERE GROUP_ID = #{groupId}
+    </delete>
+
+    <delete id="deleteGroupUser" parameterType="long">
+        DELETE FROM GROUP_USER WHERE GROUP_ID = #{groupId}
+    </delete>
+
+    <delete id="deleteChatMessage" parameterType="long">
+        DELETE FROM CHAT_MESSAGE WHERE GROUP_ID = #{groupId}
+    </delete>
+
+    <delete id="deleteGroupSchedule" parameterType="long">
+        DELETE FROM GROUP_SCHEDULE WHERE GROUP_ID = #{groupId}
+    </delete>
+
+    <delete id="deleteGroup" parameterType="long">
+        DELETE FROM GROUP_ WHERE ID = #{groupId}
+    </delete>
+
 
     <select id="getGroupInviteList" resultType="com.planu.group_meeting.dto.GroupResponseDTO">
         SELECT g.ID AS groupId,

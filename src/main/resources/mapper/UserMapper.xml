@@ -114,4 +114,10 @@
         FROM USER
         WHERE id = #{userId};
     </select>
+
+    <select id="findProfileImageById">
+        SELECT profile_img_url
+        FROM USER
+        WHERE id = #{userId};
+    </select>
 </mapper>

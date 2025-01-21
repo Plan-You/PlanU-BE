@@ -5,7 +5,7 @@ import com.planu.group_meeting.config.loginhandler.CustomOAuth2LoginSuccessHandl
 import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.jwt.JwtFilter;
 import com.planu.group_meeting.jwt.JwtUtil;
-import com.planu.group_meeting.jwt.LoginFilter;
+import com.planu.group_meeting.config.loginhandler.LoginFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -32,34 +32,37 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtUtil jwtUtil;
     private final UserDAO userDAO;
+
     @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder(){
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception{
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-                .authorizeHttpRequests((auth)->auth
-                        .requestMatchers("/", "/users","/users/login","/users/token/reissue","/oauth2-jwt-header" ,"/users/username/**",
-                                "/users/email-verification/**","/users/find-username","/users/find-password","/profile","/swagger-ui/**","/v3/api-docs/**").permitAll()
+                .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/", "/users", "/users/login", "/users/token/reissue", "/users/username/**",
+                                "/users/email-verification/**", "/users/find-username", "/users/find-password", "/profile", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
         http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
+
 
         http
-                .addFilterBefore(new JwtFilter(jwtUtil,userDAO), LoginFilter.class);
+                .addFilterBefore(new JwtFilter(jwtUtil, userDAO), LoginFilter.class);
 
         http
-                .oauth2Login((oauth2)->oauth2
-                        .userInfoEndpoint((userInfo)->userInfo
+                .oauth2Login((oauth2) -> oauth2
+                        .userInfoEndpoint((userInfo) -> userInfo
                                 .userService(customOAuth2UserService))
                         .successHandler(new CustomOAuth2LoginSuccessHandler(jwtUtil))
                         .permitAll());
@@ -67,11 +70,11 @@ public class SecurityConfig {
         http
                 .csrf((auth) -> auth.disable());
         http
-                .formLogin((auth)->auth.disable());
+                .formLogin((auth) -> auth.disable());
         http
-                .httpBasic((auth)->auth.disable());
+                .httpBasic((auth) -> auth.disable());
         http
-                .sessionManagement((session)->session
+                .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http

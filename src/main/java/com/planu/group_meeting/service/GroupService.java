@@ -5,9 +5,7 @@ import com.planu.group_meeting.dao.*;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatio;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
 import com.planu.group_meeting.dto.FriendDto.FriendInfo;
-import com.planu.group_meeting.dto.GroupDTO.Member;
-import com.planu.group_meeting.dto.GroupDTO.NonGroupFriend;
-import com.planu.group_meeting.dto.GroupDTO.NonGroupFriendsResponse;
+import com.planu.group_meeting.dto.GroupDTO.*;
 import com.planu.group_meeting.dto.GroupInviteResponseDTO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.entity.Group;
@@ -136,11 +134,19 @@ public class GroupService {
 
     @Transactional
     public void leaveGroup(Long userId, Long groupId) {
-        int deletedCount = groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
-
-        if (deletedCount == 0) {
+        GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
+        if(groupUser == null){
             throw new IllegalArgumentException("이미 그룹에 속하지 않습니다.");
         }
+        if(groupUser.getGroupState() == 0){
+            throw new IllegalArgumentException("초대 수락/거절을 먼저 수행하십시오.");
+        }
+        if(groupUser.getGroupRole() == GroupUser.GroupRole.LEADER){
+            throw new IllegalArgumentException("그룹 리더는 그룹을 떠날 수 없습니다.");
+        }
+
+        groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
+
     }
 
     @Transactional
@@ -151,11 +157,20 @@ public class GroupService {
         if (group == null) {
             throw new IllegalArgumentException("해당 그룹이 존재하지 않습니다.");
         }
+        if (groupUser == null){
+            throw new IllegalArgumentException("그룹을 삭제할 권한이 없습니다.");
+        }
         if (groupUser.getGroupRole() != GroupUser.GroupRole.LEADER) {
             throw new IllegalArgumentException("그룹을 삭제할 권한이 없습니다.");
         }
 
 
+        groupDAO.deleteGroupScheduleParticipant(groupId);
+        groupDAO.deleteGroupScheduleUnregisteredParticipant(groupId);
+        groupDAO.deleteGroupScheduleComment(groupId);
+        groupDAO.deleteGroupUser(groupId);
+        groupDAO.deleteChatMessage(groupId);
+        groupDAO.deleteGroupSchedule(groupId);
         groupDAO.deleteGroup(groupId);
     }
 
@@ -180,6 +195,12 @@ public class GroupService {
     public void forceExpelMember(Long leaderId, Long groupId, String username) {
         Long userId = groupDAO.findUserIdByUserName(username);
         GroupUser leaderGroupUser = groupDAO.findGroupUserByUserIdAndGroupId(leaderId, groupId);
+        if(Objects.equals(leaderId, userId)){
+            throw new IllegalArgumentException("자기자신을 퇴출시킬 수 없습니다.");
+        }
+        if(leaderGroupUser == null){
+            throw new IllegalArgumentException("강제 퇴출시킬 권한이 없습니다.");
+        }
         if (leaderGroupUser.getGroupRole() != GroupUser.GroupRole.LEADER) {
             throw new IllegalArgumentException("강제 퇴출시킬 권한이 없습니다.");
         }
@@ -257,7 +278,7 @@ public class GroupService {
         for (var groupMemberId : groupMemberIds) {
             List<LocalDate> availableDates = availableDateDAO.findAvailableDatesByUserIdInRange(groupMemberId, startOfCalendar, endOfCalendar);
             for (var availableDate : availableDates) {
-                if(!availableDateRatio.containsKey(availableDate)) {
+                if (!availableDateRatio.containsKey(availableDate)) {
                     availableDateRatio.put(availableDate, 1.0);
                     continue;
                 }
@@ -266,8 +287,8 @@ public class GroupService {
         }
 
         List<AvailableDateRatio> availableDateRatios = new ArrayList<>();
-        Double countOfGroupMember = (double)groupMemberIds.size();
-        for(var availableDate : availableDateRatio.entrySet()) {
+        Double countOfGroupMember = (double) groupMemberIds.size();
+        for (var availableDate : availableDateRatio.entrySet()) {
             availableDateRatios.add(new AvailableDateRatio(
                     availableDate.getKey().toString(),
                     availableDate.getValue() / countOfGroupMember * 100.0));
@@ -284,11 +305,38 @@ public class GroupService {
 
         List<Long> groupMemberIds = groupUserDAO.getGroupMemberIds(groupId);
         List<String> availableMemberNames = new ArrayList<>();
-        for(var memberId : groupMemberIds) {
-            if(availableDateDAO.contains(memberId, date)) {
+        for (var memberId : groupMemberIds) {
+            if (availableDateDAO.contains(memberId, date)) {
                 availableMemberNames.add(userDAO.findNameById(memberId));
             }
         }
         return availableMemberNames;
+    }
+
+    public AvailableMemberInfos getAvailableMemberInfos(Long groupId, YearMonth yearMonth, Long userId) {
+        if (groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
+        }
+        checkAccessPermission(groupId, userId);
+
+        LocalDate firstDayOfMonth = yearMonth.atDay(1);
+        LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
+
+        LocalDate startOfCalendar = firstDayOfMonth.minusDays(firstDayOfMonth.getDayOfWeek().getValue() % 7);
+        LocalDate endOfCalendar = lastDayOfMonth.plusDays(6 - lastDayOfMonth.getDayOfWeek().getValue());
+
+        List<Long> groupMemberIds = groupUserDAO.getGroupMemberIds(groupId);
+        List<AvailableMemberInfo> availableMemberInfos = new ArrayList<>();
+        for (var memberId : groupMemberIds) {
+            String name = userDAO.findNameById(memberId);
+            String profileImage = userDAO.findProfileImageById(memberId);
+            List<String> availableDates = new ArrayList<>();
+            for (var availableDate : availableDateDAO.findAvailableDatesByUserIdInRange(memberId, startOfCalendar, endOfCalendar)) {
+                availableDates.add(availableDate.toString());
+            }
+            availableMemberInfos.add(new AvailableMemberInfo(name, profileImage, availableDates));
+        }
+
+        return new AvailableMemberInfos(availableMemberInfos);
     }
 }

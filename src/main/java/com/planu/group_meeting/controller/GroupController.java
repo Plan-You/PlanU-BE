@@ -1,12 +1,9 @@
 package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
-import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
-import com.planu.group_meeting.dto.BaseResponse;
-import com.planu.group_meeting.dto.GroupDTO.GroupMembersResponse;
-import com.planu.group_meeting.dto.GroupDTO.NonGroupFriendsResponse;
-import com.planu.group_meeting.dto.GroupInviteResponseDTO;
-import com.planu.group_meeting.dto.GroupResponseDTO;
+import com.planu.group_meeting.dto.*;
+import com.planu.group_meeting.dto.AvailableDateDto.*;
+import com.planu.group_meeting.dto.GroupDTO.*;
 import com.planu.group_meeting.service.FriendService;
 import com.planu.group_meeting.service.GroupService;
 import com.planu.group_meeting.service.GroupUserService;
@@ -55,25 +52,27 @@ public class GroupController {
     }
 
     @PutMapping("/join/{groupId}")
-    public ResponseEntity<Map<String, String>> joinGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<BaseResponse> joinGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                          @PathVariable("groupId") Long groupId) {
 
         groupService.joinGroup(userDetails, groupId);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("status", "초대 수락 하였습니다.");
 
-        return ResponseEntity.ok(response);
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "초대 수락 하였습니다.");
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<GroupResponseDTO>> groupList(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(groupService.getGroupList(userDetails.getId()));
+    public ResponseEntity<ApiResponse<List<GroupResponseDTO>>> groupList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<GroupResponseDTO> groupList = groupService.getGroupList(userDetails.getId());
+        ApiResponse<List<GroupResponseDTO>> response = new ApiResponse<>(groupList);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/inviteList")
-    public ResponseEntity<List<GroupResponseDTO>> groupInviteList(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(groupService.getGroupInviteList(userDetails.getId()));
+    public ResponseEntity<ApiResponse<List<GroupResponseDTO>>> groupInviteList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<GroupResponseDTO> groupList = groupService.getGroupInviteList(userDetails.getId());
+        ApiResponse<List<GroupResponseDTO>> response = new ApiResponse<>(groupList);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/leave/{groupId}")
@@ -153,5 +152,20 @@ public class GroupController {
         Map<String, Object> response = new HashMap<>();
         response.put("availableMembers",groupService.findAvailableMembers(groupId, date, userDetails.getId()));
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("{groupId}/available-dates/member-info")
+    public ResponseEntity<AvailableMemberInfos> getAvailableMemberInfos(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable("groupId") Long groupId,
+        @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth
+    )
+    {
+        if(yearMonth == null) {
+            yearMonth = YearMonth.now();
+        }
+
+        AvailableMemberInfos memberInfos = groupService.getAvailableMemberInfos(groupId, yearMonth, userDetails.getId());
+        return ResponseEntity.ok(memberInfos);
     }
 }
