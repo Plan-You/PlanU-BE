@@ -168,4 +168,19 @@ public class GroupController {
         AvailableMemberInfos memberInfos = groupService.getAvailableMemberInfos(groupId, yearMonth, userDetails.getId());
         return ResponseEntity.ok(memberInfos);
     }
+
+    @GetMapping("{groupId}/available-dates/date-info")
+    public ResponseEntity<AvailableDateInfos> getAvailableDateInfos(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable("groupId") Long groupId,
+        @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth
+    )
+    {
+        if(yearMonth == null) {
+            yearMonth = YearMonth.now();
+        }
+
+        AvailableDateInfos availableDateInfos = groupService.getAvailableDateInfos(groupId, yearMonth, userDetails.getId());
+        return ResponseEntity.ok(availableDateInfos);
+    }
 }
