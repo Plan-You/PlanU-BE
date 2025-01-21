@@ -339,4 +339,37 @@ public class GroupService {
 
         return new AvailableMemberInfos(availableMemberInfos);
     }
+
+    public AvailableDateInfos getAvailableDateInfos(Long groupId, YearMonth yearMonth, Long userId) {
+        if (groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
+        }
+        checkAccessPermission(groupId, userId);
+
+        LocalDate firstDayOfMonth = yearMonth.atDay(1);
+        LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
+
+        LocalDate startOfCalendar = firstDayOfMonth.minusDays(firstDayOfMonth.getDayOfWeek().getValue() % 7);
+        LocalDate endOfCalendar = lastDayOfMonth.plusDays(6 - lastDayOfMonth.getDayOfWeek().getValue());
+
+        List<Long> groupMembers = groupUserDAO.getGroupMemberIds(groupId);
+        HashMap<LocalDate, List<String>> membersByAvailableDate = new HashMap<>();
+        for(var memberId : groupMembers) {
+            for (var availableDate : availableDateDAO.findAvailableDatesByUserIdInRange(memberId, startOfCalendar, endOfCalendar)) {
+                if (!membersByAvailableDate.containsKey(availableDate)) {
+                    membersByAvailableDate.put(availableDate, new ArrayList<>());
+                }
+                membersByAvailableDate.get(availableDate).add(userDAO.findNameById(memberId));
+            }
+        }
+        AvailableDateInfos availableDateInfos = new AvailableDateInfos(new ArrayList<>());
+
+        for (var dateInfos : membersByAvailableDate.entrySet()) {
+            availableDateInfos
+                    .getAvailableDateInfos()
+                    .add(new AvailableDateInfo(dateInfos.getKey().toString(), dateInfos.getValue()));
+        }
+
+        return availableDateInfos;
+    }
 }
