@@ -111,8 +111,8 @@ public class FriendService {
                 member.setFriendStatus("ME");
                 continue;
             }
-            Long fromUserId = userDAO.findByUsername(member.getUsername()).getId();
-            FriendStatus friendStatus = friendDAO.getFriendStatus(fromUserId, userId);
+            Long toUserId = userDAO.findByUsername(member.getUsername()).getId();
+            FriendStatus friendStatus = friendDAO.getFriendStatus(userId, toUserId);
             member.setFriendStatus(friendStatus.name());
         }
     }
