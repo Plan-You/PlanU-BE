@@ -183,4 +183,20 @@ public class GroupController {
         AvailableDateInfos availableDateInfos = groupService.getAvailableDateInfos(groupId, yearMonth, userDetails.getId());
         return ResponseEntity.ok(availableDateInfos);
     }
+
+    @GetMapping("{groupId}/available-dates/ranks")
+    public ResponseEntity<Map<String, Object>> getAvailableDateRanks(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable("groupId") Long groupId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth
+    )
+    {
+        if(yearMonth == null) {
+            yearMonth = YearMonth.now();
+        }
+        List<String> availableDateRanks = groupService.getAvailableDateRanks(groupId, yearMonth, userDetails.getId());
+        Map<String, Object> response = new HashMap<>();
+        response.put("availableDateRanks", availableDateRanks);
+        return ResponseEntity.ok(response);
+    }
 }
