@@ -234,6 +234,7 @@ public class GroupService {
         }
     }
 
+    @Transactional
     public NonGroupFriendsResponse getMemberInviteList(Long groupId, Long userId) {
         if (groupDAO.findGroupById(groupId) == null) {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
@@ -248,7 +249,7 @@ public class GroupService {
                 if (state == 1) {
                     continue;
                 }
-                status = "RECEIVE";
+                status = "PROGRESS";
             }
 
             nonGroupFriends.add(new NonGroupFriend(
@@ -262,6 +263,7 @@ public class GroupService {
         return new NonGroupFriendsResponse(nonGroupFriends);
     }
 
+    @Transactional
     public AvailableDateRatios findAvailableDateRatios(Long groupId, YearMonth yearMonth, Long userId) {
         if (groupDAO.findGroupById(groupId) == null) {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
@@ -298,6 +300,7 @@ public class GroupService {
         return new AvailableDateRatios(availableDateRatios);
     }
 
+    @Transactional
     public List<String> findAvailableMembers(Long groupId, LocalDate date, Long userId) {
         if (groupDAO.findGroupById(groupId) == null) {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
@@ -314,6 +317,7 @@ public class GroupService {
         return availableMemberNames;
     }
 
+    @Transactional
     public AvailableMemberInfos getAvailableMemberInfos(Long groupId, YearMonth yearMonth, Long userId) {
         if (groupDAO.findGroupById(groupId) == null) {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
@@ -341,6 +345,7 @@ public class GroupService {
         return new AvailableMemberInfos(availableMemberInfos);
     }
 
+    @Transactional
     public AvailableDateInfos getAvailableDateInfos(Long groupId, YearMonth yearMonth, Long userId) {
         if (groupDAO.findGroupById(groupId) == null) {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
@@ -374,6 +379,7 @@ public class GroupService {
         return availableDateInfos;
     }
 
+    @Transactional
     public List<String> getAvailableDateRanks(Long groupId, YearMonth yearMonth, Long userId) {
         if (groupDAO.findGroupById(groupId) == null) {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
