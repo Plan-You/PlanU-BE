@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class GroupService {
@@ -233,6 +234,7 @@ public class GroupService {
         }
     }
 
+    @Transactional
     public NonGroupFriendsResponse getMemberInviteList(Long groupId, Long userId) {
         if (groupDAO.findGroupById(groupId) == null) {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
@@ -247,7 +249,7 @@ public class GroupService {
                 if (state == 1) {
                     continue;
                 }
-                status = "RECEIVE";
+                status = "PROGRESS";
             }
 
             nonGroupFriends.add(new NonGroupFriend(
@@ -261,6 +263,7 @@ public class GroupService {
         return new NonGroupFriendsResponse(nonGroupFriends);
     }
 
+    @Transactional
     public AvailableDateRatios findAvailableDateRatios(Long groupId, YearMonth yearMonth, Long userId) {
         if (groupDAO.findGroupById(groupId) == null) {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
@@ -297,6 +300,7 @@ public class GroupService {
         return new AvailableDateRatios(availableDateRatios);
     }
 
+    @Transactional
     public List<String> findAvailableMembers(Long groupId, LocalDate date, Long userId) {
         if (groupDAO.findGroupById(groupId) == null) {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
@@ -313,6 +317,7 @@ public class GroupService {
         return availableMemberNames;
     }
 
+    @Transactional
     public AvailableMemberInfos getAvailableMemberInfos(Long groupId, YearMonth yearMonth, Long userId) {
         if (groupDAO.findGroupById(groupId) == null) {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
@@ -338,5 +343,80 @@ public class GroupService {
         }
 
         return new AvailableMemberInfos(availableMemberInfos);
+    }
+
+    @Transactional
+    public AvailableDateInfos getAvailableDateInfos(Long groupId, YearMonth yearMonth, Long userId) {
+        if (groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
+        }
+        checkAccessPermission(groupId, userId);
+
+        LocalDate firstDayOfMonth = yearMonth.atDay(1);
+        LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
+
+        LocalDate startOfCalendar = firstDayOfMonth.minusDays(firstDayOfMonth.getDayOfWeek().getValue() % 7);
+        LocalDate endOfCalendar = lastDayOfMonth.plusDays(6 - lastDayOfMonth.getDayOfWeek().getValue());
+
+        List<Long> groupMembers = groupUserDAO.getGroupMemberIds(groupId);
+        HashMap<LocalDate, List<String>> membersByAvailableDate = new HashMap<>();
+        for(var memberId : groupMembers) {
+            for (var availableDate : availableDateDAO.findAvailableDatesByUserIdInRange(memberId, startOfCalendar, endOfCalendar)) {
+                if (!membersByAvailableDate.containsKey(availableDate)) {
+                    membersByAvailableDate.put(availableDate, new ArrayList<>());
+                }
+                membersByAvailableDate.get(availableDate).add(userDAO.findNameById(memberId));
+            }
+        }
+        AvailableDateInfos availableDateInfos = new AvailableDateInfos(new ArrayList<>());
+
+        for (var dateInfos : membersByAvailableDate.entrySet()) {
+            availableDateInfos
+                    .getAvailableDateInfos()
+                    .add(new AvailableDateInfo(dateInfos.getKey().toString(), dateInfos.getValue()));
+        }
+
+        return availableDateInfos;
+    }
+
+    @Transactional
+    public List<String> getAvailableDateRanks(Long groupId, YearMonth yearMonth, Long userId) {
+        if (groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
+        }
+        checkAccessPermission(groupId, userId);
+
+        LocalDate firstDayOfMonth = yearMonth.atDay(1);
+        LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
+
+        LocalDate startOfCalendar = firstDayOfMonth.minusDays(firstDayOfMonth.getDayOfWeek().getValue() % 7);
+        LocalDate endOfCalendar = lastDayOfMonth.plusDays(6 - lastDayOfMonth.getDayOfWeek().getValue());
+
+        List<Long> groupMemberIds = groupUserDAO.getGroupMemberIds(groupId);
+        Map<LocalDate, Integer> countOfAvailableDate = new HashMap<>();
+        for(var memberId : groupMemberIds) {
+            for (var availableDate : availableDateDAO.findAvailableDatesByUserIdInRange(memberId, startOfCalendar, endOfCalendar)) {
+                if (!countOfAvailableDate.containsKey(availableDate)) {
+                    countOfAvailableDate.put(availableDate, 0);
+                }
+                countOfAvailableDate.put(availableDate, countOfAvailableDate.get(availableDate) + 1);
+            }
+        }
+
+        List<Map.Entry<LocalDate, Integer>> availableDateRanks = new ArrayList<>(countOfAvailableDate.entrySet());
+
+        availableDateRanks.sort(
+                (entryA, entryB) -> {
+                    int countComparison = entryB.getValue().compareTo(entryA.getValue());
+                    if(countComparison != 0) {
+                        return countComparison;
+                    }
+                    return entryA.getKey().compareTo(entryB.getKey());
+                }
+        );
+
+        return availableDateRanks.stream()
+                .map(entry -> entry.getKey().toString())
+                .collect(Collectors.toList());
     }
 }

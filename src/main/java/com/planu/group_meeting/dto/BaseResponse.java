@@ -28,4 +28,11 @@ public class BaseResponse {
                         .build());
     }
 
+    public static BaseResponse toEntity(HttpStatus httpStatus, String msg){
+        return BaseResponse.builder()
+                .resultCode(httpStatus.value())
+                .resultMsg(msg)
+                .build();
+    }
+
 }

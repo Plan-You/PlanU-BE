@@ -56,4 +56,20 @@ public class GroupDTO {
         private List<String> availableDates;
     }
 
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class AvailableDateInfos {
+        private List<AvailableDateInfo> availableDateInfos;
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class AvailableDateInfo {
+        private String availableDate;
+        private List<String> memberNames;
+    }
+
 }
