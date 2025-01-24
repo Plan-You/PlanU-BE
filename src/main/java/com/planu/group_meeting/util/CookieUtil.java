@@ -15,6 +15,7 @@ public class CookieUtil {
         cookie.setPath("/");
         //cookie.setDomain("localhost");
         cookie.setDomain("15.165.3.168.nip.io");
+        cookie.setAttribute("SameSite","None");
         cookie.setHttpOnly(true);
         response.addCookie(cookie);
     }
