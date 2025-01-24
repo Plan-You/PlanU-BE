@@ -2,10 +2,12 @@ package com.planu.group_meeting.config;
 
 import com.planu.group_meeting.config.auth.CustomOAuth2UserService;
 import com.planu.group_meeting.config.loginhandler.CustomOAuth2LoginSuccessHandler;
+import com.planu.group_meeting.config.loginhandler.LoginFilter;
 import com.planu.group_meeting.dao.UserDAO;
+import com.planu.group_meeting.exception.CustomAuthenticationEntryPoint;
+import com.planu.group_meeting.exception.ExceptionHandlerFilter;
 import com.planu.group_meeting.jwt.JwtFilter;
 import com.planu.group_meeting.jwt.JwtUtil;
-import com.planu.group_meeting.config.loginhandler.LoginFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +22,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,6 +35,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtUtil jwtUtil;
     private final UserDAO userDAO;
+    private final HandlerMappingIntrospector introspector;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -54,11 +58,12 @@ public class SecurityConfig {
                 );
 
         http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
-
-
-        http
-                .addFilterBefore(new JwtFilter(jwtUtil, userDAO), LoginFilter.class);
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtFilter(jwtUtil, userDAO), LoginFilter.class)
+                .addFilterBefore(new ExceptionHandlerFilter(), JwtFilter.class)
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                );
 
         http
                 .oauth2Login((oauth2) -> oauth2
@@ -66,6 +71,7 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService))
                         .successHandler(new CustomOAuth2LoginSuccessHandler(jwtUtil))
                         .permitAll());
+
 
         http
                 .csrf((auth) -> auth.disable());
