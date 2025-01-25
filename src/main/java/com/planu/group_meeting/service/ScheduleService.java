@@ -9,6 +9,7 @@ import com.planu.group_meeting.entity.UnregisteredParticipant;
 import com.planu.group_meeting.entity.common.FriendStatus;
 import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
 import com.planu.group_meeting.exception.user.NotFoundUserException;
+import com.planu.group_meeting.exception.user.NotFriendException;
 import com.planu.group_meeting.exception.user.UnauthorizedResourceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,11 +37,26 @@ public class ScheduleService {
     @Transactional
     public void createSchedule(Long userId, ScheduleSaveRequest scheduleDto) {
         Schedule schedule = scheduleDto.toEntity(userId);
+        List<Long> participants = scheduleDto.getParticipants();
+        validateParticipants(userId, participants);
+
         scheduleDAO.insertSchedule(schedule);
 
-        insertParticipants(schedule, scheduleDto.getParticipants());
+        insertParticipants(schedule, participants);
         insertUnregisteredParticipants(schedule, scheduleDto.getUnregisteredParticipants());
     }
+
+    private void validateParticipants(Long userId, List<Long> participants) {
+        for(Long participantId : participants){
+            if(!userDAO.existsById(participantId)){
+                throw new NotFoundUserException();
+            }
+            if(friendDAO.getFriendStatus(userId, participantId)!=FriendStatus.FRIEND){
+                throw new NotFriendException();
+            }
+        }
+    }
+
 
     @Transactional
     public void updateSchedule(Long userId, Long scheduleId, ScheduleSaveRequest scheduleSaveRequest) {

@@ -44,6 +44,12 @@
         WHERE EMAIL = #{email}
     </select>
 
+    <select id="existsById" parameterType="Long" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM USER
+        WHERE ID = #{userId}
+    </select>
+
     <select id="findByUsername" parameterType="String" resultMap="userResultMap">
         SELECT ID, USERNAME,
         EMAIL,

@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -38,9 +39,9 @@ public class ScheduleDto {
 
         private String location;
 
-        private String latitude;
+        private BigDecimal latitude;
 
-        private String longitude;
+        private BigDecimal longitude;
 
         @Size(max = 100, message = "메모는 100자 이내로 입력해주세요.")
         private String memo;
@@ -57,6 +58,8 @@ public class ScheduleDto {
                     .color(color)
                     .memo(memo)
                     .location(location)
+                    .latitude(latitude)
+                    .longitude(longitude)
                     .userId(userId)
                     .build();
         }
