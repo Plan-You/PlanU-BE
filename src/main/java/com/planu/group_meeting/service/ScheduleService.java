@@ -6,6 +6,7 @@ import com.planu.group_meeting.dto.ScheduleDto.*;
 import com.planu.group_meeting.entity.Schedule;
 import com.planu.group_meeting.entity.ScheduleParticipant;
 import com.planu.group_meeting.entity.UnregisteredParticipant;
+import com.planu.group_meeting.entity.User;
 import com.planu.group_meeting.entity.common.FriendStatus;
 import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
 import com.planu.group_meeting.exception.user.NotFoundUserException;
@@ -22,6 +23,7 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,21 +39,30 @@ public class ScheduleService {
     @Transactional
     public void createSchedule(Long userId, ScheduleSaveRequest scheduleDto) {
         Schedule schedule = scheduleDto.toEntity(userId);
-        List<Long> participants = scheduleDto.getParticipants();
-        validateParticipants(userId, participants);
+        List<Long> participantIds = getParticipantIds(scheduleDto.getParticipants());
+        validateParticipants(userId, participantIds);
 
         scheduleDAO.insertSchedule(schedule);
 
-        insertParticipants(schedule, participants);
+        insertParticipants(schedule, participantIds);
         insertUnregisteredParticipants(schedule, scheduleDto.getUnregisteredParticipants());
     }
 
+    private List<Long> getParticipantIds(List<String> participants) {
+        return participants.stream()
+                .map(username -> {
+                    User user = userDAO.findByUsername(username);
+                    if (user == null) {
+                        throw new NotFoundUserException();
+                    }
+                    return user.getId();
+                })
+                .toList();
+    }
+
     private void validateParticipants(Long userId, List<Long> participants) {
-        for(Long participantId : participants){
-            if(!userDAO.existsById(participantId)){
-                throw new NotFoundUserException();
-            }
-            if(friendDAO.getFriendStatus(userId, participantId)!=FriendStatus.FRIEND){
+        for (Long participantId : participants) {
+            if (friendDAO.getFriendStatus(userId, participantId) != FriendStatus.FRIEND) {
                 throw new NotFriendException();
             }
         }
@@ -72,8 +83,7 @@ public class ScheduleService {
 
         participantDAO.deleteAllParticipantsByScheduleId(scheduleId);
         unregisteredParticipantDAO.deleteAllParticipantsByScheduleId(scheduleId);
-
-        insertParticipants(schedule, scheduleSaveRequest.getParticipants());
+        insertParticipants(schedule, getParticipantIds(scheduleSaveRequest.getParticipants()));
         insertUnregisteredParticipants(schedule, scheduleSaveRequest.getUnregisteredParticipants());
     }
 
@@ -111,7 +121,7 @@ public class ScheduleService {
     }
 
     public List<ScheduleCheckResponse> getSchedulesForMonth(Long currentUserId, Long userId, YearMonth yearMonth) {
-        if(!Objects.equals(userId, currentUserId) && friendDAO.getFriendStatus(currentUserId,userId) != FriendStatus.FRIEND){
+        if (!Objects.equals(userId, currentUserId) && friendDAO.getFriendStatus(currentUserId, userId) != FriendStatus.FRIEND) {
             throw new NotFoundUserException();
         }
 
@@ -155,11 +165,12 @@ public class ScheduleService {
 
     private void insertParticipants(Schedule schedule, List<Long> participantIds) {
         if (participantIds != null && !participantIds.isEmpty()) {
-            List<ScheduleParticipant> participants = participantIds.stream()
-                    .map(userId -> new ScheduleParticipant(schedule.getId(), userId))
+            List<ScheduleParticipant> scheduleParticipants = participantIds.stream()
+                    .map(participant -> new ScheduleParticipant(schedule.getId(), participant))
                     .toList();
-            participantDAO.insertScheduleParticipants(participants);
+            participantDAO.insertScheduleParticipants(scheduleParticipants);
         }
+
     }
 
     private void insertUnregisteredParticipants(Schedule schedule, List<String> unregisteredParticipantNames) {

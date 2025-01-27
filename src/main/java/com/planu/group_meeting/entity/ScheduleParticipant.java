@@ -14,4 +14,5 @@ public class ScheduleParticipant {
         this.scheduleId = scheduleId;
         this.userId = userId;
     }
+
 }

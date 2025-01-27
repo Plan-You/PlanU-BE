@@ -1,8 +1,8 @@
 package com.planu.group_meeting.dto;
 
 import com.planu.group_meeting.entity.Schedule;
-import com.planu.group_meeting.entity.ScheduleParticipant;
-import com.planu.group_meeting.entity.UnregisteredParticipant;
+import com.planu.group_meeting.dto.ParticipantDto.ScheduleParticipantResponse;
+import com.planu.group_meeting.dto.ParticipantDto.UnregisteredParticipantResponse;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -46,7 +46,7 @@ public class ScheduleDto {
         @Size(max = 100, message = "메모는 100자 이내로 입력해주세요.")
         private String memo;
 
-        private List<Long> participants;
+        private List<String> participants;
 
         private List<String> unregisteredParticipants;
 
@@ -76,9 +76,8 @@ public class ScheduleDto {
         private String latitude;
         private String longitude;
         private String memo;
-        private List<ScheduleParticipant> participants = new ArrayList<>();
-        private List<UnregisteredParticipant> unregisteredParticipants = new ArrayList<>();
-
+        private final List<ScheduleParticipantResponse> participants = new ArrayList<>();
+        private final List<UnregisteredParticipantResponse> unregisteredParticipants = new ArrayList<>();
     }
 
     @Getter
@@ -96,8 +95,6 @@ public class ScheduleDto {
         private Long groupId;
         private String title;
         private String location;
-        private String latitude;
-        private String longitude;
         private String startTime;
         private String endTime;
         private String color;
