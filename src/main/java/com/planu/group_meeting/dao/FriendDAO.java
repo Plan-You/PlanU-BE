@@ -4,6 +4,7 @@ import com.planu.group_meeting.dto.FriendDto.FriendInfo;
 import com.planu.group_meeting.entity.common.FriendStatus;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.security.core.parameters.P;
 
 import java.util.List;
 
@@ -18,4 +19,7 @@ public interface FriendDAO {
     void deleteFriend(Long fromUserId, Long toUserId);
 
     List<FriendInfo> getFriendsInfo(@Param("userId") Long userId, @Param("friendStatus") FriendStatus friendStatus);
+
+    List<FriendInfo> getFriendsInfo(@Param("userId") Long userId, @Param("friendStatus") FriendStatus friendStatus,
+                                   @Param("keyword") String keyword);
 }

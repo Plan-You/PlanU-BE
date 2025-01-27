@@ -90,9 +90,9 @@ public class FriendService {
         friendDAO.deleteFriend(toUserId,userId);
     }
 
-    public FriendListResponse getFriendList(Long userId){
-        List<FriendInfo> friendsInfo = friendDAO.getFriendsInfo(userId, FriendStatus.FRIEND);
-        return new FriendListResponse(friendsInfo.size(), friendsInfo);
+    public FriendListResponse getFriendList(Long userId, String keyword){
+        List<FriendInfo> friendInfos = friendDAO.getFriendsInfo(userId, FriendStatus.FRIEND, keyword);
+        return new FriendListResponse(friendInfos.size(), friendInfos);
     }
 
     public FriendListResponse getFriendRequestList(Long userId){

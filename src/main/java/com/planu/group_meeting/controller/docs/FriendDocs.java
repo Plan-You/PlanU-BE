@@ -150,7 +150,6 @@ public interface FriendDocs {
                                                @AuthenticationPrincipal CustomUserDetails userDetails);
 
 
-
     @Operation(summary = "친구 목록 조회", description = "로그인한 사용자의 친구 목록을 조회합니다.")
     @ApiResponses({
             @ApiResponse(
@@ -162,8 +161,7 @@ public interface FriendDocs {
                     )
             )
     })
-    ResponseEntity<FriendDto.FriendListResponse> getFriendList(@AuthenticationPrincipal CustomUserDetails userDetails);
-
+    ResponseEntity<FriendDto.FriendListResponse> getFriendList(@RequestParam(value = "search", defaultValue = "") String keyword, @AuthenticationPrincipal CustomUserDetails userDetails);
 
 
     @Operation(summary = "친구 요청 받은 목록 조회", description = "사용자가 받은 친구 요청 목록을 조회합니다.", security = @SecurityRequirement(name = "JWT"))
@@ -178,7 +176,6 @@ public interface FriendDocs {
             )
     })
     ResponseEntity<FriendDto.FriendListResponse> getFriendRequestList(@AuthenticationPrincipal CustomUserDetails userDetails);
-
 
 
     @Operation(summary = "친구 요청 보낸 목록 조회", description = "사용자가 보낸 친구 요청 목록을 조회합니다.")
