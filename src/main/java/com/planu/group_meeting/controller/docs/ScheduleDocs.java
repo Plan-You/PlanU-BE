@@ -144,6 +144,7 @@ public interface ScheduleDocs {
             )
     })
     ResponseEntity<ScheduleDto.DailyScheduleResponse> getScheduleList(
+            @PathVariable String username,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
             @AuthenticationPrincipal CustomUserDetails userDetails);
@@ -192,7 +193,5 @@ public interface ScheduleDocs {
             )
     })
     ResponseEntity<List<ScheduleDto.ScheduleCheckResponse>> checkScheduleList(
-            @PathVariable Long userId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth requestDate, @AuthenticationPrincipal CustomUserDetails userDetails);
-
-
+            @PathVariable String username, @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth, @AuthenticationPrincipal CustomUserDetails userDetails);
 }

@@ -55,8 +55,9 @@ public class FriendController implements FriendDocs {
     }
 
     @GetMapping
-    public ResponseEntity<FriendListResponse> getFriendList(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(friendService.getFriendList(userDetails.getId()));
+    public ResponseEntity<FriendListResponse> getFriendList(@RequestParam(value="search" , defaultValue = "") String keyword,
+                                                                     @AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok(friendService.getFriendList(userDetails.getId(),keyword));
     }
 
     @GetMapping("/request")

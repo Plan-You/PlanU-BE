@@ -23,7 +23,6 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -106,7 +105,13 @@ public class ScheduleService {
                 .orElseThrow(() -> new ScheduleNotFoundException("scheduleId " + scheduleId + " : 해당 스케줄을 찾을 수 없습니다."));
     }
 
-    public DailyScheduleResponse findScheduleList(Long userId, LocalDate startDate, LocalDate endDate) {
+    public DailyScheduleResponse findScheduleList(String username, LocalDate startDate, LocalDate endDate) {
+        User targetUser = userDAO.findByUsername(username);
+        if(targetUser==null){
+            throw new NotFoundUserException();
+        }
+        Long targetUserId = targetUser.getId();
+
         LocalDate today = LocalDate.now();
         startDate = (startDate != null) ? startDate : today;
         endDate = (endDate != null) ? endDate : startDate;
@@ -114,16 +119,18 @@ public class ScheduleService {
         LocalDateTime startDateTime = startDate.atStartOfDay();
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
 
-        List<ScheduleListResponse> scheduleList = scheduleDAO.getScheduleList(userId, startDateTime, endDateTime);
-        List<ScheduleDto.BirthdayFriend> birthdayFriends = userDAO.findBirthdayByDate(userId, startDate, endDate);
+        List<ScheduleListResponse> scheduleList = scheduleDAO.getScheduleList(targetUserId, startDateTime, endDateTime);
+        List<ScheduleDto.BirthdayFriend> birthdayFriends = userDAO.findBirthdayByDate(targetUserId, startDate, endDate);
 
         return new DailyScheduleResponse(scheduleList, birthdayFriends);
     }
 
-    public List<ScheduleCheckResponse> getSchedulesForMonth(Long currentUserId, Long userId, YearMonth yearMonth) {
-        if (!Objects.equals(userId, currentUserId) && friendDAO.getFriendStatus(currentUserId, userId) != FriendStatus.FRIEND) {
+    public List<ScheduleCheckResponse> getSchedulesForMonth(Long currentUserId, String username, YearMonth yearMonth) {
+        User targetUser = userDAO.findByUsername(username);
+        if(targetUser==null){
             throw new NotFoundUserException();
         }
+        Long targetUserId = targetUser.getId();
 
         LocalDate firstDayOfMonth = yearMonth.atDay(1);
         LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
@@ -133,7 +140,7 @@ public class ScheduleService {
 
         List<ScheduleCheckResponse> scheduleCheckResponse = new ArrayList<>();
         for (LocalDate current = startOfCalendar; !current.isAfter(endOfCalendar); current = current.plusDays(1)) {
-            ScheduleCheckResponse response = createScheduleCheckResponse(userId, current);
+            ScheduleCheckResponse response = createScheduleCheckResponse(targetUserId, current);
             if (existsEvent(response)) {
                 scheduleCheckResponse.add(response);
             }
