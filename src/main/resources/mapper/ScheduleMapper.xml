@@ -11,11 +11,14 @@
         <result property="endDateTime" column="endDateTime"/>
         <result property="color" column="color"/>
         <result property="location" column="location"/>
+        <result property="latitude" column="latitude"/>
+        <result property="longitude" column="longitude"/>
         <result property="memo" column="memo"/>
         <collection property="participants"
                     ofType="com.planu.group_meeting.dto.ParticipantDto$ScheduleParticipantResponse">
-            <result property="id" column="participantId"/>
             <result property="name" column="participantName"/>
+            <result property="username" column="participantUsername"/>
+            <result property="profileImage" column="participantProfileImage"/>
         </collection>
         <collection property="unregisteredParticipants"
                     ofType="com.planu.group_meeting.dto.ParticipantDto$UnregisteredParticipantResponse">
@@ -92,8 +95,10 @@
         s.LATITUDE AS latitude,
         s.LONGITUDE AS longitude,
         s.MEMO AS memo,
-        u.ID AS participantId,
+
         u.NAME AS participantName,
+        u.USERNAME AS participantUsername,
+        u.PROFILE_IMG_URL AS participantProfileImage,
         up.PARTICIPANT_NAME AS unregisteredParticipantName
         FROM SCHEDULE s
         LEFT JOIN SCHEDULE_PARTICIPANT sp ON s.ID = sp.SCHEDULE_ID
@@ -109,8 +114,6 @@
         NULL AS groupId,
         S.TITLE,
         S.LOCATION,
-        S.LATITUDE,
-        S.LONGITUDE,
         DATE_FORMAT(S.START_DATETIME, '%H:%i') AS startTime,
         DATE_FORMAT(S.END_DATETIME, '%H:%i') AS endTime,
         S.COLOR
@@ -126,8 +129,6 @@
         GS.GROUP_ID AS groupId,
         GS.TITLE,
         GS.LOCATION,
-        GS.LATITUDE,
-        GS.LONGITUDE,
         DATE_FORMAT(GS.START_DATETIME, '%H:%i') AS startTime,
         DATE_FORMAT(GS.END_DATETIME, '%H:%i') AS endTime,
         GS.COLOR
