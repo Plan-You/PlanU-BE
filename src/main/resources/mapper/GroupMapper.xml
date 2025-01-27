@@ -122,6 +122,7 @@
 
     <select id="findGroupMembers" resultType="com.planu.group_meeting.dto.GroupDTO$Member">
         SELECT
+            u.id,
             u.name,
             u.username,
             u.profile_img_url as profileImage,

@@ -93,6 +93,11 @@ public class GlobalExceptionHandler {
         return BaseResponse.toResponseEntity(HttpStatus.BAD_REQUEST,"친구 요청 받은 상태가 아닙니다.");
     }
 
+    @ExceptionHandler(NotFriendException.class)
+    public ResponseEntity<BaseResponse>handleNotFriendException(NotFriendException e){
+        return BaseResponse.toResponseEntity(HttpStatus.BAD_REQUEST,"친구로 등록된 사용자가 아닙니다.");
+    }
+
     @ExceptionHandler(DuplicatedRequestException.class)
     public ResponseEntity<BaseResponse>handleDuplicatedRequestException(DuplicatedRequestException e){
         return BaseResponse.toResponseEntity(HttpStatus.CONFLICT,e.getMessage());
