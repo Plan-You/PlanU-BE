@@ -26,6 +26,8 @@ public interface GroupDAO {
 
     void updateGroupPin(@Param("userId") Long userId, @Param("groupId") Long groupId);
 
+    void updateGroupUnpin(@Param("userId") Long userId, @Param("groupId") Long groupId);
+
     void updateGroupUserGroupStatus(Long userId, Long groupId);
 
     String findNameByGroupId(Long groupId);

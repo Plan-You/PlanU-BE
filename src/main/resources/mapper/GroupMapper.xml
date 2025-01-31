@@ -141,4 +141,10 @@
         SET GROUP_PIN = NOW()
         WHERE USER_ID = #{userId} AND GROUP_ID = #{groupId}
     </update>
+
+    <update id="updateGroupUnpin">
+        UPDATE GROUP_USER
+        SET GROUP_PIN = NULL
+        WHERE USER_ID = #{userId} AND GROUP_ID = #{groupId}
+    </update>
 </mapper>

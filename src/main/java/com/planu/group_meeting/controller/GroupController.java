@@ -116,6 +116,14 @@ public class GroupController {
         return BaseResponse.toResponseEntity(HttpStatus.OK, "상단 고정 성공");
     }
 
+    @PutMapping("/unpin/{groupId}")
+    public ResponseEntity<BaseResponse> unpinedGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                     @PathVariable("groupId") Long groupId){
+        groupService.unpinedGroup(userDetails.getId(), groupId);
+
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "상단 고정 해제 성공");
+    }
+
     @GetMapping("/{groupId}/members")
     public ResponseEntity<GroupMembersResponse> findGroupMembers(
             @AuthenticationPrincipal CustomUserDetails userDetails,
