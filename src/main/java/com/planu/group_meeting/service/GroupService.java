@@ -214,6 +214,22 @@ public class GroupService {
     }
 
     @Transactional
+    public void pinedGroup(Long userId, Long groupId){
+        Group group = groupDAO.findGroupById(groupId);
+        GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
+
+        if (group == null) {
+            throw new IllegalArgumentException("해당 그룹이 존재하지 않습니다.");
+        }
+
+        if (groupUser == null) {
+            throw new IllegalArgumentException("해당 그룹의 그룹원이 아닙니다.");
+        }
+
+        groupDAO.updateGroupPin(userId, groupId);
+    }
+
+    @Transactional
     public String findNameByGroupId(Long groupId) {
         return groupDAO.findNameByGroupId(groupId);
     }
