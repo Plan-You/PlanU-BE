@@ -9,10 +9,10 @@
         VALUES (#{name}, #{groupImageUrl})
     </insert>
 
-    <select id="findUserIdByUserName" resultType="java.lang.Long">
+    <select id="findUserIdByUsername" resultType="java.lang.Long">
         SELECT id
         FROM USER
-        WHERE username = #{userName}
+        WHERE username = #{username}
     </select>
 
     <insert id="insertGroupUser">
@@ -135,4 +135,10 @@
             g.group_id = #{groupId}
             AND g.GROUP_STATE = 1;
     </select>
+
+    <update id="updateGroupPin">
+        UPDATE GROUP_USER
+        SET GROUP_PIN = NOW()
+        WHERE USER_ID = #{userId} AND GROUP_ID = #{groupId}
+    </update>
 </mapper>

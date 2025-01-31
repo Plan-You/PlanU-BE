@@ -108,6 +108,14 @@ public class GroupController {
         return BaseResponse.toResponseEntity(HttpStatus.OK, "강제 퇴출 성공");
     }
 
+    @PutMapping("/pin/{groupId}")
+    public ResponseEntity<BaseResponse> pinedGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                   @PathVariable("groupId") Long groupId){
+        groupService.pinedGroup(userDetails.getId(), groupId);
+
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "상단 고정 성공");
+    }
+
     @GetMapping("/{groupId}/members")
     public ResponseEntity<GroupMembersResponse> findGroupMembers(
             @AuthenticationPrincipal CustomUserDetails userDetails,

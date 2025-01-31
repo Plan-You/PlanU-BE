@@ -18,11 +18,13 @@ public interface GroupDAO {
 
     Group findGroupById(Long groupId);
 
-    Long findUserIdByUserName(String userName);
+    Long findUserIdByUsername(String username);
 
     GroupUser findGroupUserByUserIdAndGroupId(Long userId, Long groupId);
 
-    int deleteGroupUserByUserIdAndGroupId(Long userId, Long groupId);
+    void deleteGroupUserByUserIdAndGroupId(Long userId, Long groupId);
+
+    void updateGroupPin(@Param("userId") Long userId, @Param("groupId") Long groupId);
 
     void updateGroupUserGroupStatus(Long userId, Long groupId);
 
