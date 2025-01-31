@@ -45,7 +45,7 @@ public class GroupController {
     @PostMapping("/invite")
     public ResponseEntity<GroupInviteResponseDTO> inviteUser(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                              @RequestParam("groupId") Long id,
-                                                             @RequestParam("userName") String userName) {
+                                                             @RequestParam("username") String userName) {
         inputValidator.invalidUserNameEquls(userName, userDetails.getUsername());
 
         return ResponseEntity.ok(groupService.inviteUser(userDetails, userName, id));

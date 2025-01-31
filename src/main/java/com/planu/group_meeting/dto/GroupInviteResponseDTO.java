@@ -7,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class GroupInviteResponseDTO {
-    private String invitedUserName;
+    private String invitedUsername;
     private Long groupId;
     private String groupName;
     private String groupImageUrl;
