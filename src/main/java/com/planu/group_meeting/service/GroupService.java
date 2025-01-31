@@ -130,7 +130,18 @@ public class GroupService {
 
     @Transactional
     public List<GroupResponseDTO> getGroupList(Long userId) {
-        return groupDAO.findGroupsByUserId(userId);
+        List<GroupResponseDTO> groupList = groupDAO.findGroupsByUserId(userId);
+
+        for(GroupResponseDTO group : groupList) {
+            if(group.getGroupPin() == null) {
+                group.setGroupPin(0);
+            }
+            else {
+                group.setGroupPin(1);
+            }
+        }
+
+        return groupList;
     }
 
     @Transactional
