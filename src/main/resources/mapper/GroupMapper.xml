@@ -64,16 +64,23 @@
         (SELECT COUNT(*)
         FROM GROUP_USER gu_sub
         WHERE gu_sub.GROUP_ID = g.ID
-        AND gu_sub.GROUP_STATE = 1) AS participant
+        AND gu_sub.GROUP_STATE = 1) AS participant,
+        gu.GROUP_PIN AS groupPin  -- GROUP_PIN을 함께 가져옵니다.
         FROM
         GROUP_ g
+        LEFT JOIN GROUP_USER gu ON gu.GROUP_ID = g.ID  -- GROUP_USER와 LEFT JOIN을 사용하여 GROUP_PIN을 가져옵니다.
         WHERE
         EXISTS (SELECT 1
-        FROM GROUP_USER gu
-        WHERE gu.USER_ID = #{userId}
-        AND gu.GROUP_ID = g.ID
-        AND gu.GROUP_STATE = 1)
+        FROM GROUP_USER gu_check
+        WHERE gu_check.USER_ID = #{userId}
+        AND gu_check.GROUP_ID = g.ID
+        AND gu_check.GROUP_STATE = 1)  -- gu_check를 참조
+        ORDER BY
+        CASE WHEN gu.GROUP_PIN IS NULL THEN 1 ELSE 0 END,  -- GROUP_PIN이 NULL인 경우 뒤로 정렬
+        gu.GROUP_PIN DESC,  -- GROUP_PIN이 NULL이 아니면 최신순 정렬
+        g.NAME ASC;  -- 그 후, 그룹명이 알파벳 순으로 정렬
     </select>
+
 
 
     <delete id="deleteGroupUserByUserIdAndGroupId">
