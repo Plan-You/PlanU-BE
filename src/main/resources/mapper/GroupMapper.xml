@@ -9,10 +9,10 @@
         VALUES (#{name}, #{groupImageUrl})
     </insert>
 
-    <select id="findUserIdByUserName" resultType="java.lang.Long">
+    <select id="findUserIdByUsername" resultType="java.lang.Long">
         SELECT id
         FROM USER
-        WHERE username = #{userName}
+        WHERE username = #{username}
     </select>
 
     <insert id="insertGroupUser">

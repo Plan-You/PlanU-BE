@@ -18,7 +18,7 @@ public interface GroupDAO {
 
     Group findGroupById(Long groupId);
 
-    Long findUserIdByUserName(String userName);
+    Long findUserIdByUsername(String username);
 
     GroupUser findGroupUserByUserIdAndGroupId(Long userId, Long groupId);
 

@@ -45,7 +45,7 @@ public class GroupService {
     }
 
     @Transactional
-    public GroupResponseDTO createGroup(String userName, String groupName, MultipartFile groupImage) {
+    public GroupResponseDTO createGroup(String username, String groupName, MultipartFile groupImage) {
         String imageUrl = s3Uploader.uploadFile(groupImage);
 
         Group group = Group.builder()
@@ -57,7 +57,7 @@ public class GroupService {
 
 
         groupDAO.insertGroupUser(GroupUser.builder()
-                .userId(groupDAO.findUserIdByUserName(userName))
+                .userId(groupDAO.findUserIdByUsername(username))
                 .groupId(group.getId())
                 .groupRole(GroupUser.GroupRole.LEADER)
                 .groupState(1)
@@ -67,13 +67,13 @@ public class GroupService {
         return GroupResponseDTO.builder()
                 .groupId(group.getId())
                 .groupName(groupName)
-                .leaderUserName(userName)
+                .leaderUsername(username)
                 .groupImageUrl(imageUrl)
                 .build();
     }
 
     @Transactional
-    public GroupInviteResponseDTO inviteUser(CustomUserDetails customUserDetails, String userName, Long groupId) {
+    public GroupInviteResponseDTO inviteUser(CustomUserDetails customUserDetails, String username, Long groupId) {
         if (groupDAO.findGroupUserByUserIdAndGroupId(customUserDetails.getId(), groupId) == null) {
             throw new IllegalArgumentException("초대 권한이 없습니다.");
         }
@@ -83,9 +83,9 @@ public class GroupService {
             throw new IllegalArgumentException("해당 그룹이 존재하지 않습니다.");
         }
 
-        User user = userDAO.findByUsername(userName);
+        User user = userDAO.findByUsername(username);
         if (user == null) {
-            throw new IllegalArgumentException("사용자 '" + userName + "'을 찾을 수 없습니다.");
+            throw new IllegalArgumentException("사용자 '" + username + "'을 찾을 수 없습니다.");
         }
 
         groupDAO.insertGroupUser(GroupUser.builder()
@@ -96,7 +96,7 @@ public class GroupService {
                 .build());
 
         return GroupInviteResponseDTO.builder()
-                .invitedUserName(userName)
+                .invitedUsername(username)
                 .groupId(groupId)
                 .groupName(group.getName())
                 .groupImageUrl(group.getGroupImageUrl())
@@ -194,7 +194,7 @@ public class GroupService {
 
     @Transactional
     public void forceExpelMember(Long leaderId, Long groupId, String username) {
-        Long userId = groupDAO.findUserIdByUserName(username);
+        Long userId = groupDAO.findUserIdByUsername(username);
         GroupUser leaderGroupUser = groupDAO.findGroupUserByUserIdAndGroupId(leaderId, groupId);
         if(Objects.equals(leaderId, userId)){
             throw new IllegalArgumentException("자기자신을 퇴출시킬 수 없습니다.");
