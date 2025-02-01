@@ -22,7 +22,6 @@ public class GroupDTO {
     @Setter
     @RequiredArgsConstructor
     public static class Member {
-        private final Long userId;
         private final String name;
         private final String username;
         private final String groupRole;
