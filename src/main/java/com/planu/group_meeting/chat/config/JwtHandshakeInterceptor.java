@@ -2,7 +2,6 @@ package com.planu.group_meeting.chat.config;
 
 import com.planu.group_meeting.dao.GroupDAO;
 import com.planu.group_meeting.jwt.JwtUtil;
-import com.planu.group_meeting.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
@@ -30,7 +29,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
             String username = jwtUtil.getUsername(token);
 
-            Long userId = groupDAO.findUserIdByUserName(username);
+            Long userId = groupDAO.findUserIdByUsername(username);
 
             attributes.put("userId", userId);
         }

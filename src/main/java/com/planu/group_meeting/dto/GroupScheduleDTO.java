@@ -35,9 +35,7 @@ public class GroupScheduleDTO {
 
         private String memo;
 
-        private List<Long> participants;
-
-        private List<String> unregisteredParticipants;
+        private List<String> participants;
 
         public GroupSchedule toEntity(Long groupId) {
             return GroupSchedule.builder()
@@ -88,8 +86,7 @@ public class GroupScheduleDTO {
     @Getter
     public static class ParticipantsResponse {
         private String name;
-        private Long participantId;
-        private Boolean isRegistered;
+        private String username;
     }
 
     @Getter
