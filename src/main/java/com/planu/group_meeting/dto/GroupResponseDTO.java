@@ -14,5 +14,5 @@ public class GroupResponseDTO {
     private String leaderUsername;
     private String groupImageUrl;
     private String participant;
-    private Integer groupPin;
+    private Boolean isPin;
 }
