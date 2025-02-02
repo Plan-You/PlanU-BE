@@ -61,6 +61,7 @@ public class GroupService {
                 .groupId(group.getId())
                 .groupRole(GroupUser.GroupRole.LEADER)
                 .groupState(1)
+                .isPin(false)
                 .build());
 
 
@@ -93,6 +94,7 @@ public class GroupService {
                 .userId(user.getId())
                 .groupRole(GroupUser.GroupRole.PARTICIPANT)
                 .groupState(0)
+                .isPin(false)
                 .build());
 
         return GroupInviteResponseDTO.builder()
@@ -130,18 +132,7 @@ public class GroupService {
 
     @Transactional
     public List<GroupResponseDTO> getGroupList(Long userId) {
-        List<GroupResponseDTO> groupList = groupDAO.findGroupsByUserId(userId);
-
-        for(GroupResponseDTO group : groupList) {
-            if(group.getGroupPin() == null) {
-                group.setGroupPin(0);
-            }
-            else {
-                group.setGroupPin(1);
-            }
-        }
-
-        return groupList;
+        return groupDAO.findGroupsByUserId(userId);
     }
 
     @Transactional
@@ -237,23 +228,11 @@ public class GroupService {
             throw new IllegalArgumentException("해당 그룹의 그룹원이 아닙니다.");
         }
 
-        groupDAO.updateGroupPin(userId, groupId);
-    }
-
-    @Transactional
-    public void unpinedGroup(Long userId, Long groupId) {
-        Group group = groupDAO.findGroupById(groupId);
-        GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
-
-        if (group == null) {
-            throw new IllegalArgumentException("해당 그룹이 존재하지 않습니다.");
+        if (groupUser.getIsPin()) {
+            groupDAO.updateGroupUnpin(userId, groupId);
+        } else {
+            groupDAO.updateGroupPin(userId, groupId);
         }
-
-        if (groupUser == null) {
-            throw new IllegalArgumentException("해당 그룹의 그룹원이 아닙니다.");
-        }
-
-        groupDAO.updateGroupUnpin(userId, groupId);
     }
 
 
