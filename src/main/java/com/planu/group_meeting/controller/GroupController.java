@@ -2,8 +2,12 @@ package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dto.*;
-import com.planu.group_meeting.dto.AvailableDateDto.*;
-import com.planu.group_meeting.dto.GroupDTO.*;
+import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRanks;
+import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
+import com.planu.group_meeting.dto.GroupDTO.AvailableDateInfos;
+import com.planu.group_meeting.dto.GroupDTO.AvailableMemberInfos;
+import com.planu.group_meeting.dto.GroupDTO.GroupMembersResponse;
+import com.planu.group_meeting.dto.GroupDTO.NonGroupFriendsResponse;
 import com.planu.group_meeting.service.FriendService;
 import com.planu.group_meeting.service.GroupService;
 import com.planu.group_meeting.service.GroupUserService;
@@ -117,10 +121,11 @@ public class GroupController {
 
     @GetMapping("/{groupId}/members")
     public ResponseEntity<GroupMembersResponse> findGroupMembers(
+            @RequestParam("search") @Nullable String keyword,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("groupId") Long groupId
     ) {
-        GroupMembersResponse groupMembers = new GroupMembersResponse(groupService.findGroupMembers(groupId, userDetails.getId()));
+        GroupMembersResponse groupMembers = new GroupMembersResponse(groupService.findGroupMembers(groupId, userDetails.getId(), keyword));
         friendService.setFriendStatus(userDetails.getId(), groupMembers, userDetails.getUsername());
         return ResponseEntity.ok(groupMembers);
     }
@@ -199,5 +204,14 @@ public class GroupController {
         }
         List<AvailableDateRanks> availableDateRanks = groupService.getAvailableDateRanks(groupId, yearMonth, userDetails.getId());
         return ResponseEntity.ok(availableDateRanks);
+    }
+
+    @GetMapping("{groupId}/details")
+    public ResponseEntity<GroupDTO.GroupInfo> getGroupDetails(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable("groupId") Long groupId
+    )
+    {
+        return ResponseEntity.ok(groupService.getGroupDetails(groupId, userDetails.getId()));
     }
 }

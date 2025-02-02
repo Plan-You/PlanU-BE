@@ -72,4 +72,12 @@ public class GroupDTO {
         private List<String> memberNames;
     }
 
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class GroupInfo {
+        private String groupName;
+        private String groupImage;
+        private Boolean isPin;
+    }
 }

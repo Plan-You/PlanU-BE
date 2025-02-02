@@ -255,12 +255,12 @@ public class GroupService {
     }
 
     @Transactional
-    public List<Member> findGroupMembers(Long groupId, Long userId) {
+    public List<Member> findGroupMembers(Long groupId, Long userId, String keyword) {
         if (groupDAO.findGroupById(groupId) == null) {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
         }
         checkAccessPermission(groupId, userId);
-        return groupDAO.findGroupMembers(groupId);
+        return groupDAO.findGroupMembers(groupId, keyword);
     }
 
     public void checkAccessPermission(Long groupId, Long id) throws UnauthorizedAccessException {
@@ -462,5 +462,18 @@ public class GroupService {
         }
 
         return response;
+    }
+
+    @Transactional
+    public GroupInfo getGroupDetails(Long groupId, Long userId) {
+        if (groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
+        }
+        checkAccessPermission(groupId, userId);
+
+        Group group = groupDAO.findGroupById(groupId);
+        Boolean isPin = groupUserDAO.getPinById(groupId, userId);
+
+        return new GroupInfo(group.getName(), group.getGroupImageUrl(), isPin);
     }
 }
