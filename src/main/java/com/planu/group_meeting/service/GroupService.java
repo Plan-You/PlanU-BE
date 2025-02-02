@@ -2,6 +2,7 @@ package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dao.*;
+import com.planu.group_meeting.dto.AvailableDateDto;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatio;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
 import com.planu.group_meeting.dto.FriendDto.FriendInfo;
@@ -23,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class GroupService {
@@ -237,17 +237,29 @@ public class GroupService {
 
 
     @Transactional
-    public String findNameByGroupId(Long groupId) {
+    public String findNameByGroupId(Long groupId, Long userId) {
+        if (groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
+        }
+        checkAccessPermission(groupId, userId);
         return groupDAO.findNameByGroupId(groupId);
     }
 
     @Transactional
     public Boolean isGroupMember(Long userId, Long groupId) {
+        if (groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
+        }
+        checkAccessPermission(groupId, userId);
         return groupUserDAO.isGroupMember(userId, groupId);
     }
 
     @Transactional
-    public List<Member> findGroupMembers(Long groupId) {
+    public List<Member> findGroupMembers(Long groupId, Long userId) {
+        if (groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
+        }
+        checkAccessPermission(groupId, userId);
         return groupDAO.findGroupMembers(groupId);
     }
 
@@ -258,12 +270,12 @@ public class GroupService {
     }
 
     @Transactional
-    public NonGroupFriendsResponse getMemberInviteList(Long groupId, Long userId) {
+    public NonGroupFriendsResponse getMemberInviteList(Long groupId, Long userId, String keyword) {
         if (groupDAO.findGroupById(groupId) == null) {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
         }
         checkAccessPermission(groupId, userId);
-        List<FriendInfo> friendInfos = friendDAO.getFriendsInfo(userId, FriendStatus.FRIEND);
+        List<FriendInfo> friendInfos = friendDAO.getFriendsInfo(userId, FriendStatus.FRIEND, keyword);
         List<NonGroupFriend> nonGroupFriends = new ArrayList<>();
         for (var friendInfo : friendInfos) {
             String status = "NONE";
@@ -403,7 +415,7 @@ public class GroupService {
     }
 
     @Transactional
-    public List<String> getAvailableDateRanks(Long groupId, YearMonth yearMonth, Long userId) {
+    public List<AvailableDateDto.AvailableDateRanks> getAvailableDateRanks(Long groupId, YearMonth yearMonth, Long userId) {
         if (groupDAO.findGroupById(groupId) == null) {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
         }
@@ -438,8 +450,17 @@ public class GroupService {
                 }
         );
 
-        return availableDateRanks.stream()
-                .map(entry -> entry.getKey().toString())
-                .collect(Collectors.toList());
+        List<AvailableDateDto.AvailableDateRanks> response = new ArrayList<>();
+        var ranks = 1L;
+        var previousCount = availableDateRanks.get(0).getValue();
+        for(var entry : availableDateRanks) {
+            if(!previousCount.equals(entry.getValue())) {
+                ranks++;
+                previousCount = entry.getValue();
+            }
+            response.add(new AvailableDateDto.AvailableDateRanks(ranks, entry.getKey().toString()));
+        }
+
+        return response;
     }
 }

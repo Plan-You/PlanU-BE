@@ -53,7 +53,7 @@ public class GroupController {
 
     @PutMapping("/join/{groupId}")
     public ResponseEntity<BaseResponse> joinGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                         @PathVariable("groupId") Long groupId) {
+                                                  @PathVariable("groupId") Long groupId) {
 
         groupService.joinGroup(userDetails, groupId);
 
@@ -110,9 +110,8 @@ public class GroupController {
 
     @PatchMapping("/pin/{groupId}")
     public ResponseEntity<BaseResponse> pinedGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                   @PathVariable("groupId") Long groupId){
+                                                   @PathVariable("groupId") Long groupId) {
         groupService.pinedGroup(userDetails.getId(), groupId);
-
         return BaseResponse.toResponseEntity(HttpStatus.OK, "상단 고정/해제 성공");
     }
 
@@ -121,17 +120,18 @@ public class GroupController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("groupId") Long groupId
     ) {
-        GroupMembersResponse groupMembers = new GroupMembersResponse(groupService.findGroupMembers(groupId));
+        GroupMembersResponse groupMembers = new GroupMembersResponse(groupService.findGroupMembers(groupId, userDetails.getId()));
         friendService.setFriendStatus(userDetails.getId(), groupMembers, userDetails.getUsername());
         return ResponseEntity.ok(groupMembers);
     }
 
     @GetMapping("{groupId}/invite-list")
-    public ResponseEntity<NonGroupFriendsResponse> findNonGroupFriends (
-        @AuthenticationPrincipal CustomUserDetails userDetails,
-        @PathVariable("groupId") Long groupId
+    public ResponseEntity<NonGroupFriendsResponse> findNonGroupFriends(
+            @RequestParam("search") @Nullable String keyword,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable("groupId") Long groupId
     ) {
-        NonGroupFriendsResponse nonGroupFriends = groupService.getMemberInviteList(groupId, userDetails.getId());
+        NonGroupFriendsResponse nonGroupFriends = groupService.getMemberInviteList(groupId, userDetails.getId(), keyword);
         return ResponseEntity.ok(nonGroupFriends);
     }
 
@@ -140,36 +140,33 @@ public class GroupController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("groupId") Long groupId,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth
-    )
-    {
+    ) {
         AvailableDateRatios availableDateRatios = groupService.findAvailableDateRatios(groupId, yearMonth, userDetails.getId());
         return ResponseEntity.ok(availableDateRatios);
     }
 
     @GetMapping("{groupId}/available-dates/members")
     public ResponseEntity<Map<String, Object>> getAvailableMembers(
-        @AuthenticationPrincipal CustomUserDetails userDetails,
-        @PathVariable("groupId") Long groupId,
-        @RequestParam @DateTimeFormat(pattern = "yyyy-mm-dd") @Nullable LocalDate date
-    )
-    {
-        if(date == null) {
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable("groupId") Long groupId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-mm-dd") @Nullable LocalDate date
+    ) {
+        if (date == null) {
             date = LocalDate.now();
         }
 
         Map<String, Object> response = new HashMap<>();
-        response.put("availableMembers",groupService.findAvailableMembers(groupId, date, userDetails.getId()));
+        response.put("availableMembers", groupService.findAvailableMembers(groupId, date, userDetails.getId()));
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("{groupId}/available-dates/member-info")
     public ResponseEntity<AvailableMemberInfos> getAvailableMemberInfos(
-        @AuthenticationPrincipal CustomUserDetails userDetails,
-        @PathVariable("groupId") Long groupId,
-        @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth
-    )
-    {
-        if(yearMonth == null) {
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable("groupId") Long groupId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth
+    ) {
+        if (yearMonth == null) {
             yearMonth = YearMonth.now();
         }
 
@@ -179,12 +176,11 @@ public class GroupController {
 
     @GetMapping("{groupId}/available-dates/date-info")
     public ResponseEntity<AvailableDateInfos> getAvailableDateInfos(
-        @AuthenticationPrincipal CustomUserDetails userDetails,
-        @PathVariable("groupId") Long groupId,
-        @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth
-    )
-    {
-        if(yearMonth == null) {
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable("groupId") Long groupId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth
+    ) {
+        if (yearMonth == null) {
             yearMonth = YearMonth.now();
         }
 
@@ -193,18 +189,15 @@ public class GroupController {
     }
 
     @GetMapping("{groupId}/available-dates/ranks")
-    public ResponseEntity<Map<String, Object>> getAvailableDateRanks(
+    public ResponseEntity<List<AvailableDateRanks>> getAvailableDateRanks(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("groupId") Long groupId,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth
-    )
-    {
-        if(yearMonth == null) {
+    ) {
+        if (yearMonth == null) {
             yearMonth = YearMonth.now();
         }
-        List<String> availableDateRanks = groupService.getAvailableDateRanks(groupId, yearMonth, userDetails.getId());
-        Map<String, Object> response = new HashMap<>();
-        response.put("availableDateRanks", availableDateRanks);
-        return ResponseEntity.ok(response);
+        List<AvailableDateRanks> availableDateRanks = groupService.getAvailableDateRanks(groupId, yearMonth, userDetails.getId());
+        return ResponseEntity.ok(availableDateRanks);
     }
 }
