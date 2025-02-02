@@ -139,7 +139,10 @@
             USER as u ON g.user_id = u.id
         WHERE
             g.group_id = #{groupId}
-            AND g.GROUP_STATE = 1;
+            AND g.GROUP_STATE = 1
+        <if test="keyword != null and keyword != ''">
+            AND (u.username LIKE CONCAT('%', #{keyword}, '%') OR u.name LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
     </select>
 
     <update id="updateGroupPin">

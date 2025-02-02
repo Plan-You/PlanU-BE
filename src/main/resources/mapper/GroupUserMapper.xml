@@ -33,4 +33,10 @@
         FROM GROUP_USER
         WHERE group_id = #{groupId} and group_state = 1;
     </select>
+
+    <select id="getPinById">
+        SELECT group_is_pin
+        FROM GROUP_USER
+        WHERE group_id = #{groupId} and user_id = #{userId};
+    </select>
 </mapper>

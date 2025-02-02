@@ -57,5 +57,5 @@ public interface GroupDAO {
 
     List<GroupResponseDTO> getGroupInviteList(Long userId);
 
-    List<Member> findGroupMembers(Long groupId);
+    List<Member> findGroupMembers(Long groupId, String keyword);
 }
