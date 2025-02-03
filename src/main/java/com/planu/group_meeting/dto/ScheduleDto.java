@@ -12,7 +12,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -39,9 +38,9 @@ public class ScheduleDto {
 
         private String location;
 
-        private BigDecimal latitude;
+        private double latitude;
 
-        private BigDecimal longitude;
+        private double longitude;
 
         @Size(max = 100, message = "메모는 100자 이내로 입력해주세요.")
         private String memo;
@@ -73,8 +72,8 @@ public class ScheduleDto {
         private LocalDateTime startDateTime;
         private LocalDateTime endDateTime;
         private String location;
-        private String latitude;
-        private String longitude;
+        private double latitude;
+        private double longitude;
         private String memo;
         private final List<ScheduleParticipantResponse> participants = new ArrayList<>();
         private final List<UnregisteredParticipantResponse> unregisteredParticipants = new ArrayList<>();
