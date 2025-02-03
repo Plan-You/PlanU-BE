@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -21,8 +20,8 @@ public class Schedule {
     ScheduleVisibility visibility;
     private String memo;
     private String location;
-    private BigDecimal latitude;
-    private BigDecimal longitude;
+    private double latitude;
+    private double longitude;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
