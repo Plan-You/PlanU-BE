@@ -109,6 +109,7 @@ public class UserService{
         String username = jwtUtil.getUsername(refresh);
         String storedRefresh = redisTemplate.opsForValue().get(REFRESH_TOKEN_PREFIX + username);
         if (storedRefresh == null || !storedRefresh.equals(refresh)) {
+            System.out.println("리프레쉬 토큰 에러 발생2 ->" + refresh);
             throw new InvalidRefreshTokenException();
         }
         redisTemplate.delete(username);
@@ -116,7 +117,7 @@ public class UserService{
         String role = jwtUtil.getRole(refresh);
         String newAccess = jwtUtil.createAccessToken(username, role);
         String newRefresh = jwtUtil.createRefreshToken(username, role);
-
+        System.out.println(username + " 토큰 재발행 성공");
         return new TokenDto(newAccess, newRefresh);
     }
 
@@ -190,6 +191,7 @@ public class UserService{
 
     private void validateRefreshToken(String refresh) {
         if (refresh == null || jwtUtil.isExpired(refresh) || !"refresh".equals(jwtUtil.getCategory(refresh))) {
+            System.out.println("리프레쉬 토큰 에러 발생1 ->" + refresh);
             throw new InvalidRefreshTokenException();
         }
     }

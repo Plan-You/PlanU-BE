@@ -100,6 +100,7 @@ public class UserController implements UserDocs {
     @PostMapping("/logout")
     public ResponseEntity<BaseResponse> logout(HttpServletRequest request, HttpServletResponse response) {
         String refresh = CookieUtil.getCookieValue(request, "refresh");
+        System.out.println("refresh 토큰 : " + refresh);
         userService.logout(refresh);
         response.addCookie(CookieUtil.deleteCookie("refresh"));
         return BaseResponse.toResponseEntity(HttpStatus.OK,"로그아웃 성공");
