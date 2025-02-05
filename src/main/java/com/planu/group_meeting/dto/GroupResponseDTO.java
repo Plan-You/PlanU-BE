@@ -11,7 +11,8 @@ import lombok.*;
 public class GroupResponseDTO {
     private Long groupId;
     private String groupName;
-    private String leaderUserName;
+    private String leaderUsername;
     private String groupImageUrl;
     private String participant;
+    private Boolean isPin;
 }

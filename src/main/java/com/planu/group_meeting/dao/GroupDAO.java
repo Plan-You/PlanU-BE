@@ -18,11 +18,15 @@ public interface GroupDAO {
 
     Group findGroupById(Long groupId);
 
-    Long findUserIdByUserName(String userName);
+    Long findUserIdByUsername(String username);
 
     GroupUser findGroupUserByUserIdAndGroupId(Long userId, Long groupId);
 
-    int deleteGroupUserByUserIdAndGroupId(Long userId, Long groupId);
+    void deleteGroupUserByUserIdAndGroupId(Long userId, Long groupId);
+
+    void updateGroupPin(@Param("userId") Long userId, @Param("groupId") Long groupId);
+
+    void updateGroupUnpin(@Param("userId") Long userId, @Param("groupId") Long groupId);
 
     void updateGroupUserGroupStatus(Long userId, Long groupId);
 
@@ -53,5 +57,5 @@ public interface GroupDAO {
 
     List<GroupResponseDTO> getGroupInviteList(Long userId);
 
-    List<Member> findGroupMembers(Long groupId);
+    List<Member> findGroupMembers(Long groupId, String keyword);
 }

@@ -2,12 +2,11 @@ package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.dao.*;
 import com.planu.group_meeting.dto.GroupScheduleDTO;
+import com.planu.group_meeting.dto.GroupScheduleDTO.GroupSchedulesDetailResponse;
 import com.planu.group_meeting.dto.GroupScheduleDTO.scheduleOverViewResponse;
 import com.planu.group_meeting.dto.GroupScheduleDTO.todayScheduleResponse;
-import com.planu.group_meeting.dto.GroupScheduleDTO.GroupSchedulesDetailResponse;
 import com.planu.group_meeting.entity.GroupSchedule;
 import com.planu.group_meeting.entity.GroupScheduleParticipant;
-import com.planu.group_meeting.entity.GroupScheduleUnregisteredParticipant;
 import com.planu.group_meeting.exception.group.GroupNotFoundException;
 import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
 import jakarta.validation.Valid;
@@ -18,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,7 +25,6 @@ import java.util.List;
 public class GroupScheduleService {
     private final GroupScheduleDAO groupScheduleDAO;
     private final GroupScheduleParticipantDAO groupScheduleParticipantDAO;
-    private final GroupScheduleUnregisteredParticipantDAO groupScheduleUnregisteredParticipantDAO;
     private final UserDAO userDAO;
     private final ParticipantDAO participantDAO;
     private final GroupDAO groupDAO;
@@ -77,9 +76,11 @@ public class GroupScheduleService {
         checkValidGroupId(groupId);
         GroupSchedule groupSchedule = groupScheduleRequest.toEntity(groupId);
         groupScheduleDAO.insert(groupSchedule);
-
-        insertParticipants(groupSchedule, groupScheduleRequest.getParticipants());
-        insertUnregisteredParticipants(groupSchedule, groupScheduleRequest.getUnregisteredParticipants());
+        List<Long> groupScheduleParticipants = new ArrayList<>();
+        for(var username : groupScheduleRequest.getParticipants()) {
+            groupScheduleParticipants.add(userDAO.findByUsername(username).getId());
+        }
+        insertParticipants(groupSchedule, groupScheduleParticipants);
     }
 
 
@@ -89,15 +90,6 @@ public class GroupScheduleService {
                     .map(userId -> new GroupScheduleParticipant(groupSchedule.getId(), userId, groupSchedule.getGroupId()))
                     .toList();
             groupScheduleParticipantDAO.insert(participants);
-        }
-    }
-
-    private void insertUnregisteredParticipants(GroupSchedule groupSchedule, List<String> unregisteredParticipantNames) {
-        if (unregisteredParticipantNames != null && !unregisteredParticipantNames.isEmpty()) {
-            List<GroupScheduleUnregisteredParticipant> unregisteredParticipants = unregisteredParticipantNames.stream()
-                    .map(userName -> new GroupScheduleUnregisteredParticipant(groupSchedule.getId(), userName))
-                    .toList();
-            groupScheduleUnregisteredParticipantDAO.insert(unregisteredParticipants);
         }
     }
 
@@ -113,9 +105,7 @@ public class GroupScheduleService {
     private List<GroupScheduleDTO.ParticipantsResponse> findParticipantsByScheduleId(Long groupId, Long scheduleId) {
         checkValidGroupId(groupId);
         findGroupScheduleById(groupId, scheduleId);
-        List<GroupScheduleDTO.ParticipantsResponse> participants = groupScheduleParticipantDAO.findByScheduleId(groupId, scheduleId);
-        participants.addAll(groupScheduleUnregisteredParticipantDAO.findByScheduleId(groupId, scheduleId));
-        return participants;
+        return groupScheduleParticipantDAO.findByScheduleId(groupId, scheduleId);
     }
 
     @Transactional
@@ -123,7 +113,6 @@ public class GroupScheduleService {
         checkValidGroupId(groupId);
         findGroupScheduleById(groupId, scheduleId);
         groupScheduleParticipantDAO.deleteAllByScheduleId(groupId, scheduleId);
-        groupScheduleUnregisteredParticipantDAO.deleteAllByScheduleId(groupId, scheduleId);
         groupScheduleDAO.deleteGroupScheduleById(groupId, scheduleId);
     }
 
@@ -134,10 +123,13 @@ public class GroupScheduleService {
 
         groupSchedule.updateGroupSchedule(groupScheduleRequest);
         groupScheduleParticipantDAO.deleteAllByScheduleId(groupId, scheduleId);
-        groupScheduleUnregisteredParticipantDAO.deleteAllByScheduleId(groupId, scheduleId);
         groupScheduleDAO.updateGroupSchedule(groupSchedule);
 
-        insertParticipants(groupSchedule, groupScheduleRequest.getParticipants());
-        insertUnregisteredParticipants(groupSchedule, groupScheduleRequest.getUnregisteredParticipants());
+        List<Long> groupScheduleParticipants = new ArrayList<>();
+        for(var username : groupScheduleRequest.getParticipants()) {
+            groupScheduleParticipants.add(userDAO.findByUsername(username).getId());
+        }
+
+        insertParticipants(groupSchedule, groupScheduleParticipants);
     }
 }

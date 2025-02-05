@@ -28,4 +28,12 @@ public class AvailableDateDto {
         private String date;
         private Double ratio;
     }
+
+    @Setter
+    @Getter
+    @AllArgsConstructor
+    public static class AvailableDateRanks{
+        private Long ranks;
+        private String date;
+    }
 }

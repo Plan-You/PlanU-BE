@@ -22,7 +22,6 @@ public class GroupDTO {
     @Setter
     @RequiredArgsConstructor
     public static class Member {
-        private final Long userId;
         private final String name;
         private final String username;
         private final String groupRole;
@@ -73,4 +72,12 @@ public class GroupDTO {
         private List<String> memberNames;
     }
 
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class GroupInfo {
+        private String groupName;
+        private String groupImage;
+        private Boolean isPin;
+    }
 }

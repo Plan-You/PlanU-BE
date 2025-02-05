@@ -42,7 +42,7 @@ public class GroupScheduleController {
         groupUserService.isGroupMember(userDetails.getId(), groupId);
         LocalDateTime today = LocalDateTime.now();
         return ResponseEntity.ok(new GroupScheduleDTO.GroupTodayScheduleResponse(
-                groupService.findNameByGroupId(groupId),
+                groupService.findNameByGroupId(groupId, userDetails.getId()),
                 groupScheduleService.findTodaySchedulesByToday(groupId, today)
         ));
     }

@@ -13,4 +13,6 @@ public interface GroupUserDAO {
     Short getState(Long userId, Long groupId);
 
     List<Long> getGroupMemberIds(Long groupId);
+
+    Boolean getPinById(Long groupId, Long userId);
 }

@@ -9,15 +9,15 @@
         VALUES (#{name}, #{groupImageUrl})
     </insert>
 
-    <select id="findUserIdByUserName" resultType="java.lang.Long">
+    <select id="findUserIdByUsername" resultType="java.lang.Long">
         SELECT id
         FROM USER
-        WHERE username = #{userName}
+        WHERE username = #{username}
     </select>
 
     <insert id="insertGroupUser">
-        INSERT INTO GROUP_USER (user_id, group_id, group_role, group_state)
-        VALUES (#{userId}, #{groupId}, #{groupRole}, #{groupState})
+        INSERT INTO GROUP_USER (user_id, group_id, group_role, group_state, group_is_pin)
+        VALUES (#{userId}, #{groupId}, #{groupRole}, #{groupState}, #{isPin})
     </insert>
 
     <select id="findGroupById" resultType="com.planu.group_meeting.entity.Group">
@@ -38,6 +38,7 @@
         GROUP_ID AS groupId,
         GROUP_ROLE AS groupRole,
         GROUP_STATE AS groupState,
+        GROUP_IS_PIN AS isPin,
         CREATED_DATE AS createdDate,
         UPDATED_DATE AS updatedDate
         FROM GROUP_USER
@@ -64,16 +65,22 @@
         (SELECT COUNT(*)
         FROM GROUP_USER gu_sub
         WHERE gu_sub.GROUP_ID = g.ID
-        AND gu_sub.GROUP_STATE = 1) AS participant
-        FROM
-        GROUP_ g
-        WHERE
-        EXISTS (SELECT 1
-        FROM GROUP_USER gu
-        WHERE gu.USER_ID = #{userId}
-        AND gu.GROUP_ID = g.ID
-        AND gu.GROUP_STATE = 1)
+        AND gu_sub.GROUP_STATE = 1) AS participant,
+        gu.GROUP_PIN AS groupPin,
+        gu.GROUP_IS_PIN AS isPin  -- 그룹 고정 여부 추가
+        FROM GROUP_ g
+        LEFT JOIN GROUP_USER gu ON gu.GROUP_ID = g.ID AND gu.USER_ID = #{userId}  -- 현재 사용자의 GROUP_USER 정보 조회
+        WHERE EXISTS (
+        SELECT 1 FROM GROUP_USER gu_check
+        WHERE gu_check.USER_ID = #{userId}
+        AND gu_check.GROUP_ID = g.ID
+        AND gu_check.GROUP_STATE = 1)
+        ORDER BY
+        CASE WHEN gu.GROUP_PIN IS NULL THEN 1 ELSE 0 END,  -- GROUP_PIN이 NULL이면 뒤로 정렬
+        gu.GROUP_PIN DESC,  -- 최신 핀 우선 정렬
+        g.NAME ASC;  -- 그룹명 알파벳순 정렬
     </select>
+
 
 
     <delete id="deleteGroupUserByUserIdAndGroupId">
@@ -122,7 +129,6 @@
 
     <select id="findGroupMembers" resultType="com.planu.group_meeting.dto.GroupDTO$Member">
         SELECT
-            u.id,
             u.name,
             u.username,
             u.profile_img_url as profileImage,
@@ -133,6 +139,21 @@
             USER as u ON g.user_id = u.id
         WHERE
             g.group_id = #{groupId}
-            AND g.GROUP_STATE = 1;
+            AND g.GROUP_STATE = 1
+        <if test="keyword != null and keyword != ''">
+            AND (u.username LIKE CONCAT('%', #{keyword}, '%') OR u.name LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
     </select>
+
+    <update id="updateGroupPin">
+        UPDATE GROUP_USER
+        SET GROUP_PIN = NOW(), GROUP_IS_PIN = TRUE
+        WHERE USER_ID = #{userId} AND GROUP_ID = #{groupId}
+    </update>
+
+    <update id="updateGroupUnpin">
+        UPDATE GROUP_USER
+        SET GROUP_PIN = NULL, GROUP_IS_PIN = FALSE
+        WHERE USER_ID = #{userId} AND GROUP_ID = #{groupId}
+    </update>
 </mapper>

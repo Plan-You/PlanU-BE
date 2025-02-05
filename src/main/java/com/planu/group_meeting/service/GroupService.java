@@ -2,6 +2,7 @@ package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dao.*;
+import com.planu.group_meeting.dto.AvailableDateDto;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatio;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
 import com.planu.group_meeting.dto.FriendDto.FriendInfo;
@@ -23,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class GroupService {
@@ -45,7 +45,7 @@ public class GroupService {
     }
 
     @Transactional
-    public GroupResponseDTO createGroup(String userName, String groupName, MultipartFile groupImage) {
+    public GroupResponseDTO createGroup(String username, String groupName, MultipartFile groupImage) {
         String imageUrl = s3Uploader.uploadFile(groupImage);
 
         Group group = Group.builder()
@@ -57,23 +57,24 @@ public class GroupService {
 
 
         groupDAO.insertGroupUser(GroupUser.builder()
-                .userId(groupDAO.findUserIdByUserName(userName))
+                .userId(groupDAO.findUserIdByUsername(username))
                 .groupId(group.getId())
                 .groupRole(GroupUser.GroupRole.LEADER)
                 .groupState(1)
+                .isPin(false)
                 .build());
 
 
         return GroupResponseDTO.builder()
                 .groupId(group.getId())
                 .groupName(groupName)
-                .leaderUserName(userName)
+                .leaderUsername(username)
                 .groupImageUrl(imageUrl)
                 .build();
     }
 
     @Transactional
-    public GroupInviteResponseDTO inviteUser(CustomUserDetails customUserDetails, String userName, Long groupId) {
+    public GroupInviteResponseDTO inviteUser(CustomUserDetails customUserDetails, String username, Long groupId) {
         if (groupDAO.findGroupUserByUserIdAndGroupId(customUserDetails.getId(), groupId) == null) {
             throw new IllegalArgumentException("초대 권한이 없습니다.");
         }
@@ -83,9 +84,9 @@ public class GroupService {
             throw new IllegalArgumentException("해당 그룹이 존재하지 않습니다.");
         }
 
-        User user = userDAO.findByUsername(userName);
+        User user = userDAO.findByUsername(username);
         if (user == null) {
-            throw new IllegalArgumentException("사용자 '" + userName + "'을 찾을 수 없습니다.");
+            throw new IllegalArgumentException("사용자 '" + username + "'을 찾을 수 없습니다.");
         }
 
         groupDAO.insertGroupUser(GroupUser.builder()
@@ -93,10 +94,11 @@ public class GroupService {
                 .userId(user.getId())
                 .groupRole(GroupUser.GroupRole.PARTICIPANT)
                 .groupState(0)
+                .isPin(false)
                 .build());
 
         return GroupInviteResponseDTO.builder()
-                .invitedUserName(userName)
+                .invitedUsername(username)
                 .groupId(groupId)
                 .groupName(group.getName())
                 .groupImageUrl(group.getGroupImageUrl())
@@ -194,7 +196,7 @@ public class GroupService {
 
     @Transactional
     public void forceExpelMember(Long leaderId, Long groupId, String username) {
-        Long userId = groupDAO.findUserIdByUserName(username);
+        Long userId = groupDAO.findUserIdByUsername(username);
         GroupUser leaderGroupUser = groupDAO.findGroupUserByUserIdAndGroupId(leaderId, groupId);
         if(Objects.equals(leaderId, userId)){
             throw new IllegalArgumentException("자기자신을 퇴출시킬 수 없습니다.");
@@ -214,18 +216,51 @@ public class GroupService {
     }
 
     @Transactional
-    public String findNameByGroupId(Long groupId) {
+    public void pinedGroup(Long userId, Long groupId){
+        Group group = groupDAO.findGroupById(groupId);
+        GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
+
+        if (group == null) {
+            throw new IllegalArgumentException("해당 그룹이 존재하지 않습니다.");
+        }
+
+        if (groupUser == null) {
+            throw new IllegalArgumentException("해당 그룹의 그룹원이 아닙니다.");
+        }
+
+        if (groupUser.getIsPin()) {
+            groupDAO.updateGroupUnpin(userId, groupId);
+        } else {
+            groupDAO.updateGroupPin(userId, groupId);
+        }
+    }
+
+
+    @Transactional
+    public String findNameByGroupId(Long groupId, Long userId) {
+        if (groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
+        }
+        checkAccessPermission(groupId, userId);
         return groupDAO.findNameByGroupId(groupId);
     }
 
     @Transactional
     public Boolean isGroupMember(Long userId, Long groupId) {
+        if (groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
+        }
+        checkAccessPermission(groupId, userId);
         return groupUserDAO.isGroupMember(userId, groupId);
     }
 
     @Transactional
-    public List<Member> findGroupMembers(Long groupId) {
-        return groupDAO.findGroupMembers(groupId);
+    public List<Member> findGroupMembers(Long groupId, Long userId, String keyword) {
+        if (groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
+        }
+        checkAccessPermission(groupId, userId);
+        return groupDAO.findGroupMembers(groupId, keyword);
     }
 
     public void checkAccessPermission(Long groupId, Long id) throws UnauthorizedAccessException {
@@ -235,12 +270,14 @@ public class GroupService {
     }
 
     @Transactional
-    public NonGroupFriendsResponse getMemberInviteList(Long groupId, Long userId) {
+    public NonGroupFriendsResponse getMemberInviteList(Long groupId, Long userId, String keyword) {
         if (groupDAO.findGroupById(groupId) == null) {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
         }
         checkAccessPermission(groupId, userId);
+
         List<FriendInfo> friendInfos = friendDAO.getFriendsInfo(userId, FriendStatus.FRIEND, null);
+
         List<NonGroupFriend> nonGroupFriends = new ArrayList<>();
         for (var friendInfo : friendInfos) {
             String status = "NONE";
@@ -380,7 +417,7 @@ public class GroupService {
     }
 
     @Transactional
-    public List<String> getAvailableDateRanks(Long groupId, YearMonth yearMonth, Long userId) {
+    public List<AvailableDateDto.AvailableDateRanks> getAvailableDateRanks(Long groupId, YearMonth yearMonth, Long userId) {
         if (groupDAO.findGroupById(groupId) == null) {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
         }
@@ -415,8 +452,30 @@ public class GroupService {
                 }
         );
 
-        return availableDateRanks.stream()
-                .map(entry -> entry.getKey().toString())
-                .collect(Collectors.toList());
+        List<AvailableDateDto.AvailableDateRanks> response = new ArrayList<>();
+        var ranks = 1L;
+        var previousCount = availableDateRanks.get(0).getValue();
+        for(var entry : availableDateRanks) {
+            if(!previousCount.equals(entry.getValue())) {
+                ranks++;
+                previousCount = entry.getValue();
+            }
+            response.add(new AvailableDateDto.AvailableDateRanks(ranks, entry.getKey().toString()));
+        }
+
+        return response;
+    }
+
+    @Transactional
+    public GroupInfo getGroupDetails(Long groupId, Long userId) {
+        if (groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
+        }
+        checkAccessPermission(groupId, userId);
+
+        Group group = groupDAO.findGroupById(groupId);
+        Boolean isPin = groupUserDAO.getPinById(groupId, userId);
+
+        return new GroupInfo(group.getName(), group.getGroupImageUrl(), isPin);
     }
 }
