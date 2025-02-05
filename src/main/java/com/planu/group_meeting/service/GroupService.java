@@ -240,7 +240,7 @@ public class GroupService {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
         }
         checkAccessPermission(groupId, userId);
-        List<FriendInfo> friendInfos = friendDAO.getFriendsInfo(userId, FriendStatus.FRIEND);
+        List<FriendInfo> friendInfos = friendDAO.getFriendsInfo(userId, FriendStatus.FRIEND, null);
         List<NonGroupFriend> nonGroupFriends = new ArrayList<>();
         for (var friendInfo : friendInfos) {
             String status = "NONE";
