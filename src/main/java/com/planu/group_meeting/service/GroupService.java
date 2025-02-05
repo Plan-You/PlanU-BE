@@ -276,12 +276,12 @@ public class GroupService {
         }
         checkAccessPermission(groupId, userId);
 
-        List<FriendInfo> friendInfos = friendDAO.getFriendsInfo(userId, FriendStatus.FRIEND, null);
+        List<FriendInfo> friendInfos = friendDAO.getFriendsInfo(userId, FriendStatus.FRIEND, keyword);
 
         List<NonGroupFriend> nonGroupFriends = new ArrayList<>();
         for (var friendInfo : friendInfos) {
             String status = "NONE";
-            if (groupUserDAO.isGroupMember(friendInfo.getUserId(), groupId)) {
+            if (groupUserDAO.isExistsGroupUser(friendInfo.getUserId(), groupId)) {
                 Short state = groupUserDAO.getState(friendInfo.getUserId(), groupId);
                 if (state == 1) {
                     continue;
