@@ -15,4 +15,6 @@ public interface GroupUserDAO {
     List<Long> getGroupMemberIds(Long groupId);
 
     Boolean getPinById(Long groupId, Long userId);
+
+    Boolean isExistsGroupUser(Long userId, Long groupId);
 }
