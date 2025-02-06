@@ -11,5 +11,17 @@
         (#{receiverId}, #{senderId}, #{eventType}, #{contents}, 0)
     </insert>
 
+    <select id="findAllByUserId" parameterType="Long" resultType="com.planu.group_meeting.dto.NotificationDTO">
+        SELECT
+        id,
+        SENDER_ID AS senderId,
+        RECEIVER_ID AS receiverId,
+        EVENT_TYPE AS eventType,
+        CONTENT AS contents,
+        IS_READ AS isRead
+        FROM NOTIFICATION
+        WHERE RECEIVER_ID = #{userId}
+    </select>
+
 
 </mapper>
