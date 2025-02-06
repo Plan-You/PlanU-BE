@@ -55,6 +55,15 @@ public class GroupController {
         return ResponseEntity.ok(groupService.inviteUser(userDetails, userName, id));
     }
 
+    @DeleteMapping("/invite")
+    public ResponseEntity<BaseResponse> inviteUserCancel(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                         @RequestParam("groupId") Long groupId,
+                                                         @RequestParam("username") String username){
+        groupService.inviteUserCancel(userDetails.getId(), username, groupId);
+
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "초대 취소 성공");
+    }
+
     @PutMapping("/join/{groupId}")
     public ResponseEntity<BaseResponse> joinGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                   @PathVariable("groupId") Long groupId) {
