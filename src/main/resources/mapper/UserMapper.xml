@@ -26,6 +26,7 @@
         VALUES (#{username}, #{email}, #{password}, #{name}, #{role})
     </insert>
 
+
     <select id="findUsernameByEmail" parameterType="String" resultType="String">
         SELECT USERNAME
         FROM USER
@@ -64,6 +65,22 @@
         UPDATED_DATE
         FROM USER
         WHERE USERNAME = #{username}
+    </select>
+
+    <select id="findById" parameterType="Long" resultMap="userResultMap">
+        SELECT ID, USERNAME,
+        EMAIL,
+        PASSWORD,
+        NAME,
+        ROLE,
+        GENDER,
+        PROFILE_IMG_URL,
+        BIRTH_DATE,
+        PROFILE_STATUS,
+        CREATED_DATE,
+        UPDATED_DATE
+        FROM USER
+        WHERE ID = #{id}
     </select>
 
     <update id="updateUserProfile" parameterType="com.planu.group_meeting.entity.User">

@@ -1,6 +1,7 @@
 package com.planu.group_meeting.dto;
 
-import com.planu.group_meeting.entity.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.planu.group_meeting.entity.common.EventType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,9 +11,12 @@ import lombok.Setter;
 @Builder
 public class NotificationDTO {
     private Long id;
-    private User receiver;
-    private User provider;
-    private Object content;
-    private String relatedUrl;
+
+    @JsonIgnore
+    private Long senderId;
+    @JsonIgnore
+    private Long receiverId;
+    private EventType eventType;
+    private String contents;
     private boolean isRead;
 }

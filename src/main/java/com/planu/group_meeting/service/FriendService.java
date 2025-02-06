@@ -2,16 +2,20 @@ package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.dao.FriendDAO;
 import com.planu.group_meeting.dao.UserDAO;
+import com.planu.group_meeting.dto.FriendDto;
 import com.planu.group_meeting.dto.FriendDto.FriendInfo;
 import com.planu.group_meeting.dto.FriendDto.FriendListResponse;
 import com.planu.group_meeting.dto.GroupDTO.GroupMembersResponse;
 import com.planu.group_meeting.dto.GroupDTO.Member;
+import com.planu.group_meeting.entity.User;
+import com.planu.group_meeting.entity.common.EventType;
 import com.planu.group_meeting.entity.common.FriendStatus;
 import com.planu.group_meeting.exception.user.DuplicatedRequestException;
 import com.planu.group_meeting.exception.user.FriendRequestNotFoundException;
 import com.planu.group_meeting.exception.user.NotFoundUserException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,14 +26,16 @@ import java.util.List;
 public class FriendService {
     private final FriendDAO friendDAO;
     private final UserDAO userDAO;
+    private final NotificationService notificationService;
 
-
+    @Transactional
     public void requestFriend(Long userId, String toUsername) {
         if(!userDAO.existsByUsername(toUsername)){
             throw new NotFoundUserException();
         }
+        User user = userDAO.findByUsername(toUsername);
         Long toUserId = userDAO.findByUsername(toUsername).getId();
-        FriendStatus friendStatus = friendDAO.getFriendStatus(userId, toUserId);
+        FriendStatus friendStatus = friendDAO.getFriendStatus(user.getId(), toUserId);
         switch (friendStatus) {
             case NONE:
                 friendDAO.requestFriend(userId, toUserId);
@@ -43,6 +49,11 @@ public class FriendService {
             default:
                 throw new IllegalStateException("알 수 없는 상태입니다.");
         }
+
+        FriendDto.FriendNotification friendNotification = new FriendDto.FriendNotification(EventType.FRIEND_REQUEST,userId, toUserId,
+                userDAO.findNameById(userId) + "님이 친구요청을 보냈습니다.");
+
+        notificationService.sendNotification(EventType.FRIEND_REQUEST, friendNotification);
     }
 
     public void acceptFriend(Long userId, String fromUsername) {
@@ -54,6 +65,9 @@ public class FriendService {
         if (friendDAO.getFriendStatus(fromUserId, userId) != FriendStatus.REQUEST) {
             throw new FriendRequestNotFoundException();
         }
+        FriendDto.FriendNotification friendNotification = new FriendDto.FriendNotification(EventType.FRIEND_ACCEPT,userId, fromUserId,
+                userDAO.findNameById(userId) + "님이 친구요청을 수락하였습니다.");
+        notificationService.sendNotification(EventType.FRIEND_ACCEPT,friendNotification);
         friendDAO.acceptFriend(fromUserId, userId);
     }
 
