@@ -39,4 +39,12 @@
         FROM GROUP_USER
         WHERE group_id = #{groupId} and user_id = #{userId};
     </select>
+
+    <select id="isExistsGroupUser">
+        SELECT EXISTS (
+            SELECT 1
+            FROM GROUP_USER
+            WHERE group_id = #{groupId} and user_id = #{userId}
+        );
+    </select>
 </mapper>
