@@ -45,29 +45,6 @@
         </if>
     </select>
 
-<!--    <select id="getFriendsInfo" parameterType="Map" resultType="com.planu.group_meeting.dto.FriendDto$FriendInfo">-->
-<!--        SELECT-->
-<!--        u.ID AS userId,-->
-<!--        u.NAME AS name,-->
-<!--        u.USERNAME AS username,-->
-<!--        u.PROFILE_IMG_URL as profileImageUrl-->
-<!--        FROM FRIEND f-->
-<!--        JOIN USER u ON f.TO_USER_ID = u.ID-->
-<!--        WHERE f.FROM_USER_ID=#{userId} AND f.FRIEND_STATUS=#{friendStatus}-->
-<!--    </select>-->
-
-<!--    <select id="getFriendsInfo" parameterType="Map" resultType="com.planu.group_meeting.dto.FriendDto$FriendInfo">-->
-<!--        SELECT-->
-<!--        u.ID AS userId,-->
-<!--        u.NAME AS name,-->
-<!--        u.USERNAME AS username,-->
-<!--        u.PROFILE_IMG_URL AS profileImageUrl-->
-<!--        FROM FRIEND f-->
-<!--        JOIN USER u ON f.TO_USER_ID = u.ID-->
-<!--        WHERE f.FROM_USER_ID = #{userId}-->
-<!--        AND f.FRIEND_STATUS = #{friendStatus}-->
-<!--        AND (u.USERNAME LIKE CONCAT('%', #{keyword}, '%') OR u.NAME LIKE CONCAT('%', #{keyword}, '%'))-->
-<!--    </select>-->
 
 
 </mapper>

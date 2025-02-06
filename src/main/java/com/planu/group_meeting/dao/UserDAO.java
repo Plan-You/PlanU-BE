@@ -16,13 +16,13 @@ public interface UserDAO {
 
     User findByUsername(String username);
 
+    User findById(Long id);
+
     String findUsernameByEmail(String email);
 
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
-
-    boolean existsById(Long userId);
 
     void updatePasswordByUsername(@Param("username") String username, @Param("newPassword") String newPassword);
 
