@@ -75,7 +75,9 @@ public class GroupService {
 
     @Transactional
     public GroupInviteResponseDTO inviteUser(CustomUserDetails customUserDetails, String username, Long groupId) {
-        if (groupDAO.findGroupUserByUserIdAndGroupId(customUserDetails.getId(), groupId) == null) {
+        GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(customUserDetails.getId(), groupId);
+
+        if(groupUser.getGroupRole() != GroupUser.GroupRole.LEADER){
             throw new IllegalArgumentException("초대 권한이 없습니다.");
         }
 
@@ -103,6 +105,33 @@ public class GroupService {
                 .groupName(group.getName())
                 .groupImageUrl(group.getGroupImageUrl())
                 .build();
+    }
+
+    @Transactional
+    public void inviteUserCancel(Long leaderId, String username, Long groupId){
+        GroupUser groupUserLeader = groupDAO.findGroupUserByUserIdAndGroupId(leaderId, groupId);
+
+        if(groupUserLeader.getGroupRole() != GroupUser.GroupRole.LEADER){
+            throw new IllegalArgumentException("초대 권한이 없습니다.");
+        }
+
+        Group group = groupDAO.findGroupById(groupId);
+        if (group == null) {
+            throw new IllegalArgumentException("해당 그룹이 존재하지 않습니다.");
+        }
+
+        Long userId = groupDAO.findUserIdByUsername(username);
+
+        GroupUser groupUserUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
+        if (groupUserUser == null) {
+            throw new IllegalArgumentException("사용자 '" + username + "'을 찾을 수 없습니다.");
+        }
+
+        if (groupUserUser.getGroupState() == 1){
+            throw new IllegalArgumentException("사용자 '" + username + "'은 이미 그룹의 멤버입니다.");
+        }
+
+        groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
     }
 
     @Transactional
