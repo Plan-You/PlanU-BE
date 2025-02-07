@@ -29,9 +29,9 @@ public class GroupScheduleDTO {
 
         private String location;
 
-        private String latitude;
+        private Double latitude;
 
-        private String longitude;
+        private Double longitude;
 
         private String memo;
 
@@ -85,6 +85,7 @@ public class GroupScheduleDTO {
 
     @Getter
     public static class ParticipantsResponse {
+        private String profileImage;
         private String name;
         private String username;
     }
@@ -99,8 +100,8 @@ public class GroupScheduleDTO {
         private final String startDate;
         private final String endDate;
         private final String location;
-        private final String latitude;
-        private final String longitude;
+        private final Double latitude;
+        private final Double longitude;
         private final String memo;
         private List<ParticipantsResponse> participants;
     }

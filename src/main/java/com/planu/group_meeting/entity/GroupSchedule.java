@@ -23,8 +23,8 @@ public class GroupSchedule {
     ScheduleVisibility visibility;
     private String memo;
     private String location;
-    private String latitude;
-    private String longitude;
+    private Double latitude;
+    private Double longitude;
 
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
