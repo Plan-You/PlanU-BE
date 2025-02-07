@@ -12,4 +12,6 @@ public interface NotificationDAO {
 
     List<NotificationDTO> findAllByUserId(Long userId);
 
+    void deleteOldNotification();
+
 }
