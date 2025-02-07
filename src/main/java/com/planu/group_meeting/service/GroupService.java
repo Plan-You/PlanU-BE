@@ -505,6 +505,6 @@ public class GroupService {
         Group group = groupDAO.findGroupById(groupId);
         Boolean isPin = groupUserDAO.getPinById(groupId, userId);
 
-        return new GroupInfo(group.getName(), group.getGroupImageUrl(), isPin);
+        return new GroupInfo(group.getName(), isPin);
     }
 }

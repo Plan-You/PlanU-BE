@@ -216,11 +216,14 @@ public class GroupController {
     }
 
     @GetMapping("{groupId}/details")
-    public ResponseEntity<GroupDTO.GroupInfo> getGroupDetails(
+    public ResponseEntity<Map<String, Object>> getGroupDetails(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("groupId") Long groupId
     )
     {
-        return ResponseEntity.ok(groupService.getGroupDetails(groupId, userDetails.getId()));
+        GroupDTO.GroupInfo groupInfo = groupService.getGroupDetails(groupId, userDetails.getId());
+        Map<String, Object> response = new HashMap<>();
+        response.put("groupInfo", groupInfo);
+        return ResponseEntity.ok(response);
     }
 }
