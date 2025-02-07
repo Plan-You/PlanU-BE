@@ -5,8 +5,11 @@ import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dto.FriendDto;
 import com.planu.group_meeting.dto.NotificationDTO;
 import com.planu.group_meeting.entity.common.EventType;
+import jdk.jfr.StackTrace;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -87,5 +90,11 @@ public class NotificationService {
 
     public List<NotificationDTO> getNotificationList(Long userId){
         return notificationDAO.findAllByUserId(userId);
+    }
+
+    @Scheduled(cron = "0 0 3 * * ?")
+    @Transactional
+    public void deleteOldNotification(){
+        notificationDAO.deleteOldNotification();
     }
 }
