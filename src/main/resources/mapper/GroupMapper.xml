@@ -39,6 +39,7 @@
         GROUP_ROLE AS groupRole,
         GROUP_STATE AS groupState,
         GROUP_IS_PIN AS isPin,
+        VERSION AS version,
         CREATED_DATE AS createdDate,
         UPDATED_DATE AS updatedDate
         FROM GROUP_USER
@@ -147,13 +148,13 @@
 
     <update id="updateGroupPin">
         UPDATE GROUP_USER
-        SET GROUP_PIN = NOW(), GROUP_IS_PIN = TRUE
-        WHERE USER_ID = #{userId} AND GROUP_ID = #{groupId}
+        SET GROUP_PIN = NOW(), GROUP_IS_PIN = TRUE, VERSION = VERSION + 1
+        WHERE USER_ID = #{userId} AND GROUP_ID = #{groupId} AND VERSION = #{version}
     </update>
 
     <update id="updateGroupUnpin">
         UPDATE GROUP_USER
-        SET GROUP_PIN = NULL, GROUP_IS_PIN = FALSE
-        WHERE USER_ID = #{userId} AND GROUP_ID = #{groupId}
+        SET GROUP_PIN = NULL, GROUP_IS_PIN = FALSE, VERSION = VERSION + 1
+        WHERE USER_ID = #{userId} AND GROUP_ID = #{groupId} AND VERSION = #{version}
     </update>
 </mapper>

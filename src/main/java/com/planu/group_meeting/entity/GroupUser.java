@@ -15,6 +15,7 @@ public class GroupUser {
     private GroupRole groupRole;  // Enum을 사용
     private Integer groupState;   // 상태를 나타내는 Integer로 매핑
     private Boolean isPin;
+    private Long version;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
 

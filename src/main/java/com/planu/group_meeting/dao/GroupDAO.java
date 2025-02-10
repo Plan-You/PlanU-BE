@@ -24,9 +24,9 @@ public interface GroupDAO {
 
     void deleteGroupUserByUserIdAndGroupId(Long userId, Long groupId);
 
-    void updateGroupPin(@Param("userId") Long userId, @Param("groupId") Long groupId);
+    int updateGroupPin(@Param("userId") Long userId, @Param("groupId") Long groupId, @Param("version") Long version);
 
-    void updateGroupUnpin(@Param("userId") Long userId, @Param("groupId") Long groupId);
+    int updateGroupUnpin(@Param("userId") Long userId, @Param("groupId") Long groupId, @Param("version") Long version);
 
     void updateGroupUserGroupStatus(Long userId, Long groupId);
 
