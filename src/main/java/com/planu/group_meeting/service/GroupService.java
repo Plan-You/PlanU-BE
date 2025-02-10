@@ -245,7 +245,7 @@ public class GroupService {
     }
 
     @Transactional
-    public void pinedGroup(Long userId, Long groupId){
+    public void pinnedGroup(Long userId, Long groupId) {
         Group group = groupDAO.findGroupById(groupId);
         GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
 
@@ -257,12 +257,18 @@ public class GroupService {
             throw new IllegalArgumentException("해당 그룹의 그룹원이 아닙니다.");
         }
 
+        int updatedRows;
         if (groupUser.getIsPin()) {
-            groupDAO.updateGroupUnpin(userId, groupId);
+            updatedRows = groupDAO.updateGroupUnpin(userId, groupId, groupUser.getVersion());
         } else {
-            groupDAO.updateGroupPin(userId, groupId);
+            updatedRows = groupDAO.updateGroupPin(userId, groupId, groupUser.getVersion());
+        }
+
+        if (updatedRows == 0) {
+            throw new ConcurrentModificationException("다른 사용자가 데이터를 먼저 변경했습니다. 다시 시도하세요.");
         }
     }
+
 
 
     @Transactional

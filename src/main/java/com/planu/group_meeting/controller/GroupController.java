@@ -124,7 +124,7 @@ public class GroupController {
     @PatchMapping("/pin/{groupId}")
     public ResponseEntity<BaseResponse> pinedGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                    @PathVariable("groupId") Long groupId) {
-        groupService.pinedGroup(userDetails.getId(), groupId);
+        groupService.pinnedGroup(userDetails.getId(), groupId);
         return BaseResponse.toResponseEntity(HttpStatus.OK, "상단 고정/해제 성공");
     }
 
