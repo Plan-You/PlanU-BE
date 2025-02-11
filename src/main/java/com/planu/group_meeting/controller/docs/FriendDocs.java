@@ -175,7 +175,7 @@ public interface FriendDocs {
                     )
             )
     })
-    ResponseEntity<FriendDto.FriendListResponse> getFriendRequestList(@AuthenticationPrincipal CustomUserDetails userDetails);
+    ResponseEntity<FriendDto.FriendListResponse> getFriendRequestList(@RequestParam(value="search" , defaultValue = "") String keyword,@AuthenticationPrincipal CustomUserDetails userDetails);
 
 
     @Operation(summary = "친구 요청 보낸 목록 조회", description = "사용자가 보낸 친구 요청 목록을 조회합니다.")
@@ -189,7 +189,7 @@ public interface FriendDocs {
                     )
             )
     })
-    ResponseEntity<FriendDto.FriendListResponse> getFriendReceiveList(@AuthenticationPrincipal CustomUserDetails userDetails);
+    ResponseEntity<FriendDto.FriendListResponse> getFriendReceiveList(@RequestParam(value="search" , defaultValue = "") String keyword,@AuthenticationPrincipal CustomUserDetails userDetails);
 
 
 }
