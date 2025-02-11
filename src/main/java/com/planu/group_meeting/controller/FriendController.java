@@ -61,13 +61,13 @@ public class FriendController implements FriendDocs {
     }
 
     @GetMapping("/request")
-    public ResponseEntity<FriendListResponse> getFriendRequestList(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(friendService.getFriendRequestList(userDetails.getId()));
+    public ResponseEntity<FriendListResponse> getFriendRequestList(@RequestParam(value="search" , defaultValue = "") String keyword,@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(friendService.getFriendRequestList(userDetails.getId(), keyword));
     }
 
     @GetMapping("/receive")
-    public ResponseEntity<FriendListResponse> getFriendReceiveList(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(friendService.getFriendReceiveList(userDetails.getId()));
+    public ResponseEntity<FriendListResponse> getFriendReceiveList(@RequestParam(value="search" , defaultValue = "") String keyword,@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(friendService.getFriendReceiveList(userDetails.getId(), keyword));
     }
 
 }
