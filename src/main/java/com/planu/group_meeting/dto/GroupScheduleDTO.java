@@ -1,6 +1,7 @@
 package com.planu.group_meeting.dto;
 
 import com.planu.group_meeting.entity.GroupSchedule;
+import com.planu.group_meeting.entity.common.EventType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -104,5 +105,21 @@ public class GroupScheduleDTO {
         private final Double longitude;
         private final String memo;
         private List<ParticipantsResponse> participants;
+    }
+
+    @Getter
+    @Setter
+    public static class GroupScheduleNotification{
+        private EventType eventType;
+        private Long senderId;
+        private Long receiverId;
+        private String contents;
+
+        public GroupScheduleNotification(Long receiverId, String contents){
+            this.eventType =EventType.SCHEDULE_REMINDER;
+            this.senderId = -1L;        // 서버가 보내는 알림
+            this.receiverId = receiverId;
+            this.contents = contents;
+        }
     }
 }

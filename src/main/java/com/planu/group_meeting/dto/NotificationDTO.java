@@ -16,6 +16,7 @@ public class NotificationDTO {
     private Long senderId;
     @JsonIgnore
     private Long receiverId;
+
     private EventType eventType;
     private String contents;
     private boolean isRead;
