@@ -1,10 +1,10 @@
 package com.planu.group_meeting.dao;
 
+import com.planu.group_meeting.dto.FriendDto;
 import com.planu.group_meeting.dto.FriendDto.FriendInfo;
 import com.planu.group_meeting.entity.common.FriendStatus;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.security.core.parameters.P;
 
 import java.util.List;
 

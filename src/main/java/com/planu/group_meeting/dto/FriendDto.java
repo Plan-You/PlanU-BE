@@ -2,6 +2,7 @@ package com.planu.group_meeting.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.planu.group_meeting.entity.common.EventType;
+import com.planu.group_meeting.entity.common.FriendStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,6 +27,11 @@ public class FriendDto {
         private String name;
         private String username;
         private String profileImageUrl;
+    }
+
+    @Getter
+    public static class FriendStatusInfo{
+        private FriendStatus friendStatus;
     }
 
     @Getter

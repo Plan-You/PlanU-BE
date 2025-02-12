@@ -6,10 +6,11 @@
 <mapper namespace="com.planu.group_meeting.dao.FriendDAO">
 
     <select id="getFriendStatus" parameterType="long" resultType="com.planu.group_meeting.entity.common.FriendStatus">
-        SELECT IFNULL(MAX(FRIEND_STATUS), 'NONE')
+        SELECT IFNULL(MAX(FRIEND_STATUS),'NONE') AS friendStatus
         FROM FRIEND
-        WHERE FROM_USER_ID=#{fromUserId} AND TO_USER_ID = #{toUserId}
+        WHERE FROM_USER_ID=#{fromUserId} AND TO_USER_ID=#{toUserId}
     </select>
+
 
     <insert id="requestFriend" parameterType="long">
         INSERT INTO FRIEND(TO_USER_ID, FROM_USER_ID, FRIEND_STATUS)
