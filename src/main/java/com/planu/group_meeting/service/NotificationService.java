@@ -2,11 +2,10 @@ package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.dao.NotificationDAO;
 import com.planu.group_meeting.dao.UserDAO;
-import com.planu.group_meeting.dto.FriendDto;
 import com.planu.group_meeting.dto.NotificationDTO;
 import com.planu.group_meeting.entity.common.EventType;
-import jdk.jfr.StackTrace;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,8 +16,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.planu.group_meeting.dto.FriendDto.FriendNotification;
+import static com.planu.group_meeting.dto.GroupScheduleDTO.GroupScheduleNotification;
+import static com.planu.group_meeting.dto.ScheduleDto.ScheduleNotification;
+
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationService {
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
     private static final Long SSE_TIMEOUT = 60L * 1000 * 60;    // 1시간
@@ -49,6 +53,7 @@ public class NotificationService {
 
     public void sendNotification(EventType eventType, Object object) {
         NotificationDTO notification = createNotification(eventType, object);
+        log.info("notification={}", notification);
         if (notification == null || notification.getReceiverId() == null) {
             return;
         }
@@ -76,8 +81,7 @@ public class NotificationService {
                     .receiverId(0L)
                     .build();
         }
-
-        if (object instanceof FriendDto.FriendNotification friendNotification) {
+        if (object instanceof FriendNotification friendNotification) {
             return NotificationDTO.builder()
                     .eventType(eventType)
                     .senderId(friendNotification.getFromUserId())
@@ -85,16 +89,33 @@ public class NotificationService {
                     .contents(friendNotification.getContents())
                     .build();
         }
+        if (object instanceof ScheduleNotification scheduleNotification) {
+            return NotificationDTO.builder()
+                    .eventType(eventType)
+                    .senderId(scheduleNotification.getSenderId())
+                    .receiverId(scheduleNotification.getReceiverId())
+                    .contents(scheduleNotification.getContents())
+                    .build();
+        }
+
+        if(object instanceof GroupScheduleNotification groupScheduleNotification){
+            return NotificationDTO.builder()
+                    .eventType(eventType)
+                    .senderId(groupScheduleNotification.getSenderId())
+                    .receiverId(groupScheduleNotification.getReceiverId())
+                    .contents(groupScheduleNotification.getContents())
+                    .build();
+        }
         return null;
     }
 
-    public List<NotificationDTO> getNotificationList(Long userId){
+    public List<NotificationDTO> getNotificationList(Long userId) {
         return notificationDAO.findAllByUserId(userId);
     }
 
     @Scheduled(cron = "0 0 3 * * ?")
     @Transactional
-    public void deleteOldNotification(){
+    public void deleteOldNotification() {
         notificationDAO.deleteOldNotification();
     }
 }

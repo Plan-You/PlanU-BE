@@ -34,6 +34,7 @@ public class ScheduleService {
     private final FriendDAO friendDAO;
     private final ParticipantDAO participantDAO;
     private final UnregisteredParticipantDAO unregisteredParticipantDAO;
+    private final ScheduleNotificationService scheduleNotificationService;
 
     @Transactional
     public void createSchedule(Long userId, ScheduleSaveRequest scheduleDto) {
@@ -42,9 +43,11 @@ public class ScheduleService {
         validateParticipants(userId, participantIds);
 
         scheduleDAO.insertSchedule(schedule);
-
         insertParticipants(schedule, participantIds);
         insertUnregisteredParticipants(schedule, scheduleDto.getUnregisteredParticipants());
+
+        scheduleNotificationService.reserveScheduleNotification(schedule);
+
     }
 
     private List<Long> getParticipantIds(List<String> participants) {

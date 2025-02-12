@@ -29,6 +29,7 @@ public class GroupScheduleService {
     private final ParticipantDAO participantDAO;
     private final GroupDAO groupDAO;
     private final GroupUserDAO groupUserDAO;
+    private final ScheduleNotificationService scheduleNotificationService;
 
     private void checkValidGroupId(Long groupId) {
           if(groupDAO.findGroupById(groupId) == null) {
@@ -81,6 +82,7 @@ public class GroupScheduleService {
             groupScheduleParticipants.add(userDAO.findByUsername(username).getId());
         }
         insertParticipants(groupSchedule, groupScheduleParticipants);
+        scheduleNotificationService.reserveGroupScheduleNotification(groupSchedule, groupScheduleParticipants);
     }
 
 
