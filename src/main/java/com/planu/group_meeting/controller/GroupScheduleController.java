@@ -1,6 +1,7 @@
 package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.controller.docs.GroupScheduleDocs;
 import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.dto.GroupScheduleDTO;
 import com.planu.group_meeting.dto.GroupScheduleDTO.GroupScheduleRequest;
@@ -21,7 +22,7 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/groups")
 @RequiredArgsConstructor
-public class GroupScheduleController {
+public class GroupScheduleController implements GroupScheduleDocs {
 
     private final GroupService groupService;
     private final GroupScheduleService groupScheduleService;
