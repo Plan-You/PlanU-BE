@@ -14,6 +14,7 @@ import com.planu.group_meeting.exception.user.DuplicatedRequestException;
 import com.planu.group_meeting.exception.user.FriendRequestNotFoundException;
 import com.planu.group_meeting.exception.user.NotFoundUserException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FriendService {
     private final FriendDAO friendDAO;
     private final UserDAO userDAO;
@@ -34,7 +36,9 @@ public class FriendService {
         }
         User user = userDAO.findByUsername(toUsername);
         Long toUserId = userDAO.findByUsername(toUsername).getId();
-        FriendStatus friendStatus = friendDAO.getFriendStatus(user.getId(), toUserId);
+        FriendStatus friendStatus = friendDAO.getFriendStatus(userId, toUserId);
+        log.info("friendStatus={}", friendStatus);
+        log.info("myId={}, toId={}", userId, toUserId);
         switch (friendStatus) {
             case NONE:
                 friendDAO.requestFriend(userId, toUserId);
