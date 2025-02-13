@@ -16,8 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.planu.group_meeting.dto.GroupScheduleDTO.GroupScheduleNotification;
-import static com.planu.group_meeting.dto.NotificationDTO.*;
+//import static com.planu.group_meeting.dto.NotificationDTO.builder;
 
 
 @Service
@@ -74,67 +73,27 @@ public class NotificationService {
 
     private NotificationDTO createNotification(EventType eventType, Object object) {
         if (eventType == EventType.DUMMY) {
-            return builder()
+            return NotificationDTO.builder()
                     .eventType(EventType.DUMMY)
                     .contents("Dummy Notification")
                     .receiverId(0L)
                     .build();
         }
-        if (object instanceof FriendNotification friendNotification) {
-            return builder()
-                    .eventType(eventType)
-                    .senderId(friendNotification.getFromUserId())
-                    .receiverId(friendNotification.getToUserId())
-                    .contents(friendNotification.getContents())
-                    .build();
-        }
-        if (object instanceof ScheduleNotification scheduleNotification) {
-            return builder()
-                    .eventType(eventType)
-                    .senderId(scheduleNotification.getSenderId())
-                    .receiverId(scheduleNotification.getReceiverId())
-                    .contents(scheduleNotification.getContents())
-                    .build();
-        }
 
-        if (object instanceof GroupScheduleNotification groupScheduleNotification) {
-            return builder()
-                    .eventType(eventType)
-                    .senderId(groupScheduleNotification.getSenderId())
-                    .receiverId(groupScheduleNotification.getReceiverId())
-                    .contents(groupScheduleNotification.getContents())
-                    .build();
+        if(object instanceof NotificationDTO){
+            log.info("object is NotificationDTO");
+            return createNotificationFromDetail(eventType, (NotificationDTO)object);
         }
-
-        if (object instanceof GroupDeleteNotification groupDeleteNotification) {
-            return builder()
-                    .eventType(eventType)
-                    .senderId(groupDeleteNotification.getSenderId())
-                    .receiverId(groupDeleteNotification.getReceiverId())
-                    .contents(groupDeleteNotification.getContents())
-                    .build();
-        }
-
-        if(object instanceof GroupInviteNotification groupInviteNotification){
-            return builder()
-                    .eventType(eventType)
-                    .senderId(groupInviteNotification.getSenderId())
-                    .receiverId(groupInviteNotification.getReceiverId())
-                    .contents(groupInviteNotification.getContents())
-                    .build();
-        }
-
-        if(object instanceof GroupAcceptNotification groupAcceptNotification){
-            return builder()
-                    .eventType(eventType)
-                    .senderId(groupAcceptNotification.getSenderId())
-                    .receiverId(groupAcceptNotification.getReceiverId())
-                    .contents(groupAcceptNotification.getContents())
-                    .build();
-        }
-
-
         return null;
+    }
+
+    private NotificationDTO createNotificationFromDetail(EventType eventType, NotificationDTO notification) {
+        return NotificationDTO.builder()
+                .eventType(eventType)
+                .senderId(notification.getSenderId())
+                .receiverId(notification.getReceiverId())
+                .contents(notification.getContents())
+                .build();
     }
 
     public List<NotificationDTO> getNotificationList(Long userId) {

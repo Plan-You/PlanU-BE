@@ -163,7 +163,7 @@ public class GroupService {
         groupDAO.updateGroupUserGroupStatus(customUserDetails.getId(), groupId);
 
         User leader = groupUserDAO.findLeaderByGroupId(groupId);
-        GroupAcceptNotification groupAcceptNotification = new GroupAcceptNotification(customUserDetails.getId(), leader.getId(), customUserDetails.getName() + "님이 그룹초대 요청을 수락하였습니다.");
+        GroupAcceptNotification groupAcceptNotification = new GroupAcceptNotification(customUserDetails.getId(), leader.getId(), customUserDetails.getName() + "님이 그룹 초대 요청을 수락하였습니다.");
         notificationService.sendNotification(EventType.GROUP_ACCEPT, groupAcceptNotification);
     }
 
@@ -264,6 +264,9 @@ public class GroupService {
         if (groupUser == null || groupUser.getGroupState() == 0) {
             throw new IllegalArgumentException("그룹에 속해 있지 않은 멤버입니다.");
         }
+
+        GroupExpelNotification groupExpelNotification = new GroupExpelNotification(leaderId, userId, groupDAO.findNameByGroupId(groupId) + " 그룹에서 추방되었습니다.");
+        notificationService.sendNotification(EventType.GROUP_EXPEL, groupExpelNotification);
 
         groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
     }
