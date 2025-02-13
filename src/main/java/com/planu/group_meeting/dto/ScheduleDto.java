@@ -81,10 +81,11 @@ public class ScheduleDto {
     }
 
     @Getter
+    @Setter
     @AllArgsConstructor
     public static class DailyScheduleResponse {
         private List<ScheduleListResponse> schedules = new ArrayList<>();
-        private List<BirthdayFriend> birthdayFriends;
+        private List<BirthdayPerson> birthdayPerson;
     }
 
     @Getter
@@ -102,9 +103,8 @@ public class ScheduleDto {
 
     @Getter
     @Setter
-    public static class BirthdayFriend {
-        private String date;
-        private String names;
+    public static class BirthdayPerson {
+        private List<String> names;
     }
 
     @Getter

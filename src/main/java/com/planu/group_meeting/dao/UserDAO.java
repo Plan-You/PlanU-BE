@@ -1,12 +1,13 @@
 package com.planu.group_meeting.dao;
 
-import com.planu.group_meeting.dto.ScheduleDto.BirthdayFriend;
 import com.planu.group_meeting.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import static com.planu.group_meeting.dto.ScheduleDto.BirthdayPerson;
 
 @Mapper
 public interface UserDAO {
@@ -28,7 +29,7 @@ public interface UserDAO {
 
     boolean existsBirthdayByDate(Long userId, LocalDate date);
 
-    List<BirthdayFriend> findBirthdayByDate(Long userId, LocalDate startDate, LocalDate endDate);
+    List<BirthdayPerson> findBirthdayByDate(Long userId, LocalDate startDate, LocalDate endDate);
 
     String findNameById(Long userId);
 
