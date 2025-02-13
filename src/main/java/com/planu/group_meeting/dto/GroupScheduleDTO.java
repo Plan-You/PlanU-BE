@@ -109,6 +109,15 @@ public class GroupScheduleDTO {
 
     @Getter
     @Setter
+    @AllArgsConstructor
+    public static class GroupCalendarEvent {
+        private String date;
+        private Boolean isSchedule;
+        private Boolean isBirthday;
+    }
+
+    @Getter
+    @Setter
     public static class GroupScheduleNotification{
         private EventType eventType;
         private Long senderId;

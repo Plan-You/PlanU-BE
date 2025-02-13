@@ -157,4 +157,10 @@
         FROM USER
         WHERE id = #{userId};
     </select>
+
+    <select id="findBirthdayById">
+        SELECT birth_date
+        FROM USER
+        WHERE id = #{userId}
+    </select>
 </mapper>
