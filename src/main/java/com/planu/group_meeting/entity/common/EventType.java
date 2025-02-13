@@ -8,7 +8,8 @@ public enum EventType {
     GROUP_DELETE,
     GROUP_INVITE,
     GROUP_ACCEPT,
-    GROUP_BAN,
+    GROUP_EXPEL,
+    GROUP_SCHEDULE_CREATE,
     GROUP_SCHEDULE_DELETE,
     DUMMY
 }

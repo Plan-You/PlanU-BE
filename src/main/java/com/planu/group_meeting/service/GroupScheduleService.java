@@ -1,16 +1,17 @@
 package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.dao.*;
-import com.planu.group_meeting.dto.GroupScheduleDTO;
 import com.planu.group_meeting.dto.GroupScheduleDTO.GroupSchedulesDetailResponse;
 import com.planu.group_meeting.dto.GroupScheduleDTO.scheduleOverViewResponse;
 import com.planu.group_meeting.dto.GroupScheduleDTO.todayScheduleResponse;
 import com.planu.group_meeting.entity.GroupSchedule;
 import com.planu.group_meeting.entity.GroupScheduleParticipant;
+import com.planu.group_meeting.entity.common.EventType;
 import com.planu.group_meeting.exception.group.GroupNotFoundException;
 import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,8 +22,14 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.planu.group_meeting.dto.GroupScheduleDTO.GroupScheduleRequest;
+import static com.planu.group_meeting.dto.GroupScheduleDTO.ParticipantsResponse;
+import static com.planu.group_meeting.dto.NotificationDTO.GroupScheduleCreateNotification;
+import static com.planu.group_meeting.dto.NotificationDTO.GroupScheduleDeleteNotification;
+
 @Service
 @AllArgsConstructor
+@Slf4j
 public class GroupScheduleService {
     private final GroupScheduleDAO groupScheduleDAO;
     private final GroupScheduleParticipantDAO groupScheduleParticipantDAO;
@@ -30,6 +37,7 @@ public class GroupScheduleService {
     private final GroupDAO groupDAO;
     private final GroupUserDAO groupUserDAO;
     private final ScheduleNotificationService scheduleNotificationService;
+    private final NotificationService notificationService;
 
     private void checkValidGroupId(Long groupId) {
         if (groupDAO.findGroupById(groupId) == null) {
@@ -72,7 +80,7 @@ public class GroupScheduleService {
     }
 
     @Transactional
-    public void insert(Long groupId, GroupScheduleDTO.@Valid GroupScheduleRequest groupScheduleRequest) {
+    public void insert(Long groupId, @Valid GroupScheduleRequest groupScheduleRequest) {
         checkValidGroupId(groupId);
         GroupSchedule groupSchedule = groupScheduleRequest.toEntity(groupId);
         groupScheduleDAO.insert(groupSchedule);
@@ -81,6 +89,11 @@ public class GroupScheduleService {
             groupScheduleParticipants.add(userDAO.findByUsername(username).getId());
         }
         insertParticipants(groupSchedule, groupScheduleParticipants);
+
+        for(Long groupScheduleParticipant : groupScheduleParticipants){
+            GroupScheduleCreateNotification groupScheduleCreateNotification = new GroupScheduleCreateNotification(groupScheduleParticipant, "그룹 일정 '" + groupSchedule.getTitle() + "'이(가) 생성되었습니다.");
+            notificationService.sendNotification(EventType.GROUP_SCHEDULE_CREATE, groupScheduleCreateNotification);
+        }
         scheduleNotificationService.reserveGroupScheduleNotification(groupSchedule, groupScheduleParticipants);
     }
 
@@ -103,7 +116,7 @@ public class GroupScheduleService {
         return response;
     }
 
-    private List<GroupScheduleDTO.ParticipantsResponse> findParticipantsByScheduleId(Long groupId, Long scheduleId) {
+    private List<ParticipantsResponse> findParticipantsByScheduleId(Long groupId, Long scheduleId) {
         checkValidGroupId(groupId);
         findGroupScheduleById(groupId, scheduleId);
         return groupScheduleParticipantDAO.findByScheduleId(groupId, scheduleId);
@@ -112,13 +125,24 @@ public class GroupScheduleService {
     @Transactional
     public void deleteGroupScheduleById(Long groupId, Long scheduleId) {
         checkValidGroupId(groupId);
-        findGroupScheduleById(groupId, scheduleId);
+        GroupSchedule groupSchedule = findGroupScheduleById(groupId, scheduleId);
+
+        List<ParticipantsResponse> participantsResponses = groupScheduleParticipantDAO.findByScheduleId(groupId, scheduleId);
+        List<Long> participantIds = participantsResponses.stream()
+                .map(ParticipantsResponse::getUserId)
+                .toList();
+
+        for(Long participantId : participantIds){
+            GroupScheduleDeleteNotification groupScheduleDeleteNotification = new GroupScheduleDeleteNotification(participantId, "그룹 일정 '" + groupSchedule.getTitle() + "'이(가) 삭제되었습니다.");
+            notificationService.sendNotification(EventType.GROUP_SCHEDULE_DELETE, groupScheduleDeleteNotification);
+        }
+
         groupScheduleParticipantDAO.deleteAllByScheduleId(groupId, scheduleId);
         groupScheduleDAO.deleteGroupScheduleById(groupId, scheduleId);
     }
 
     @Transactional
-    public void updateGroupSchedule(Long groupId, Long scheduleId, GroupScheduleDTO.@Valid GroupScheduleRequest groupScheduleRequest) {
+    public void updateGroupSchedule(Long groupId, Long scheduleId, @Valid GroupScheduleRequest groupScheduleRequest) {
         checkValidGroupId(groupId);
         GroupSchedule groupSchedule = findGroupScheduleById(groupId, scheduleId);
 
