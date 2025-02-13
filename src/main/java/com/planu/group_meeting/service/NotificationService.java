@@ -115,6 +115,24 @@ public class NotificationService {
                     .build();
         }
 
+        if(object instanceof GroupInviteNotification groupInviteNotification){
+            return builder()
+                    .eventType(eventType)
+                    .senderId(groupInviteNotification.getSenderId())
+                    .receiverId(groupInviteNotification.getReceiverId())
+                    .contents(groupInviteNotification.getContents())
+                    .build();
+        }
+
+        if(object instanceof GroupAcceptNotification groupAcceptNotification){
+            return builder()
+                    .eventType(eventType)
+                    .senderId(groupAcceptNotification.getSenderId())
+                    .receiverId(groupAcceptNotification.getReceiverId())
+                    .contents(groupAcceptNotification.getContents())
+                    .build();
+        }
+
 
         return null;
     }

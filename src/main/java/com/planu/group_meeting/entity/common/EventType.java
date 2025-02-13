@@ -7,6 +7,7 @@ public enum EventType {
     SCHEDULE_REMINDER,
     GROUP_DELETE,
     GROUP_INVITE,
+    GROUP_ACCEPT,
     GROUP_BAN,
     GROUP_SCHEDULE_DELETE,
     DUMMY

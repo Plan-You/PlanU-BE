@@ -72,6 +72,36 @@ public class NotificationDTO {
         }
     }
 
+    @Getter
+    @Setter
+    public static class GroupInviteNotification{
+        private EventType eventType;
+        private Long senderId;
+        private Long receiverId;
+        private String contents;
 
+        public GroupInviteNotification(Long senderId,Long receiverId, String contents){
+            this.eventType =EventType.GROUP_INVITE;
+            this.senderId = senderId;
+            this.receiverId = receiverId;
+            this.contents = contents;
+        }
+    }
+
+    @Getter
+    @Setter
+    public static class GroupAcceptNotification{
+        private EventType eventType;
+        private Long senderId;
+        private Long receiverId;
+        private String contents;
+
+        public GroupAcceptNotification(Long senderId,Long receiverId, String contents){
+            this.eventType =EventType.GROUP_ACCEPT;
+            this.senderId = senderId;
+            this.receiverId = receiverId;
+            this.contents = contents;
+        }
+    }
 
 }

@@ -1,5 +1,6 @@
 package com.planu.group_meeting.dao;
 
+import com.planu.group_meeting.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -17,4 +18,6 @@ public interface GroupUserDAO {
     Boolean getPinById(Long groupId, Long userId);
 
     Boolean isExistsGroupUser(Long userId, Long groupId);
+
+    User findLeaderByGroupId(Long groupId);
 }

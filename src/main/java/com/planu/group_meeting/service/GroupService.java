@@ -9,7 +9,6 @@ import com.planu.group_meeting.dto.FriendDto.FriendInfo;
 import com.planu.group_meeting.dto.GroupDTO.*;
 import com.planu.group_meeting.dto.GroupInviteResponseDTO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
-import com.planu.group_meeting.dto.NotificationDTO;
 import com.planu.group_meeting.entity.Group;
 import com.planu.group_meeting.entity.GroupUser;
 import com.planu.group_meeting.entity.User;
@@ -27,6 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
+
+import static com.planu.group_meeting.dto.NotificationDTO.*;
 
 @Service
 @Slf4j
@@ -105,6 +106,10 @@ public class GroupService {
                 .isPin(false)
                 .build());
 
+        GroupInviteNotification groupInviteNotification =
+                new GroupInviteNotification(customUserDetails.getId(), user.getId(),customUserDetails.getName() +"님이 그룹 초대 요청을 보냈습니다.");
+        notificationService.sendNotification(EventType.GROUP_INVITE, groupInviteNotification);
+
         return GroupInviteResponseDTO.builder()
                 .invitedUsername(username)
                 .groupId(groupId)
@@ -155,9 +160,11 @@ public class GroupService {
         if (groupUser.getGroupState() == 1) {
             throw new IllegalArgumentException("이미 그룹에 속해 있습니다.");
         }
-
         groupDAO.updateGroupUserGroupStatus(customUserDetails.getId(), groupId);
 
+        User leader = groupUserDAO.findLeaderByGroupId(groupId);
+        GroupAcceptNotification groupAcceptNotification = new GroupAcceptNotification(customUserDetails.getId(), leader.getId(), customUserDetails.getName() + "님이 그룹초대 요청을 수락하였습니다.");
+        notificationService.sendNotification(EventType.GROUP_ACCEPT, groupAcceptNotification);
     }
 
     @Transactional
@@ -217,8 +224,8 @@ public class GroupService {
         log.info("groupUserIds={}", groupUserIds);
         for(Long groupUserId : groupUserIds){
             log.info("groupUserId={}", groupUserId);
-            NotificationDTO.GroupDeleteNotification groupDeleteNotification =
-                    new NotificationDTO.GroupDeleteNotification(groupUserId, group.getName() + " 그룹이 삭제되었습니다.");
+            GroupDeleteNotification groupDeleteNotification =
+                    new GroupDeleteNotification(groupUserId, group.getName() + " 그룹이 삭제되었습니다.");
             notificationService.sendNotification(EventType.GROUP_DELETE, groupDeleteNotification);
         }
     }
