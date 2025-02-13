@@ -34,4 +34,6 @@ public interface UserDAO {
     String findNameById(Long userId);
 
     String findProfileImageById(Long userId);
+
+    LocalDate findBirthdayById(Long groupMemberIds);
 }

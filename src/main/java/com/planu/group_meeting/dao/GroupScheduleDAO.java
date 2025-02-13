@@ -29,4 +29,6 @@ public interface GroupScheduleDAO {
     Optional<GroupSchedule> findById(Long groupId, Long scheduleId);
 
     void updateGroupSchedule(GroupSchedule groupSchedule);
+
+    Boolean existsGroupScheduleByDate(Long groupId, LocalDate date);
 }

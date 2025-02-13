@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,16 +34,15 @@ public class GroupScheduleService {
     private final GroupScheduleDAO groupScheduleDAO;
     private final GroupScheduleParticipantDAO groupScheduleParticipantDAO;
     private final UserDAO userDAO;
-    private final ParticipantDAO participantDAO;
     private final GroupDAO groupDAO;
     private final GroupUserDAO groupUserDAO;
     private final ScheduleNotificationService scheduleNotificationService;
     private final NotificationService notificationService;
 
     private void checkValidGroupId(Long groupId) {
-          if(groupDAO.findGroupById(groupId) == null) {
-              throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
-          }
+        if (groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
+        }
     }
 
     private GroupSchedule findGroupScheduleById(Long groupId, Long scheduleId) {
@@ -55,12 +55,11 @@ public class GroupScheduleService {
         checkValidGroupId(groupId);
         List<todayScheduleResponse> todaySchedules = groupScheduleDAO.findTodaySchedulesByToday(groupId, today);
 
-        for(var schedule : todaySchedules) {
+        for (var schedule : todaySchedules) {
             String startDate = schedule.getStartDateTime();
-            if(startDate.contains("AM")) {
+            if (startDate.contains("AM")) {
                 startDate = startDate.replace("AM", "오전");
-            }
-            else if(startDate.contains("PM")) {
+            } else if (startDate.contains("PM")) {
                 startDate = startDate.replace("PM", "오후");
             }
             schedule.setStartDateTime(startDate);
@@ -86,7 +85,7 @@ public class GroupScheduleService {
         GroupSchedule groupSchedule = groupScheduleRequest.toEntity(groupId);
         groupScheduleDAO.insert(groupSchedule);
         List<Long> groupScheduleParticipants = new ArrayList<>();
-        for(var username : groupScheduleRequest.getParticipants()) {
+        for (var username : groupScheduleRequest.getParticipants()) {
             groupScheduleParticipants.add(userDAO.findByUsername(username).getId());
         }
         insertParticipants(groupSchedule, groupScheduleParticipants);
@@ -152,10 +151,47 @@ public class GroupScheduleService {
         groupScheduleDAO.updateGroupSchedule(groupSchedule);
 
         List<Long> groupScheduleParticipants = new ArrayList<>();
-        for(var username : groupScheduleRequest.getParticipants()) {
+        for (var username : groupScheduleRequest.getParticipants()) {
             groupScheduleParticipants.add(userDAO.findByUsername(username).getId());
         }
 
         insertParticipants(groupSchedule, groupScheduleParticipants);
+    }
+
+    public List<GroupScheduleDTO.GroupCalendarEvent> getGroupCalendarEvents(Long groupId, YearMonth yearMonth, GroupUserService groupUserService) {
+        checkValidGroupId(groupId);
+
+        if (yearMonth == null) {
+            yearMonth = YearMonth.now();
+        }
+
+        LocalDate firstDayOfMonth = yearMonth.atDay(1);
+        LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
+
+        LocalDate startOfCalendar = firstDayOfMonth.minusDays(firstDayOfMonth.getDayOfWeek().getValue() % 7);
+        LocalDate endOfCalendar = lastDayOfMonth.plusDays(6 - lastDayOfMonth.getDayOfWeek().getValue());
+
+        List<Long> groupMemberIds = groupUserDAO.getGroupMemberIds(groupId);
+        List<GroupScheduleDTO.GroupCalendarEvent> groupCalendarEvents = new ArrayList<>();
+        for(var current = startOfCalendar; !current.isAfter(endOfCalendar); current = current.plusDays(1)) {
+            boolean isSchedule = groupScheduleDAO.existsGroupScheduleByDate(groupId, current);
+            boolean isBirthday = false;
+
+            for(var memberId : groupMemberIds) {
+                LocalDate birthday = userDAO.findBirthdayById(memberId);
+                if(birthday == null) {
+                    continue;
+                }
+                if(current.getMonthValue() == birthday.getMonthValue() && current.getDayOfMonth() == birthday.getDayOfMonth()) {
+                    isBirthday = true;
+                    break;
+                }
+            }
+
+            if(isBirthday || isSchedule) {
+                groupCalendarEvents.add(new GroupScheduleDTO.GroupCalendarEvent(current.toString(), isSchedule, isBirthday));
+            }
+        }
+        return groupCalendarEvents;
     }
 }
