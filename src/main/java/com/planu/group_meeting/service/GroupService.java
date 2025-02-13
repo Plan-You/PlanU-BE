@@ -9,13 +9,16 @@ import com.planu.group_meeting.dto.FriendDto.FriendInfo;
 import com.planu.group_meeting.dto.GroupDTO.*;
 import com.planu.group_meeting.dto.GroupInviteResponseDTO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
+import com.planu.group_meeting.dto.NotificationDTO;
 import com.planu.group_meeting.entity.Group;
 import com.planu.group_meeting.entity.GroupUser;
 import com.planu.group_meeting.entity.User;
+import com.planu.group_meeting.entity.common.EventType;
 import com.planu.group_meeting.entity.common.FriendStatus;
 import com.planu.group_meeting.exception.group.GroupNotFoundException;
 import com.planu.group_meeting.exception.group.UnauthorizedAccessException;
 import com.planu.group_meeting.service.file.S3Uploader;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +29,7 @@ import java.time.YearMonth;
 import java.util.*;
 
 @Service
+@Slf4j
 public class GroupService {
     private final GroupDAO groupDAO;
     private final UserDAO userDAO;
@@ -33,15 +37,17 @@ public class GroupService {
     private final GroupUserDAO groupUserDAO;
     private final FriendDAO friendDAO;
     private final AvailableDateDAO availableDateDAO;
+    private final NotificationService notificationService;
 
     @Autowired
-    public GroupService(GroupDAO groupDAO, UserDAO userDAO, S3Uploader s3Uploader, GroupUserDAO groupUserDAO, FriendDAO friendDAO, AvailableDateDAO availableDateDAO) {
+    public GroupService(GroupDAO groupDAO, UserDAO userDAO, S3Uploader s3Uploader, GroupUserDAO groupUserDAO, FriendDAO friendDAO, AvailableDateDAO availableDateDAO, NotificationService notificationService) {
         this.groupDAO = groupDAO;
         this.userDAO = userDAO;
         this.s3Uploader = s3Uploader;
         this.groupUserDAO = groupUserDAO;
         this.friendDAO = friendDAO;
         this.availableDateDAO = availableDateDAO;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -196,14 +202,25 @@ public class GroupService {
             throw new IllegalArgumentException("그룹을 삭제할 권한이 없습니다.");
         }
 
+        createGroupDeleteNotification(groupId, group);
 
         groupDAO.deleteGroupScheduleParticipant(groupId);
-        groupDAO.deleteGroupScheduleUnregisteredParticipant(groupId);
         groupDAO.deleteGroupScheduleComment(groupId);
         groupDAO.deleteGroupUser(groupId);
         groupDAO.deleteChatMessage(groupId);
         groupDAO.deleteGroupSchedule(groupId);
         groupDAO.deleteGroup(groupId);
+    }
+
+    private void createGroupDeleteNotification(Long groupId, Group group) {
+        List<Long> groupUserIds = groupDAO.findUserIdsByGroupId(groupId);
+        log.info("groupUserIds={}", groupUserIds);
+        for(Long groupUserId : groupUserIds){
+            log.info("groupUserId={}", groupUserId);
+            NotificationDTO.GroupDeleteNotification groupDeleteNotification =
+                    new NotificationDTO.GroupDeleteNotification(groupUserId, group.getName() + " 그룹이 삭제되었습니다.");
+            notificationService.sendNotification(EventType.GROUP_DELETE, groupDeleteNotification);
+        }
     }
 
     @Transactional

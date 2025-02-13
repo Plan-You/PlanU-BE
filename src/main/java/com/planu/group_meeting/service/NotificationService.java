@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.planu.group_meeting.dto.FriendDto.FriendNotification;
 import static com.planu.group_meeting.dto.GroupScheduleDTO.GroupScheduleNotification;
-import static com.planu.group_meeting.dto.ScheduleDto.ScheduleNotification;
+import static com.planu.group_meeting.dto.NotificationDTO.*;
+
 
 @Service
 @RequiredArgsConstructor
@@ -74,14 +74,14 @@ public class NotificationService {
 
     private NotificationDTO createNotification(EventType eventType, Object object) {
         if (eventType == EventType.DUMMY) {
-            return NotificationDTO.builder()
+            return builder()
                     .eventType(EventType.DUMMY)
                     .contents("Dummy Notification")
                     .receiverId(0L)
                     .build();
         }
         if (object instanceof FriendNotification friendNotification) {
-            return NotificationDTO.builder()
+            return builder()
                     .eventType(eventType)
                     .senderId(friendNotification.getFromUserId())
                     .receiverId(friendNotification.getToUserId())
@@ -89,7 +89,7 @@ public class NotificationService {
                     .build();
         }
         if (object instanceof ScheduleNotification scheduleNotification) {
-            return NotificationDTO.builder()
+            return builder()
                     .eventType(eventType)
                     .senderId(scheduleNotification.getSenderId())
                     .receiverId(scheduleNotification.getReceiverId())
@@ -97,14 +97,25 @@ public class NotificationService {
                     .build();
         }
 
-        if(object instanceof GroupScheduleNotification groupScheduleNotification){
-            return NotificationDTO.builder()
+        if (object instanceof GroupScheduleNotification groupScheduleNotification) {
+            return builder()
                     .eventType(eventType)
                     .senderId(groupScheduleNotification.getSenderId())
                     .receiverId(groupScheduleNotification.getReceiverId())
                     .contents(groupScheduleNotification.getContents())
                     .build();
         }
+
+        if (object instanceof GroupDeleteNotification groupDeleteNotification) {
+            return builder()
+                    .eventType(eventType)
+                    .senderId(groupDeleteNotification.getSenderId())
+                    .receiverId(groupDeleteNotification.getReceiverId())
+                    .contents(groupDeleteNotification.getContents())
+                    .build();
+        }
+
+
         return null;
     }
 
@@ -114,7 +125,7 @@ public class NotificationService {
 
     public void readNotification(Long userId, Long notificationId) throws NotFoundException {
         notificationDAO.findById(userId, notificationId)
-                .orElseThrow(()-> new NotFoundException("해당 알림이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException("해당 알림이 존재하지 않습니다."));
 
         notificationDAO.updateIsRead(notificationId);
     }

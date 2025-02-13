@@ -37,9 +37,6 @@ public interface GroupDAO {
     // 1. GROUP_SCHEDULE_PARTICIPANT 삭제
     void deleteGroupScheduleParticipant(@Param("groupId") Long groupId);
 
-    // 2. GROUP_SCHEDULE_UNREGISTERED_PARTICIPANT 삭제
-    void deleteGroupScheduleUnregisteredParticipant(@Param("groupId") Long groupId);
-
     // 3. GROUP_SCHEDULE_COMMENT 삭제
     void deleteGroupScheduleComment(@Param("groupId") Long groupId);
 
@@ -58,4 +55,6 @@ public interface GroupDAO {
     List<GroupResponseDTO> getGroupInviteList(Long userId);
 
     List<Member> findGroupMembers(Long groupId, String keyword);
+
+    List<Long> findUserIdsByGroupId(Long groupId);
 }

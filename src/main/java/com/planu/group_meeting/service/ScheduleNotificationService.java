@@ -14,7 +14,7 @@ import java.time.ZoneId;
 import java.util.List;
 
 import static com.planu.group_meeting.dto.GroupScheduleDTO.GroupScheduleNotification;
-import static com.planu.group_meeting.dto.ScheduleDto.ScheduleNotification;
+import static com.planu.group_meeting.dto.NotificationDTO.ScheduleNotification;
 
 @Service
 @RequiredArgsConstructor

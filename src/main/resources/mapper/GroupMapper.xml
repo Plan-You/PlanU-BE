@@ -93,10 +93,6 @@
         DELETE FROM GROUP_SCHEDULE_PARTICIPANT WHERE GROUP_ID = #{groupId}
     </delete>
 
-    <delete id="deleteGroupScheduleUnregisteredParticipant" parameterType="long">
-        DELETE FROM GROUP_SCHEDULE_UNREGISTERED_PARTICIPANT WHERE GROUP_SCHEDULE_ID IN (SELECT ID FROM GROUP_SCHEDULE WHERE GROUP_ID = #{groupId})
-    </delete>
-
     <delete id="deleteGroupScheduleComment" parameterType="long">
         DELETE FROM GROUP_SCHEDULE_COMMENT WHERE GROUP_ID = #{groupId}
     </delete>
@@ -144,6 +140,13 @@
         <if test="keyword != null and keyword != ''">
             AND (u.username LIKE CONCAT('%', #{keyword}, '%') OR u.name LIKE CONCAT('%', #{keyword}, '%'))
         </if>
+    </select>
+
+
+    <select id="findUserIdsByGroupId" resultType="java.lang.Long">
+        SELECT USER_ID
+        FROM GROUP_USER
+        WHERE GROUP_ID=#{groupId}
     </select>
 
     <update id="updateGroupPin">
