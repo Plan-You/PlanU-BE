@@ -8,6 +8,7 @@ import com.planu.group_meeting.exception.group.UnauthorizedAccessException;
 import com.planu.group_meeting.exception.schedule.PastDateValidationException;
 import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
 import com.planu.group_meeting.exception.user.*;
+import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,11 +28,15 @@ public class GlobalExceptionHandler {
         return BaseResponse.toResponseEntity(HttpStatus.BAD_REQUEST, errorMessage.toString());
     }
 
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<BaseResponse>handleNotFoundException(NotFoundException e){
+        return BaseResponse.toResponseEntity(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<BaseResponse>handleIllegalStateException(IllegalStateException e){
         return BaseResponse.toResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());
     }
-
 
     @ExceptionHandler(DuplicatedUsernameException.class)
     public ResponseEntity<BaseResponse> handleDuplicatedUsernameException(DuplicatedUsernameException e) {
@@ -85,7 +90,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UnauthorizedResourceException.class)
     public ResponseEntity<BaseResponse>handleUnauthorizedResourceException(UnauthorizedResourceException e){
-        return BaseResponse.toResponseEntity(HttpStatus.UNAUTHORIZED,"변경 권한이 없습니다.");
+        return BaseResponse.toResponseEntity(HttpStatus.UNAUTHORIZED,"권한이 없습니다.");
     }
 
     @ExceptionHandler(FriendRequestNotFoundException.class)

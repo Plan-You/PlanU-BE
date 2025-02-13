@@ -1,11 +1,11 @@
 package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.dao.NotificationDAO;
-import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dto.NotificationDTO;
 import com.planu.group_meeting.entity.common.EventType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +28,6 @@ public class NotificationService {
     private static final Long SSE_TIMEOUT = 60L * 1000 * 60;    // 1시간
 
     private final NotificationDAO notificationDAO;
-    private final UserDAO userDAO;
 
     public SseEmitter createEmitter(Long userId) {
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT);
@@ -111,6 +110,13 @@ public class NotificationService {
 
     public List<NotificationDTO> getNotificationList(Long userId) {
         return notificationDAO.findAllByUserId(userId);
+    }
+
+    public void readNotification(Long userId, Long notificationId) throws NotFoundException {
+        notificationDAO.findById(userId, notificationId)
+                .orElseThrow(()-> new NotFoundException("해당 알림이 존재하지 않습니다."));
+
+        notificationDAO.updateIsRead(notificationId);
     }
 
     @Scheduled(cron = "0 0 3 * * ?")
