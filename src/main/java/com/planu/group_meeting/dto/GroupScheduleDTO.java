@@ -1,5 +1,6 @@
 package com.planu.group_meeting.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.planu.group_meeting.entity.GroupSchedule;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -84,7 +85,11 @@ public class GroupScheduleDTO {
     }
 
     @Getter
+    @ToString
     public static class ParticipantsResponse {
+        @JsonIgnore
+        private Long userId;
+
         private String profileImage;
         private String name;
         private String username;

@@ -2,12 +2,10 @@ package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.dao.FriendDAO;
 import com.planu.group_meeting.dao.UserDAO;
-import com.planu.group_meeting.dto.FriendDto;
 import com.planu.group_meeting.dto.FriendDto.FriendInfo;
 import com.planu.group_meeting.dto.FriendDto.FriendListResponse;
 import com.planu.group_meeting.dto.GroupDTO.GroupMembersResponse;
 import com.planu.group_meeting.dto.GroupDTO.Member;
-import com.planu.group_meeting.entity.User;
 import com.planu.group_meeting.entity.common.EventType;
 import com.planu.group_meeting.entity.common.FriendStatus;
 import com.planu.group_meeting.exception.user.DuplicatedRequestException;
@@ -19,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static com.planu.group_meeting.dto.NotificationDTO.FriendNotification;
 
 
 @Service
@@ -34,7 +34,6 @@ public class FriendService {
         if (!userDAO.existsByUsername(toUsername)) {
             throw new NotFoundUserException();
         }
-        User user = userDAO.findByUsername(toUsername);
         Long toUserId = userDAO.findByUsername(toUsername).getId();
         FriendStatus friendStatus = friendDAO.getFriendStatus(userId, toUserId);
         log.info("friendStatus={}", friendStatus);
@@ -53,7 +52,7 @@ public class FriendService {
                 throw new IllegalStateException("알 수 없는 상태입니다.");
         }
 
-        FriendDto.FriendNotification friendNotification = new FriendDto.FriendNotification(EventType.FRIEND_REQUEST, userId, toUserId,
+        FriendNotification friendNotification = new FriendNotification(EventType.FRIEND_REQUEST, userId, toUserId,
                 userDAO.findNameById(userId) + "님이 친구요청을 보냈습니다.");
 
         notificationService.sendNotification(EventType.FRIEND_REQUEST, friendNotification);
@@ -68,7 +67,7 @@ public class FriendService {
         if (friendDAO.getFriendStatus(fromUserId, userId) != FriendStatus.REQUEST) {
             throw new FriendRequestNotFoundException();
         }
-        FriendDto.FriendNotification friendNotification = new FriendDto.FriendNotification(EventType.FRIEND_ACCEPT, userId, fromUserId,
+        FriendNotification friendNotification = new FriendNotification(EventType.FRIEND_ACCEPT, userId, fromUserId,
                 userDAO.findNameById(userId) + "님이 친구요청을 수락하였습니다.");
         notificationService.sendNotification(EventType.FRIEND_ACCEPT, friendNotification);
         friendDAO.acceptFriend(fromUserId, userId);

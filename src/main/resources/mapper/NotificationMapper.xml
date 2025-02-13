@@ -11,6 +11,18 @@
         (#{receiverId}, #{senderId}, #{eventType}, #{contents}, 0)
     </insert>
 
+    <select id="findById" parameterType="Long" resultType="com.planu.group_meeting.dto.NotificationDTO">
+        SELECT
+        id,
+        SENDER_ID AS senderId,
+        RECEIVER_ID AS receiverId,
+        EVENT_TYPE AS eventType,
+        CONTENT AS contents,
+        IS_READ AS isRead
+        FROM NOTIFICATION
+        WHERE RECEIVER_ID = #{userId} AND ID = #{notificationId}
+    </select>
+
     <select id="findAllByUserId" parameterType="Long" resultType="com.planu.group_meeting.dto.NotificationDTO">
         SELECT
         id,
@@ -22,6 +34,12 @@
         FROM NOTIFICATION
         WHERE RECEIVER_ID = #{userId}
     </select>
+
+    <update id="updateIsRead">
+        UPDATE NOTIFICATION
+        SET IS_READ = 1
+        WHERE ID = ${notificationId}
+    </update>
 
     <delete id="deleteOldNotification">
         DELETE FROM NOTIFICATION

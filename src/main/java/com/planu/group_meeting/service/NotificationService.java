@@ -1,12 +1,11 @@
 package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.dao.NotificationDAO;
-import com.planu.group_meeting.dao.UserDAO;
-import com.planu.group_meeting.dto.FriendDto;
 import com.planu.group_meeting.dto.NotificationDTO;
 import com.planu.group_meeting.entity.common.EventType;
-import jdk.jfr.StackTrace;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,14 +16,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+//import static com.planu.group_meeting.dto.NotificationDTO.builder;
+
+
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationService {
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
     private static final Long SSE_TIMEOUT = 60L * 1000 * 60;    // 1시간
 
     private final NotificationDAO notificationDAO;
-    private final UserDAO userDAO;
 
     public SseEmitter createEmitter(Long userId) {
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT);
@@ -49,6 +51,7 @@ public class NotificationService {
 
     public void sendNotification(EventType eventType, Object object) {
         NotificationDTO notification = createNotification(eventType, object);
+        log.info("notification={}", notification);
         if (notification == null || notification.getReceiverId() == null) {
             return;
         }
@@ -77,24 +80,36 @@ public class NotificationService {
                     .build();
         }
 
-        if (object instanceof FriendDto.FriendNotification friendNotification) {
-            return NotificationDTO.builder()
-                    .eventType(eventType)
-                    .senderId(friendNotification.getFromUserId())
-                    .receiverId(friendNotification.getToUserId())
-                    .contents(friendNotification.getContents())
-                    .build();
+        if(object instanceof NotificationDTO){
+            log.info("object is NotificationDTO");
+            return createNotificationFromDetail(eventType, (NotificationDTO)object);
         }
         return null;
     }
 
-    public List<NotificationDTO> getNotificationList(Long userId){
+    private NotificationDTO createNotificationFromDetail(EventType eventType, NotificationDTO notification) {
+        return NotificationDTO.builder()
+                .eventType(eventType)
+                .senderId(notification.getSenderId())
+                .receiverId(notification.getReceiverId())
+                .contents(notification.getContents())
+                .build();
+    }
+
+    public List<NotificationDTO> getNotificationList(Long userId) {
         return notificationDAO.findAllByUserId(userId);
+    }
+
+    public void readNotification(Long userId, Long notificationId) throws NotFoundException {
+        notificationDAO.findById(userId, notificationId)
+                .orElseThrow(() -> new NotFoundException("해당 알림이 존재하지 않습니다."));
+
+        notificationDAO.updateIsRead(notificationId);
     }
 
     @Scheduled(cron = "0 0 3 * * ?")
     @Transactional
-    public void deleteOldNotification(){
+    public void deleteOldNotification() {
         notificationDAO.deleteOldNotification();
     }
 }

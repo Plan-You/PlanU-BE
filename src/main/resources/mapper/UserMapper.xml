@@ -115,22 +115,36 @@
         )
     </select>
 
-    <select id="findBirthdayByDate">
-        <![CDATA[
-        SELECT DATE_FORMAT(U.BIRTH_DATE, '%m-%d') AS date,
-               GROUP_CONCAT(U.NAME SEPARATOR ', ') AS names
+
+    <select id="findBirthdayByDate" resultType="java.lang.String">
+    <![CDATA[
+        SELECT U.NAME
         FROM FRIEND F
         JOIN USER U ON F.FROM_USER_ID = U.ID
         WHERE F.FRIEND_STATUS = 'FRIEND'
-          AND TO_USER_ID = #{userId}
-          AND (
-            DATE_FORMAT(CONCAT(DATE_FORMAT(#{startDate}, '%Y'), DATE_FORMAT(U.BIRTH_DATE, '-%m-%d')), '%Y-%m-%d')
-            BETWEEN DATE_FORMAT(#{startDate}, '%Y-%m-%d')
-            AND DATE_FORMAT(#{endDate}, '%Y-%m-%d')
-          )
-        GROUP BY DATE_FORMAT(U.BIRTH_DATE, '%m-%d')
+        AND F.TO_USER_ID = #{userId}
+        AND DATE_FORMAT(U.BIRTH_DATE, '%m-%d')
+        BETWEEN DATE_FORMAT(#{startDate}, '%m-%d') AND DATE_FORMAT(#{endDate}, '%m-%d')
+
+        UNION
+
+        SELECT U.NAME
+        FROM GROUP_USER GU
+        JOIN USER U ON GU.USER_ID = U.ID
+        WHERE GU.GROUP_ID IN (
+            SELECT GROUP_ID FROM GROUP_USER WHERE USER_ID = ${userId}
+        )
+        AND DATE_FORMAT(U.BIRTH_DATE, '%m-%d')
+        BETWEEN DATE_FORMAT(#{startDate}, '%m-%d') AND DATE_FORMAT(#{endDate}, '%m-%d')
+        AND U.ID NOT IN (
+        SELECT F.FROM_USER_ID FROM FRIEND F
+        WHERE F.FRIEND_STATUS = 'FRIEND'
+        AND F.TO_USER_ID = #{userId}
+    )
+
     ]]>
     </select>
+
 
     <select id="findNameById">
         SELECT name

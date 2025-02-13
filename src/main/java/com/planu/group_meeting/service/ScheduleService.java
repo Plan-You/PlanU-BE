@@ -1,8 +1,6 @@
 package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.dao.*;
-import com.planu.group_meeting.dto.ScheduleDto;
-import com.planu.group_meeting.dto.ScheduleDto.*;
 import com.planu.group_meeting.entity.Schedule;
 import com.planu.group_meeting.entity.ScheduleParticipant;
 import com.planu.group_meeting.entity.UnregisteredParticipant;
@@ -13,6 +11,7 @@ import com.planu.group_meeting.exception.user.NotFoundUserException;
 import com.planu.group_meeting.exception.user.NotFriendException;
 import com.planu.group_meeting.exception.user.UnauthorizedResourceException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,8 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.planu.group_meeting.dto.ScheduleDto.*;
+
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ScheduleService {
 
     private final ScheduleDAO scheduleDAO;
@@ -34,6 +36,7 @@ public class ScheduleService {
     private final FriendDAO friendDAO;
     private final ParticipantDAO participantDAO;
     private final UnregisteredParticipantDAO unregisteredParticipantDAO;
+    private final ScheduleNotificationService scheduleNotificationService;
 
     @Transactional
     public void createSchedule(Long userId, ScheduleSaveRequest scheduleDto) {
@@ -42,9 +45,11 @@ public class ScheduleService {
         validateParticipants(userId, participantIds);
 
         scheduleDAO.insertSchedule(schedule);
-
         insertParticipants(schedule, participantIds);
         insertUnregisteredParticipants(schedule, scheduleDto.getUnregisteredParticipants());
+
+        scheduleNotificationService.reserveScheduleNotification(schedule);
+
     }
 
     private List<Long> getParticipantIds(List<String> participants) {
@@ -120,7 +125,7 @@ public class ScheduleService {
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
 
         List<ScheduleListResponse> scheduleList = scheduleDAO.getScheduleList(targetUserId, startDateTime, endDateTime);
-        List<ScheduleDto.BirthdayFriend> birthdayFriends = userDAO.findBirthdayByDate(targetUserId, startDate, endDate);
+        List<BirthdayPerson> birthdayFriends = userDAO.findBirthdayByDate(targetUserId, startDate, endDate);
 
         return new DailyScheduleResponse(scheduleList, birthdayFriends);
     }

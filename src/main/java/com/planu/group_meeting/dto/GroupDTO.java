@@ -79,4 +79,5 @@ public class GroupDTO {
         private String groupName;
         private Boolean isPin;
     }
+
 }

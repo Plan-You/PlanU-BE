@@ -47,4 +47,12 @@
             WHERE group_id = #{groupId} and user_id = #{userId}
         );
     </select>
+
+    <select id="findLeaderByGroupId" resultType="com.planu.group_meeting.entity.User">
+        SELECT u.*
+        FROM USER u
+        JOIN GROUP_USER gu ON u.ID=gu.USER_ID
+        WHERE gu.GROUP_ROLE='LEADER' AND gu.GROUP_ID=#{groupId}
+    </select>
+
 </mapper>
