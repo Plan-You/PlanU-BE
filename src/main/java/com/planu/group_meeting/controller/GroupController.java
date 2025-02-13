@@ -69,8 +69,6 @@ public class GroupController {
                                                   @PathVariable("groupId") Long groupId) {
 
         groupService.joinGroup(userDetails, groupId);
-
-
         return BaseResponse.toResponseEntity(HttpStatus.OK, "초대 수락 하였습니다.");
     }
 

@@ -145,22 +145,6 @@
     ]]>
     </select>
 
-<!--    <select id="findBirthdayByDate" resultMap="BirthdayPersonResultMap">-->
-<!--        <![CDATA[-->
-<!--        SELECT DATE_FORMAT(U.BIRTH_DATE, '%m-%d') AS date,-->
-<!--               GROUP_CONCAT(U.NAME SEPARATOR ', ') AS names-->
-<!--        FROM FRIEND F-->
-<!--        JOIN USER U ON F.FROM_USER_ID = U.ID-->
-<!--        WHERE F.FRIEND_STATUS = 'FRIEND'-->
-<!--          AND TO_USER_ID = #{userId}-->
-<!--          AND (-->
-<!--            DATE_FORMAT(CONCAT(DATE_FORMAT(#{startDate}, '%Y'), DATE_FORMAT(U.BIRTH_DATE, '-%m-%d')), '%Y-%m-%d')-->
-<!--            BETWEEN DATE_FORMAT(#{startDate}, '%Y-%m-%d')-->
-<!--            AND DATE_FORMAT(#{endDate}, '%Y-%m-%d')-->
-<!--          )-->
-<!--        GROUP BY DATE_FORMAT(U.BIRTH_DATE, '%m-%d')-->
-<!--    ]]>-->
-<!--    </select>-->
 
     <select id="findNameById">
         SELECT name
