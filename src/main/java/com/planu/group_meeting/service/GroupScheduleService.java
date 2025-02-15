@@ -1,6 +1,7 @@
 package com.planu.group_meeting.service;
 
 import com.planu.group_meeting.dao.*;
+import com.planu.group_meeting.dto.GroupScheduleDTO;
 import com.planu.group_meeting.dto.GroupScheduleDTO.GroupSchedulesDetailResponse;
 import com.planu.group_meeting.dto.GroupScheduleDTO.scheduleOverViewResponse;
 import com.planu.group_meeting.dto.GroupScheduleDTO.todayScheduleResponse;

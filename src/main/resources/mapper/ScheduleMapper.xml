@@ -114,13 +114,14 @@
         NULL AS groupId,
         S.TITLE,
         S.LOCATION,
-        DATE_FORMAT(S.START_DATETIME, '%H:%i') AS startTime,
-        DATE_FORMAT(S.END_DATETIME, '%H:%i') AS endTime,
+        DATE_FORMAT(S.START_DATETIME, '%Y-%m-%d %H:%i') AS startTime,
+        DATE_FORMAT(S.END_DATETIME, '%Y-%m-%d %H:%i') AS endTime,
         S.COLOR
     FROM SCHEDULE S
-    WHERE S.USER_ID = #{userId}
-    AND S.START_DATETIME >= #{startDateTime}
-    AND S.END_DATETIME <= #{endDateTime}
+    WHERE S.USER_ID = #{userId} AND
+    (S.START_DATETIME BETWEEN #{startDateTime} AND #{endDateTime})
+    OR (S.END_DATETIME BETWEEN #{startDateTime} AND #{endDateTime})
+    OR (S.START_DATETIME <= #{startDateTime} AND S.END_DATETIME >= #{endDateTime})
 
     UNION
 
@@ -129,14 +130,16 @@
         GS.GROUP_ID AS groupId,
         GS.TITLE,
         GS.LOCATION,
-        DATE_FORMAT(GS.START_DATETIME, '%H:%i') AS startTime,
-        DATE_FORMAT(GS.END_DATETIME, '%H:%i') AS endTime,
+        DATE_FORMAT(GS.START_DATETIME, '%Y-%m-%d %H:%i') AS startTime,
+        DATE_FORMAT(GS.END_DATETIME, '%Y-%m-%d %H:%i') AS endTime,
         GS.COLOR
     FROM GROUP_SCHEDULE GS
     JOIN GROUP_SCHEDULE_PARTICIPANT GSP ON GS.ID = GSP.GROUP_SCHEDULE_ID
-    WHERE GSP.USER_ID = #{userId}
-    AND GS.START_DATETIME >= #{startDateTime}
-    AND GS.END_DATETIME <= #{endDateTime}
+    WHERE GSP.USER_ID = #{userId} AND
+    (GS.START_DATETIME BETWEEN #{startDateTime} AND #{endDateTime})
+    OR (GS.END_DATETIME BETWEEN #{startDateTime} AND #{endDateTime})
+    OR (GS.START_DATETIME <= #{startDateTime} AND GS.END_DATETIME >= #{endDateTime})
+
     ORDER BY startTime
     ]]>
     </select>
