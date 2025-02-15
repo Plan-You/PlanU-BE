@@ -120,19 +120,4 @@ public class GroupScheduleDTO {
         private Boolean isBirthday;
     }
 
-    @Getter
-    @Setter
-    public static class GroupScheduleNotification{
-        private EventType eventType;
-        private Long senderId;
-        private Long receiverId;
-        private String contents;
-
-        public GroupScheduleNotification(Long receiverId, String contents){
-            this.eventType =EventType.SCHEDULE_REMINDER;
-            this.senderId = -1L;        // 서버가 보내는 알림
-            this.receiverId = receiverId;
-            this.contents = contents;
-        }
-    }
 }
