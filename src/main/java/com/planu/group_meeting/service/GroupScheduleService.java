@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,12 +71,11 @@ public class GroupScheduleService {
     @Transactional
     public List<scheduleOverViewResponse> findScheduleOverViewByToday(Long groupId, LocalDate startDate, LocalDate endDate) {
         checkValidGroupId(groupId);
-        LocalDateTime today = LocalDateTime.now();
-        if (startDate == null || endDate == null) {
-            startDate = today.toLocalDate().with(TemporalAdjusters.firstDayOfMonth());
-            endDate = today.toLocalDate().with(TemporalAdjusters.lastDayOfMonth());
+        if(startDate == null) {
+            startDate = LocalDate.now();
         }
-        return groupScheduleDAO.findScheduleOverViewsByRange(groupId, startDate, endDate);
+
+        return groupScheduleDAO.findScheduleOverViewsByRange(groupId, startDate);
     }
 
     @Transactional

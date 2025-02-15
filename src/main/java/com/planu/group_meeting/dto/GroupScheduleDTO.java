@@ -66,8 +66,9 @@ public class GroupScheduleDTO {
     public static class scheduleOverViewResponse {
         private Long id;
         private String title;
-        private LocalDateTime startDateTime;
-        private LocalDateTime endDateTime;
+        private String location;
+        private String startTime;
+        private String endTime;
         private String color;
     }
 
@@ -81,7 +82,8 @@ public class GroupScheduleDTO {
     @Getter
     @AllArgsConstructor
     public static class groupOverViewsResponse {
-        private List<scheduleOverViewResponse> groupSchedules;
+        private List<scheduleOverViewResponse> schedules;
+        private List<String> birthdayPerson;
     }
 
     @Getter

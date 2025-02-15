@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -52,16 +53,17 @@ public class GroupScheduleController implements GroupScheduleDocs {
         ));
     }
 
-    @GetMapping("/{groupId}/calendar")
+    @GetMapping("/{groupId}/schedules/list")
     public ResponseEntity<GroupScheduleDTO.groupOverViewsResponse> groupRequestSchedule(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("groupId") Long groupId,
-            @RequestParam(required = false) @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate endDate
-     )
-    {
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate
+    ) {
         groupUserService.isGroupMember(userDetails.getId(), groupId);
-        return ResponseEntity.ok(new GroupScheduleDTO.groupOverViewsResponse(groupScheduleService.findScheduleOverViewByToday(groupId, startDate, endDate)));
+        var schedules = groupScheduleService.findScheduleOverViewByToday(groupId, startDate, endDate);
+        List<String> birthdayPerson = groupUserService.getBirthdayByDate(groupId, startDate);
+        return ResponseEntity.ok(new GroupScheduleDTO.groupOverViewsResponse(schedules, birthdayPerson));
     }
 
     @GetMapping("/{groupId}/schedules/{scheduleId}")
@@ -69,19 +71,17 @@ public class GroupScheduleController implements GroupScheduleDocs {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("groupId") Long groupId,
             @PathVariable("scheduleId") Long scheduleId
-    )
-    {
+    ) {
         groupUserService.isGroupMember(userDetails.getId(), groupId);
         return ResponseEntity.ok(groupScheduleService.findByGroupScheduleID(groupId, scheduleId));
     }
 
     @DeleteMapping("/{groupId}/schedules/{scheduleId}")
     public ResponseEntity<BaseResponse> deleteGroupSchedule(
-                    @PathVariable("groupId") Long groupId,
-                    @PathVariable("scheduleId") Long scheduleId,
-                    @AuthenticationPrincipal CustomUserDetails userDetails
-    )
-    {
+            @PathVariable("groupId") Long groupId,
+            @PathVariable("scheduleId") Long scheduleId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
         groupUserService.isGroupMember(userDetails.getId(), groupId);
         groupScheduleService.deleteGroupScheduleById(groupId, scheduleId);
         return BaseResponse.toResponseEntity(HttpStatus.OK, "그룹 일정 삭제 성공");
@@ -93,8 +93,7 @@ public class GroupScheduleController implements GroupScheduleDocs {
             @PathVariable("scheduleId") Long scheduleId,
             @Valid @RequestBody GroupScheduleRequest groupScheduleRequest,
             @AuthenticationPrincipal CustomUserDetails userDetails
-    )
-    {
+    ) {
         groupUserService.isGroupMember(userDetails.getId(), groupId);
         groupScheduleService.updateGroupSchedule(groupId, scheduleId, groupScheduleRequest);
         return BaseResponse.toResponseEntity(HttpStatus.OK, "그룹 일정 수정 성공");
