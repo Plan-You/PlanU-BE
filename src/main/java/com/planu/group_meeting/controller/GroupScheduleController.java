@@ -8,6 +8,7 @@ import com.planu.group_meeting.dto.GroupScheduleDTO.GroupScheduleRequest;
 import com.planu.group_meeting.service.GroupScheduleService;
 import com.planu.group_meeting.service.GroupService;
 import com.planu.group_meeting.service.GroupUserService;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -18,6 +19,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/groups")
@@ -94,6 +98,17 @@ public class GroupScheduleController implements GroupScheduleDocs {
         groupUserService.isGroupMember(userDetails.getId(), groupId);
         groupScheduleService.updateGroupSchedule(groupId, scheduleId, groupScheduleRequest);
         return BaseResponse.toResponseEntity(HttpStatus.OK, "그룹 일정 수정 성공");
+    }
+
+    @GetMapping("/{groupId}/schedules/check-events")
+    public ResponseEntity<Map<String, Object>> getGroupCalendarEvents(
+            @PathVariable("groupId") Long groupId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("groupScheduleData", groupScheduleService.getGroupCalendarEvents(groupId, yearMonth, groupUserService));
+        return ResponseEntity.ok(response);
     }
 }
 

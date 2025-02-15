@@ -43,7 +43,7 @@
 
     <delete id="deleteOldNotification">
         DELETE FROM NOTIFICATION
-        WHERE CREATED_AT &lt; DATE_SUB(NOW(), INTERVAL 6 MONTH)
+        WHERE CREATED_DATE &lt; DATE_SUB(NOW(), INTERVAL 6 MONTH)
     </delete>
 
 </mapper>

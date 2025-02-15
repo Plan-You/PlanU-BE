@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.Map;
 
 @Tag(name = "GROUP SCHEDULE API", description = "그룹 일정 API")
 public interface GroupScheduleDocs {
@@ -534,6 +537,86 @@ public interface GroupScheduleDocs {
             @PathVariable("groupId") Long groupId,
             @PathVariable("scheduleId") Long scheduleId,
             @Valid @RequestBody GroupScheduleDTO.GroupScheduleRequest groupScheduleRequest,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    );
+
+    @Operation(summary = "그룹 일정 유무 조회 API", description = "그룹 일정 유무를 조회합니다.")
+    @ApiResponses
+            ({
+                    @ApiResponse
+                            (
+                                    responseCode = "200",
+                                    description = "그룹 일정 유무 조회 성공",
+                                    content = @Content
+                                            (
+                                                    mediaType = "application/json",
+                                                    schema = @Schema
+                                                            (
+                                                                    example = """
+                                                                            {
+                                                                                "groupScheduleData": [
+                                                                                    {
+                                                                                        "date": "2025-02-01",
+                                                                                        "isSchedule": false,
+                                                                                        "isBirthday": true
+                                                                                    },
+                                                                                    {
+                                                                                        "date": "2025-02-06",
+                                                                                        "isSchedule": true,
+                                                                                        "isBirthday": false
+                                                                                    },
+                                                                                    {
+                                                                                        "date": "2025-02-14",
+                                                                                        "isSchedule": true,
+                                                                                        "isBirthday": true
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                            """
+                                                            )
+                                            )
+                            ),
+                    @ApiResponse
+                            (
+                                    responseCode = "404",
+                                    description = "그룹을 찾을 수 없는 경우",
+                                    content = @Content
+                                            (
+                                                    mediaType = "application/json",
+                                                    schema = @Schema
+                                                            (
+                                                                    example = """
+                                                                            {
+                                                                                "resultCode": 404,
+                                                                                "resultMsg": "그룹을 찾을 수 없습니다."
+                                                                            }
+                                                                            """
+                                                            )
+                                            )
+
+                            ),
+                    @ApiResponse
+                            (
+                                    responseCode = "403",
+                                    description = "그룹원이 아닌 경우",
+                                    content = @Content
+                                            (
+                                                    mediaType = "application/json",
+                                                    schema = @Schema
+                                                            (
+                                                                    example = """
+                                                                            {
+                                                                                "resultCode": 403,
+                                                                                "resultMsg": "접근 권한이 없습니다."
+                                                                            }
+                                                                            """
+                                                            )
+                                            )
+                            )
+            })
+    public ResponseEntity<Map<String, Object>> getGroupCalendarEvents(
+            @PathVariable("groupId") Long groupId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth,
             @AuthenticationPrincipal CustomUserDetails userDetails
     );
 }

@@ -28,6 +28,14 @@
         )
     </select>
 
+   <select id="existsGroupScheduleByDate" resultType="boolean">
+       SELECT EXISTS (
+            SELECT 1
+            FROM GROUP_SCHEDULE
+            WHERE GROUP_ID = #{groupId} and DATE(START_DATETIME) = #{date}
+       )
+   </select>
+
     <insert id="insert" parameterType="com.planu.group_meeting.entity.GroupSchedule" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO GROUP_SCHEDULE(TITLE, START_DATETIME, END_DATETIME, COLOR, MEMO, LOCATION, LATITUDE, LONGITUDE, GROUP_ID )
         VALUES (#{title}, #{startDateTime}, #{endDateTime}, #{color}, #{memo}, #{location}, #{latitude}, #{longitude}, #{groupId})

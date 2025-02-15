@@ -110,4 +110,14 @@ public class GroupScheduleDTO {
         private final String memo;
         private List<ParticipantsResponse> participants;
     }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class GroupCalendarEvent {
+        private String date;
+        private Boolean isSchedule;
+        private Boolean isBirthday;
+    }
+
 }
