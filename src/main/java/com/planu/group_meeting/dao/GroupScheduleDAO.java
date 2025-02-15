@@ -16,7 +16,7 @@ public interface GroupScheduleDAO {
 
     List<todayScheduleResponse> findTodaySchedulesByToday(Long groupId, LocalDateTime today);
 
-    List<scheduleOverViewResponse> findScheduleOverViewsByRange(Long groupId, LocalDate startDate, LocalDate endDate);
+    List<scheduleOverViewResponse> findScheduleOverViewsByRange(Long groupId, LocalDate startDate);
 
     boolean existsScheduleByDate(Long userId, LocalDate date);
 

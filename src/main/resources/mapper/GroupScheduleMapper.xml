@@ -13,9 +13,15 @@
 
     <select id="findScheduleOverViewsByRange"
             resultType="com.planu.group_meeting.dto.GroupScheduleDTO$scheduleOverViewResponse">
-        SELECT id, title, start_datetime as startDateTIme, end_datetime as endDateTime, color
+        SELECT
+            id,
+            title,
+            location,
+            DATE_FORMAT(start_datetime, '%Y-%m-%d %H:%i') as startTime,
+            DATE_FORMAT(end_datetime, '%Y-%m-%d %H:%i') as endTime,
+            color
         FROM GROUP_SCHEDULE
-        WHERE group_id = #{groupId} and start_datetime >= #{startDate} and #{endDate} >= start_datetime
+        WHERE group_id = #{groupId} and start_datetime >= #{startDate} and end_datetime >= #{startDate}
         ORDER BY date(start_datetime) ASC, datediff(end_datetime, start_datetime) desc;
     </select>
 
