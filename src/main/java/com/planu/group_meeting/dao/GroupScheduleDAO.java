@@ -31,4 +31,6 @@ public interface GroupScheduleDAO {
     void updateGroupSchedule(GroupSchedule groupSchedule);
 
     Boolean existsGroupScheduleByDate(Long groupId, LocalDate date);
+
+    List<scheduleOverViewResponse> getGroupScheduleByYearMonth(Long groupId, LocalDate startDate, LocalDate endDate);
 }

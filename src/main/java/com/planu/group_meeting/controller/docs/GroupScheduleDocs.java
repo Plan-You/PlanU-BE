@@ -619,4 +619,83 @@ public interface GroupScheduleDocs {
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth,
             @AuthenticationPrincipal CustomUserDetails userDetails
     );
+
+    @Operation(summary = "달력의 그룹 정보", description = "그룹 달력에 그룹 일정 정보를 제공")
+    @ApiResponses
+            ({
+                    @ApiResponse
+                            (
+                                    responseCode = "200",
+                                    description = "그룹 달력 일정 조회 성공",
+                                    content = @Content
+                                            (
+                                                    mediaType = "application/json",
+                                                    schema = @Schema
+                                                            (
+                                                                    example = """
+                                                                            {
+                                                                                "groupSchedules": [
+                                                                                    {
+                                                                                        "id": 5,
+                                                                                        "title": "술약",
+                                                                                        "startDateTime": "2024-02-20",
+                                                                                        "endDateTime": "2024-02-20",
+                                                                                        "color": "#44AA44"
+                                                                                    },
+                                                                                    {
+                                                                                        "id": 8,
+                                                                                        "title": "1박 2일 여행",
+                                                                                        "startDateTime": "2024-02-02",
+                                                                                        "endDateTime": "2024-02-03",
+                                                                                        "color": "#55FFFF"
+                                                                                    },
+                                                                                    {
+                                                                                        "id": 3,
+                                                                                        "title": "수현이 생일파티",
+                                                                                        "startDateTime": "2024-02-19",
+                                                                                        "endDateTime": "2024-02-19",
+                                                                                        "color": "#22FFFF"
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                            """
+                                                            )
+
+                                            )
+                            ),
+                    @ApiResponse
+                            (
+                                    responseCode = "404",
+                                    description = "그룹을 찾을 수 없습니다.",
+                                    content = @Content
+                                            (
+                                                    mediaType = "application/json",
+                                                    schema = @Schema
+                                                            (
+                                                                    example = "{\"resultCode\": 404, \"resultMsg\": \"그룹을 찾을 수 없습니다.\"}"
+                                                            )
+                                            )
+
+                            ),
+                    @ApiResponse
+                            (
+                                    responseCode = "403",
+                                    description = "그룹원이 아닌 경우",
+                                    content = @Content
+                                            (
+                                                    mediaType = "application/json",
+                                                    schema = @Schema
+                                                            (
+                                                                    example = "{\"resultCode\": 403, \"resultMsg\": \"접근 권한이 없습니다.\"}"
+                                                            )
+                                            )
+                            )
+
+            })
+    public ResponseEntity<Map<String, Object>> getGroupScheduleByYearMonth
+            (
+                    @PathVariable("groupId") Long groupId,
+                    @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth,
+                    @AuthenticationPrincipal CustomUserDetails userDetails
+            );
 }

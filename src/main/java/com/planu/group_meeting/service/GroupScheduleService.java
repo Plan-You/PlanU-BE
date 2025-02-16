@@ -193,4 +193,18 @@ public class GroupScheduleService {
         }
         return groupCalendarEvents;
     }
+
+    public List<scheduleOverViewResponse> getGroupScheduleByYearMonth(Long groupId, YearMonth yearMonth) {
+        checkValidGroupId(groupId);
+        if(yearMonth == null) {
+            yearMonth = YearMonth.now();
+        }
+        LocalDate firstDayOfMonth = yearMonth.atDay(1);
+        LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
+
+        LocalDate startOfCalendar = firstDayOfMonth.minusDays(firstDayOfMonth.getDayOfWeek().getValue() % 7);
+        LocalDate endOfCalendar = lastDayOfMonth.plusDays(6 - lastDayOfMonth.getDayOfWeek().getValue());
+
+        return groupScheduleDAO.getGroupScheduleByYearMonth(groupId, startOfCalendar, endOfCalendar);
+    }
 }
