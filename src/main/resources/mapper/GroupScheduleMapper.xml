@@ -98,4 +98,12 @@
         WHERE
             group_id = #{groupId} and id = #{id}
     </update>
+
+    <select id="getGroupScheduleByYearMonth" resultType="com.planu.group_meeting.dto.GroupScheduleDTO$scheduleOverViewResponse">
+        SELECT id, title, start_datetime as startTime, end_datetime as endTime, color
+        FROM GROUP_SCHEDULE
+        WHERE group_id = #{groupId} and start_datetime >= #{startDate} and #{endDate} >= end_datetime
+        ORDER BY date(start_datetime) ASC, datediff(end_datetime, start_datetime) desc;
+    </select>
+
 </mapper>

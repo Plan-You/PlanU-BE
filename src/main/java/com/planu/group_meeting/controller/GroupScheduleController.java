@@ -109,5 +109,17 @@ public class GroupScheduleController implements GroupScheduleDocs {
         response.put("groupScheduleData", groupScheduleService.getGroupCalendarEvents(groupId, yearMonth, groupUserService));
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/{groupId}/calendar")
+    public ResponseEntity<Map<String, Object>> getGroupScheduleByYearMonth(
+            @PathVariable("groupId") Long groupId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        groupUserService.isGroupMember(userDetails.getId(), groupId);
+        Map<String, Object> response = new HashMap<>();
+        response.put("groupSchedules", groupScheduleService.getGroupScheduleByYearMonth(groupId, yearMonth));
+        return ResponseEntity.ok(response);
+    }
 }
 
