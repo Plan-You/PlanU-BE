@@ -207,4 +207,9 @@ public class GroupScheduleService {
 
         return groupScheduleDAO.getGroupScheduleByYearMonth(groupId, startOfCalendar, endOfCalendar);
     }
+
+    public void isValidSchedule(Long groupId, Long groupScheduleId) {
+        checkValidGroupId(groupId);
+        findGroupScheduleById(groupId, groupScheduleId);
+    }
 }

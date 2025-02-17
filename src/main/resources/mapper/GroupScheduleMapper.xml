@@ -105,5 +105,4 @@
         WHERE group_id = #{groupId} and start_datetime >= #{startDate} and #{endDate} >= end_datetime
         ORDER BY date(start_datetime) ASC, datediff(end_datetime, start_datetime) desc;
     </select>
-
 </mapper>
