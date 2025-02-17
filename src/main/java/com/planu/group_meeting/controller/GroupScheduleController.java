@@ -3,6 +3,7 @@ package com.planu.group_meeting.controller;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.controller.docs.GroupScheduleDocs;
 import com.planu.group_meeting.dto.BaseResponse;
+import com.planu.group_meeting.dto.GroupScheduleCommentDTO;
 import com.planu.group_meeting.dto.GroupScheduleDTO;
 import com.planu.group_meeting.dto.GroupScheduleDTO.GroupScheduleRequest;
 import com.planu.group_meeting.service.GroupScheduleService;
