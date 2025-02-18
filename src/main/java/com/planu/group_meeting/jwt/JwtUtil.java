@@ -1,7 +1,11 @@
 package com.planu.group_meeting.jwt;
 
+import com.planu.group_meeting.exception.user.InvalidTokenException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -11,6 +15,9 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+
+import static com.planu.group_meeting.jwt.JwtFilter.EXPIRED_JWT_TOKEN_MESSAGE;
+import static com.planu.group_meeting.jwt.JwtFilter.INVALID_JWT_TOKEN_MESSAGE;
 
 @Component
 public class JwtUtil {
@@ -51,6 +58,15 @@ public class JwtUtil {
                 .getBody();
     }
 
+    public void validateToken(String token){
+        try{
+            parseToken(token);
+        } catch (ExpiredJwtException e){
+            throw new InvalidTokenException(EXPIRED_JWT_TOKEN_MESSAGE);
+        } catch(SignatureException | MalformedJwtException e ){
+            throw new InvalidTokenException(INVALID_JWT_TOKEN_MESSAGE);
+        }
+    }
 
     public String createAccessToken(String username, String role) {
 

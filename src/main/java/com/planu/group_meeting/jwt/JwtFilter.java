@@ -7,6 +7,7 @@ import com.planu.group_meeting.entity.User;
 import com.planu.group_meeting.exception.user.InvalidTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,8 +30,8 @@ public class JwtFilter extends OncePerRequestFilter {
     private final UserDAO userDAO;
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer ";
-    private static final String EXPIRED_JWT_TOKEN_MESSAGE = "만료된 토큰입니다.";
-    private static final String INVALID_JWT_TOKEN_MESSAGE = "유효하지 않은 토큰입니다.";
+    public static final String EXPIRED_JWT_TOKEN_MESSAGE = "만료된 토큰입니다.";
+    public static final String INVALID_JWT_TOKEN_MESSAGE = "유효하지 않은 토큰입니다.";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -56,20 +57,20 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (ExpiredJwtException e) {
-            jwtExceptionHandler(response, EXPIRED_JWT_TOKEN_MESSAGE, HttpServletResponse.SC_UNAUTHORIZED);
-        } catch (InvalidTokenException | SignatureException e) {
-            jwtExceptionHandler(response, INVALID_JWT_TOKEN_MESSAGE, HttpServletResponse.SC_FORBIDDEN);
+            jwtExceptionHandler(response, EXPIRED_JWT_TOKEN_MESSAGE);
+        } catch (InvalidTokenException | MalformedJwtException | SignatureException e) {
+            jwtExceptionHandler(response, INVALID_JWT_TOKEN_MESSAGE);
         }
     }
 
-    private void jwtExceptionHandler(HttpServletResponse response, String message, int statusCode) {
-        response.setStatus(statusCode);
+    private void jwtExceptionHandler(HttpServletResponse response, String message) {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
         try {
             String json = new ObjectMapper().writeValueAsString(
-                    new ErrorResponse(statusCode, message)
+                    new ErrorResponse(HttpServletResponse.SC_UNAUTHORIZED, message)
             );
             response.getWriter().write(json);
         } catch (IOException e) {
