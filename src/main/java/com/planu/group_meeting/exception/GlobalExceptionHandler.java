@@ -48,6 +48,11 @@ public class GlobalExceptionHandler {
         return BaseResponse.toResponseEntity(HttpStatus.CONFLICT, "이미 존재하는 이메일 입니다.");
     }
 
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<BaseResponse> handleInvalidTokenException(InvalidTokenException e){
+        return BaseResponse.toResponseEntity(HttpStatus.UNAUTHORIZED, e.getMessage());
+    }
+
     @ExceptionHandler(InvalidRefreshTokenException.class)
     public ResponseEntity<BaseResponse> handleInvalidTokenException(InvalidRefreshTokenException e) {
         return BaseResponse.toResponseEntity(HttpStatus.FORBIDDEN, "유효하지 않은 토큰입니다.");
