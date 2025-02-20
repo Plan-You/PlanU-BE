@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,4 +16,6 @@ public class GroupScheduleComment {
     private Long groupId;
     private Long groupScheduleId;
     private String message;
+    private LocalDateTime createdDate;
+    private LocalDateTime updatedDate;
 }
