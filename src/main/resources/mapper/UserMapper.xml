@@ -163,4 +163,10 @@
         FROM USER
         WHERE id = #{userId}
     </select>
+
+    <select id="findUsernameById">
+        select username
+        from USER
+        where id = #{userId}
+    </select>
 </mapper>

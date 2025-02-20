@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("groups/{groupId}/schedules/{scheduleId}")
@@ -32,5 +34,19 @@ public class GroupScheduleCommentController {
         groupScheduleService.isValidSchedule(groupId, groupScheduleId);
         groupScheduleCommentService.create(userDetails.getId(), groupId, groupScheduleId, groupScheduleComment);
         return BaseResponse.toResponseEntity(HttpStatus.CREATED, "그룹 일정 댓글 생성 성공");
+    }
+
+    @GetMapping("/comment")
+    public ResponseEntity<Map<String, Object>> getAllComments(
+       @PathVariable("groupId") Long groupId,
+       @PathVariable("scheduleId") Long groupScheduleId,
+       @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        groupUserService.isGroupMember(userDetails.getId(), groupId);
+        groupScheduleService.isValidSchedule(groupId, groupScheduleId);
+
+        Map<String, Object> response = groupScheduleCommentService.getAllByGroupScheduleId(groupId, groupScheduleId);
+
+        return ResponseEntity.ok(response);
     }
 }

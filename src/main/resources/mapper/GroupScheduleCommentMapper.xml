@@ -8,4 +8,16 @@
         insert into GROUP_SCHEDULE_COMMENT(USER_ID, GROUP_ID, GROUP_SCHEDULE_ID, MESSAGE)
         values(#{userId}, #{groupId}, #{groupScheduleId}, #{message})
     </insert>
+
+    <select id="getAllByGroupScheduleId">
+        select
+            user_id as userId,
+            group_id as groupId,
+            group_schedule_id as groupScheduleId,
+            message,
+            created_date as createdDate
+        from GROUP_SCHEDULE_COMMENT
+        where group_id = #{groupId} and group_schedule_id = #{groupScheduleId}
+        order by created_date desc
+    </select>
 </mapper>
