@@ -1,5 +1,7 @@
 package com.planu.group_meeting.service;
 
+import com.planu.group_meeting.chat.controller.ChatController;
+import com.planu.group_meeting.chat.service.ChatService;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dao.*;
 import com.planu.group_meeting.dto.AvailableDateDto;
@@ -17,8 +19,8 @@ import com.planu.group_meeting.entity.common.FriendStatus;
 import com.planu.group_meeting.exception.group.GroupNotFoundException;
 import com.planu.group_meeting.exception.group.UnauthorizedAccessException;
 import com.planu.group_meeting.service.file.S3Uploader;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,6 +33,7 @@ import static com.planu.group_meeting.dto.NotificationDTO.*;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class GroupService {
     private final GroupDAO groupDAO;
     private final UserDAO userDAO;
@@ -39,17 +42,7 @@ public class GroupService {
     private final FriendDAO friendDAO;
     private final AvailableDateDAO availableDateDAO;
     private final NotificationService notificationService;
-
-    @Autowired
-    public GroupService(GroupDAO groupDAO, UserDAO userDAO, S3Uploader s3Uploader, GroupUserDAO groupUserDAO, FriendDAO friendDAO, AvailableDateDAO availableDateDAO, NotificationService notificationService) {
-        this.groupDAO = groupDAO;
-        this.userDAO = userDAO;
-        this.s3Uploader = s3Uploader;
-        this.groupUserDAO = groupUserDAO;
-        this.friendDAO = friendDAO;
-        this.availableDateDAO = availableDateDAO;
-        this.notificationService = notificationService;
-    }
+    private final ChatService chatService;
 
     @Transactional
     public GroupResponseDTO createGroup(String username, String groupName, MultipartFile groupImage) {
@@ -264,6 +257,8 @@ public class GroupService {
         if (groupUser == null || groupUser.getGroupState() == 0) {
             throw new IllegalArgumentException("그룹에 속해 있지 않은 멤버입니다.");
         }
+
+        chatService.expelChat(username, groupId);
 
         GroupExpelNotification groupExpelNotification = new GroupExpelNotification(leaderId, userId, groupDAO.findNameByGroupId(groupId) + " 그룹에서 추방되었습니다.");
         notificationService.sendNotification(EventType.GROUP_EXPEL, groupExpelNotification);

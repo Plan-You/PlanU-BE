@@ -1,5 +1,6 @@
 package com.planu.group_meeting.chat.handler;
 
+import com.planu.group_meeting.chat.principal.UsernamePrincipal;
 import com.planu.group_meeting.dao.GroupDAO;
 import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.entity.GroupUser;
@@ -37,6 +38,7 @@ public class StompHandler implements ChannelInterceptor {
 
         if (StompCommand.CONNECT.equals(command)) {
             String username = getUsernameByAuthorizationHeader(accessor.getFirstNativeHeader("Authorization"));
+            accessor.setUser(new UsernamePrincipal(username));
 
             setValue(accessor, "username", username);
         }
