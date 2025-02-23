@@ -54,6 +54,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/", "/users", "/users/login", "/users/token/reissue", "/users/username/**",
                                 "/users/email-verification/**", "/users/find-username", "/users/find-password", "/profile", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
@@ -93,7 +94,8 @@ public class SecurityConfig {
 
                         configuration.setAllowedOrigins(Arrays.asList(
                                 "https://localhost:5173",
-                                "https://15.165.3.168.nip.io"
+                                "https://15.165.3.168.nip.io",
+                                "https://jiangxy.github.io"
                         ));
 
                         configuration.setAllowedMethods(Collections.singletonList("*"));
