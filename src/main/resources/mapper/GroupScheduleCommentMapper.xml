@@ -11,6 +11,7 @@
 
     <select id="getAllByGroupScheduleId">
         select
+            id,
             user_id as userId,
             group_id as groupId,
             group_schedule_id as groupScheduleId,
