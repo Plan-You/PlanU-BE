@@ -21,7 +21,10 @@
             DATE_FORMAT(end_datetime, '%Y-%m-%d %H:%i') as endTime,
             color
         FROM GROUP_SCHEDULE
-        WHERE group_id = #{groupId} and start_datetime >= #{startDate} and end_datetime >= #{startDate}
+        WHERE group_id = #{groupId}
+        AND (
+        DATE(start_datetime) = #{startDate}
+        OR ( #{startDate} >= start_datetime AND end_datetime >= #{startDate}) )
         ORDER BY date(start_datetime) ASC, datediff(end_datetime, start_datetime) desc;
     </select>
 
