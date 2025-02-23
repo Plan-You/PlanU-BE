@@ -26,6 +26,12 @@
         VALUES (#{username}, #{email}, #{password}, #{name}, #{role})
     </insert>
 
+    <select id="findIdByUsername" parameterType="String" resultType="Long">
+        SELECT ID
+        FROM USER
+        WHERE USERNAME = #{username}
+    </select>
+
 
     <select id="findUsernameByEmail" parameterType="String" resultType="String">
         SELECT USERNAME
