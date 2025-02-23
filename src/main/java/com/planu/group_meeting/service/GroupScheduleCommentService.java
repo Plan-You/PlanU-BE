@@ -61,6 +61,10 @@ public class GroupScheduleCommentService {
         return response;
     }
 
+    public void deleteCommentById(Long groupId, Long groupScheduleId, Long commentId) {
+        groupScheduleCommentDAO.deleteCommentById(groupId, groupScheduleId, commentId);
+    }
+
     private String formatTimestamp(LocalDateTime currentTime, LocalDateTime createdTime) {
         Duration duration = Duration.between(createdTime, currentTime);
         StringBuilder stringBuilder = new StringBuilder();

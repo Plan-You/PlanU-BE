@@ -49,4 +49,18 @@ public class GroupScheduleCommentController {
 
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/comment/{commentId}")
+    public ResponseEntity<BaseResponse> deleteCommentById(
+        @PathVariable("groupId") Long groupId,
+        @PathVariable("scheduleId") Long groupScheduleId,
+        @PathVariable("commentId") Long commentId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        groupUserService.isGroupMember(userDetails.getId(), groupId);
+        groupScheduleService.isValidSchedule(groupId, groupScheduleId);
+        groupScheduleCommentService.deleteCommentById(groupId, groupScheduleId, commentId);
+
+        return BaseResponse.toResponseEntity(HttpStatus.ACCEPTED, "그룹 일정 댓글 삭제 성공");
+    }
 }
