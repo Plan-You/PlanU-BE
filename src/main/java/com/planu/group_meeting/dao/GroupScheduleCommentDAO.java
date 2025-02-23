@@ -12,4 +12,6 @@ public interface GroupScheduleCommentDAO {
 
     // 그룹 일정의 모든 댓글 정보를 조회
     List<GroupScheduleComment> getAllByGroupScheduleId(Long groupId, Long groupScheduleId);
+
+    void deleteCommentById(Long groupId, Long groupScheduleId, Long commentId);
 }

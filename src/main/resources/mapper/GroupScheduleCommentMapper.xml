@@ -21,4 +21,10 @@
         where group_id = #{groupId} and group_schedule_id = #{groupScheduleId}
         order by created_date desc
     </select>
+
+    <delete id="deleteCommentById">
+        delete
+        from GROUP_SCHEDULE_COMMENT
+        where group_id = #{groupId} and group_schedule_id = #{groupScheduleId} and id = #{commentId}
+    </delete>
 </mapper>
