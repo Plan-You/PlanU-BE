@@ -8,6 +8,8 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Controller;
 
+import java.security.Principal;
+
 @Controller
 @RequiredArgsConstructor
 public class ChatController {
@@ -15,13 +17,9 @@ public class ChatController {
     private final SimpMessageSendingOperations simpMessageSendingOperations;
 
     @MessageMapping("/chat/group/{groupId}")
-    public void chat(ChatMessageRequest message, @DestinationVariable("groupId") Long groupId){
+    public void chat(ChatMessageRequest message, @DestinationVariable("groupId") Long groupId, Principal principal){
+        message.setSender(principal.getName());
         simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId, message);
     }
 
-    public void expelChat(String username, Long groupId) {
-        simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId, username + "님이 나가셨습니다.");
-
-        // 웹소켓 연결 끊기.
-    }
 }
