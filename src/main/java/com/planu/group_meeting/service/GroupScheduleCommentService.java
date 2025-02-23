@@ -48,6 +48,7 @@ public class GroupScheduleCommentService {
             String name = userDAO.findNameById(comment.getUserId());
             String timestamp = formatTimestamp(currentTime, comment.getCreatedDate());
 
+            commentView.put("id", comment.getId());
             commentView.put("username", username);
             commentView.put("name", name);
             commentView.put("timestamp", timestamp);

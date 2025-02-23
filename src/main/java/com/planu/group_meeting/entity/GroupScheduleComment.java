@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class GroupScheduleComment {
+    private Long id;
     private Long userId;
     private Long groupId;
     private Long groupScheduleId;
