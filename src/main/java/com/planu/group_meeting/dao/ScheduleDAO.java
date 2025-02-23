@@ -1,18 +1,16 @@
 package com.planu.group_meeting.dao;
 
-import com.planu.group_meeting.dto.ScheduleDto;
-import com.planu.group_meeting.dto.ScheduleDto.ScheduleListResponse;
 import com.planu.group_meeting.dto.ScheduleDto.ScheduleDetailsResponse;
 import com.planu.group_meeting.entity.Schedule;
-import com.planu.group_meeting.entity.ScheduleParticipant;
-import com.planu.group_meeting.entity.UnregisteredParticipant;
 import org.apache.ibatis.annotations.Mapper;
-import org.springframework.data.repository.query.Param;
+import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import static com.planu.group_meeting.dto.ScheduleDto.ScheduleListResponse;
 
 @Mapper
 public interface ScheduleDAO {
@@ -29,6 +27,8 @@ public interface ScheduleDAO {
     List<ScheduleListResponse> getScheduleList(@Param("userId") Long userId,
                                                @Param("startDateTime") LocalDateTime startDateTime,
                                                @Param("endDateTime") LocalDateTime endDateTime);
+
+
 
     boolean existsScheduleByDate(Long userId, LocalDate date);
 

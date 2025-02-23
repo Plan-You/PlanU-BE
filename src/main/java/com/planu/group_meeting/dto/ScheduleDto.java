@@ -1,5 +1,6 @@
 package com.planu.group_meeting.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.planu.group_meeting.dto.ParticipantDto.ScheduleParticipantResponse;
 import com.planu.group_meeting.dto.ParticipantDto.UnregisteredParticipantResponse;
 import com.planu.group_meeting.entity.Schedule;
@@ -14,7 +15,6 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,13 +90,14 @@ public class ScheduleDto {
     @Getter
     @Setter
     public static class ScheduleListResponse {
-        private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
         private Long id;
         private Long groupId;
         private String title;
         private String location;
-        private String startTime;
-        private String endTime;
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+        private LocalDateTime startTime;
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+        private LocalDateTime endTime;
         private String color;
     }
 
