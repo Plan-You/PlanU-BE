@@ -160,4 +160,22 @@
         SET GROUP_PIN = NULL, GROUP_IS_PIN = FALSE, VERSION = VERSION + 1
         WHERE USER_ID = #{userId} AND GROUP_ID = #{groupId} AND VERSION = #{version}
     </update>
+
+    <resultMap id="GroupUserDTOResultMap" type="com.planu.group_meeting.dto.GroupUserDTO">
+        <id property="userId" column="USER_ID"/>
+        <id property="groupId" column="GROUP_ID"/>
+        <result property="groupRole" column="GROUP_ROLE"/>
+        <result property="groupState" column="GROUP_STATE"/>
+        <result property="pinTime" column="GROUP_PIN"/>
+        <result property="isPin" column="GROUP_IS_PIN"/>
+        <result property="version" column="VERSION"/>
+        <result property="createdDate" column="CREATED_DATE"/>
+        <result property="updatedDate" column="UPDATED_DATE"/>
+    </resultMap>
+
+    <select id="findGroupsByGroupId" resultMap="GroupUserDTOResultMap">
+        SELECT USER_ID, GROUP_ID, GROUP_ROLE, GROUP_STATE, GROUP_PIN, GROUP_IS_PIN, VERSION, CREATED_DATE, UPDATED_DATE
+        FROM GROUP_USER
+        WHERE GROUP_ID = #{groupId}
+    </select>
 </mapper>
