@@ -2,6 +2,7 @@ package com.planu.group_meeting.dao;
 
 import com.planu.group_meeting.dto.GroupDTO.Member;
 import com.planu.group_meeting.dto.GroupResponseDTO;
+import com.planu.group_meeting.dto.GroupUserDTO;
 import com.planu.group_meeting.entity.Group;
 import com.planu.group_meeting.entity.GroupUser;
 import org.apache.ibatis.annotations.Mapper;
@@ -57,4 +58,6 @@ public interface GroupDAO {
     List<Member> findGroupMembers(Long groupId, String keyword);
 
     List<Long> findUserIdsByGroupId(Long groupId);
+
+    List<GroupUserDTO> findGroupsByGroupId(Long groupId);
 }
