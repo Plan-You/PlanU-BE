@@ -1,4 +1,4 @@
-package com.planu.group_meeting.chat.dto;
+package com.planu.group_meeting.chat.dto.request;
 
 import lombok.Data;
 

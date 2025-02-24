@@ -1,7 +1,7 @@
 package com.planu.group_meeting.chat.controller;
 
 
-import com.planu.group_meeting.chat.dto.ChatMessageRequest;
+import com.planu.group_meeting.chat.dto.request.ChatMessageRequest;
 import com.planu.group_meeting.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -10,8 +10,6 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.security.Principal;
 
 @Controller
 @RequiredArgsConstructor

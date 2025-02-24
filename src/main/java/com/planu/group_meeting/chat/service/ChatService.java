@@ -1,6 +1,7 @@
 package com.planu.group_meeting.chat.service;
 
 import com.planu.group_meeting.chat.dao.ChatDAO;
+import com.planu.group_meeting.chat.dto.ChatMessage;
 import com.planu.group_meeting.dao.UserDAO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -19,9 +20,15 @@ public class ChatService {
     public void save(Long groupId, String username, String content){
         Long userId = userDAO.findIdByUsername(username);
 
-        Long messageId = chatDAO.save(userId, groupId, content);
+        ChatMessage chatMessage = ChatMessage.builder()
+                .userId(userId)
+                .groupId(groupId)
+                .content(content)
+                .build();
 
-        System.out.println(messageId);
+        chatDAO.save(chatMessage);
+
+        System.out.println(chatMessage.getId());
     }
 
     @Transactional
