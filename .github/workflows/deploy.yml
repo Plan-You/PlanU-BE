@@ -48,7 +48,7 @@ jobs:
             echo "Copying environment variables..."
             
             # 기존 .env 삭제 후 새로운 환경 변수 설정
-            cat <<EOF > .env
+            cat <<'ENV_EOF' > .env
             SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
             SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
             SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
@@ -63,7 +63,7 @@ jobs:
             aws.credentials.secret-key=${{ secrets.AWS_SECRET_ACCESS_KEY }}
             KAKAO_ID=${{ secrets.KAKAO_ID }}
             KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}
-            EOF
+            ENV_EOF
 
             echo "Environment variables set successfully."
 
