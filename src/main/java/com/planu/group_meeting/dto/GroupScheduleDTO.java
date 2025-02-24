@@ -63,6 +63,7 @@ public class GroupScheduleDTO {
     }
 
     @Getter
+    @Setter
     public static class scheduleOverViewResponse {
         private Long id;
         private String title;
