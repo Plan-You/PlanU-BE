@@ -4,10 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.planu.group_meeting.chat.dao.ChatDAO">
-    <insert id="save">
-        <selectKey keyProperty="id" resultType="long" order="AFTER">
-            SELECT LAST_INSERT_ID()
-        </selectKey>
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO CHAT_MESSAGE (USER_ID, GROUP_ID, MESSAGE)
         VALUES (#{userId}, #{groupId}, #{content})
     </insert>

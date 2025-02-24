@@ -1,6 +1,5 @@
 package com.planu.group_meeting.chat.handler;
 
-import com.planu.group_meeting.chat.principal.UsernamePrincipal;
 import com.planu.group_meeting.dao.GroupDAO;
 import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.entity.GroupUser;
@@ -14,7 +13,6 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.WebSocketSession;
 
 import java.util.Map;
 import java.util.Objects;
@@ -27,6 +25,8 @@ public class StompHandler implements ChannelInterceptor {
     public static final String DEFAULT_SUB_PATH = "/sub/chat/group/";
     public static final String DEFAULT_PUB_PATH = "/pub/chat/group/";
 
+    public static final String DEFAULT_DISCONNECT_SUB_PATH = "/sub/disconnect/";
+
     private final JwtUtil jwtUtil;
     private final GroupDAO groupDAO;
     private final UserDAO userDAO;
@@ -38,16 +38,19 @@ public class StompHandler implements ChannelInterceptor {
 
         if (StompCommand.CONNECT.equals(command)) {
             String username = getUsernameByAuthorizationHeader(accessor.getFirstNativeHeader("Authorization"));
-            accessor.setUser(new UsernamePrincipal(username));
 
             setValue(accessor, "username", username);
         }
 
         else if (StompCommand.SUBSCRIBE.equals(command)) {
             String username = (String)getValue(accessor, "username");
-            Long groupId = parseGroupIdFromSubPath(accessor);
-
-            validateUserInGroup(username, groupId);
+            String destination = accessor.getDestination();
+            if(destination.startsWith(DEFAULT_SUB_PATH)){
+                Long groupId = parseGroupIdFromSubPath(accessor);
+                validateUserInGroup(username, groupId);
+            } else {
+                validateUsername(accessor, username);
+            }
         }
         
         else if (StompCommand.SEND.equals(command)) {
@@ -93,6 +96,13 @@ public class StompHandler implements ChannelInterceptor {
         }
     }
 
+    private void validateUsername(StompHeaderAccessor accessor, String username) {
+        String usernameFromDestination = parseUsernameFromSubpath(accessor);
+        if(!Objects.equals(username, usernameFromDestination)) {
+            throw new IllegalArgumentException("username : " + usernameFromDestination + "이 저장된 정보와 다릅니다.");
+        }
+    }
+
     private Long parseGroupIdFromSubPath(StompHeaderAccessor accessor) {
         String destination = accessor.getDestination();
         return Long.parseLong(destination.substring(DEFAULT_SUB_PATH.length()));
@@ -101,6 +111,11 @@ public class StompHandler implements ChannelInterceptor {
     private Long parseGroupIdFromPubPath(StompHeaderAccessor accessor) {
         String destination = accessor.getDestination();
         return Long.parseLong(destination.substring(DEFAULT_PUB_PATH.length()));
+    }
+
+    private String parseUsernameFromSubpath(StompHeaderAccessor accessor) {
+        String destination = accessor.getDestination();
+        return destination.substring(DEFAULT_DISCONNECT_SUB_PATH.length());
     }
 
     private Object getValue(StompHeaderAccessor accessor, String key) {
