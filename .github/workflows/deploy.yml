@@ -48,27 +48,27 @@ jobs:
             echo "Copying environment variables..."
             
             # 기존 .env 삭제 후 새로운 환경 변수 설정
-          cat <<EOF > .env
-          SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
-          SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
-          SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-          REDIS_HOST=${{ secrets.REDIS_HOST }}
-          REDIS_PORT=${{ secrets.REDIS_PORT }}
-          MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
-          MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
-          GOOGLE_EMAIL=${{ secrets.GOOGLE_EMAIL }}
-          GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}
-          SPRING_JWT_SECRET=${{ secrets.SPRING_JWT_SECRET }}
-          aws.credentials.access-key=${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws.credentials.secret-key=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          KAKAO_ID=${{ secrets.KAKAO_ID }}
-          KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}
-          EOF
+            cat <<EOF > .env
+            SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
+            SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
+            SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+            REDIS_HOST=${{ secrets.REDIS_HOST }}
+            REDIS_PORT=${{ secrets.REDIS_PORT }}
+            MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
+            MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
+            GOOGLE_EMAIL=${{ secrets.GOOGLE_EMAIL }}
+            GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}
+            SPRING_JWT_SECRET=${{ secrets.SPRING_JWT_SECRET }}
+            aws.credentials.access-key=${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws.credentials.secret-key=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            KAKAO_ID=${{ secrets.KAKAO_ID }}
+            KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}
+            EOF
 
             echo "Environment variables set successfully."
 
             # Docker Compose 실행
-             # 기존 컨테이너 강제 종료 및 삭제
+            # 기존 컨테이너 강제 종료 및 삭제
             docker-compose down --remove-orphans
             docker stop $(docker ps -aq) || true
             docker rm $(docker ps -aq) || true
