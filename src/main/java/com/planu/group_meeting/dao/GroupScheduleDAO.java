@@ -33,4 +33,5 @@ public interface GroupScheduleDAO {
     Boolean existsGroupScheduleByDate(Long groupId, LocalDate date);
 
     List<scheduleOverViewResponse> getGroupScheduleByYearMonth(Long groupId, LocalDate startDate, LocalDate endDate);
+
 }
