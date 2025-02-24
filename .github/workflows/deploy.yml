@@ -48,7 +48,7 @@ jobs:
             echo "Copying environment variables..."
             
             # 기존 .env 삭제 후 새로운 환경 변수 설정
-            cat <<'ENV_EOF' > .env
+            cat << 'ENV_EOF' > .env
             SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
             SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
             SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
@@ -72,4 +72,6 @@ jobs:
             docker-compose down --remove-orphans
             docker stop $(docker ps -aq) || true
             docker rm $(docker ps -aq) || true
+
+            docker-compose up -d --build
           EOF
