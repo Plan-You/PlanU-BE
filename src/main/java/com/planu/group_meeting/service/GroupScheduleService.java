@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,11 +72,31 @@ public class GroupScheduleService {
     @Transactional
     public List<scheduleOverViewResponse> findScheduleOverViewByToday(Long groupId, LocalDate startDate, LocalDate endDate) {
         checkValidGroupId(groupId);
-        if(startDate == null) {
+        if (startDate == null) {
             startDate = LocalDate.now();
         }
+        List<scheduleOverViewResponse> schedules = groupScheduleDAO.findScheduleOverViewsByRange(groupId, startDate);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        for (var schedule : schedules) {
+            LocalDateTime startTime = LocalDateTime.parse(schedule.getStartTime(), formatter);
+            LocalDateTime endTime = LocalDateTime.parse(schedule.getEndTime(), formatter);
 
-        return groupScheduleDAO.findScheduleOverViewsByRange(groupId, startDate);
+            if(startTime.toLocalDate().isBefore(startDate)) {
+                schedule.setStartTime(startDate.atTime(0, 0).format(outputFormatter));
+            }
+            else if(startTime.toLocalDate().equals(startDate)) {
+                schedule.setStartTime(startTime.format(outputFormatter));
+            }
+
+            if(endTime.toLocalDate().isAfter(startDate)) {
+                schedule.setEndTime(startDate.atTime(23, 59).format(outputFormatter));
+            }
+            else if(endTime.toLocalDate().equals(startDate)) {
+                schedule.setEndTime(endTime.format(outputFormatter));
+            }
+        }
+        return schedules;
     }
 
     @Transactional
@@ -89,7 +110,7 @@ public class GroupScheduleService {
         }
         insertParticipants(groupSchedule, groupScheduleParticipants);
 
-        for(Long groupScheduleParticipant : groupScheduleParticipants){
+        for (Long groupScheduleParticipant : groupScheduleParticipants) {
             GroupScheduleCreateNotification groupScheduleCreateNotification = new GroupScheduleCreateNotification(groupScheduleParticipant, "그룹 일정 '" + groupSchedule.getTitle() + "'이(가) 생성되었습니다.");
             notificationService.sendNotification(EventType.GROUP_SCHEDULE_CREATE, groupScheduleCreateNotification);
         }
@@ -131,7 +152,7 @@ public class GroupScheduleService {
                 .map(ParticipantsResponse::getUserId)
                 .toList();
 
-        for(Long participantId : participantIds){
+        for (Long participantId : participantIds) {
             GroupScheduleDeleteNotification groupScheduleDeleteNotification = new GroupScheduleDeleteNotification(participantId, "그룹 일정 '" + groupSchedule.getTitle() + "'이(가) 삭제되었습니다.");
             notificationService.sendNotification(EventType.GROUP_SCHEDULE_DELETE, groupScheduleDeleteNotification);
         }
@@ -172,22 +193,22 @@ public class GroupScheduleService {
 
         List<Long> groupMemberIds = groupUserDAO.getGroupMemberIds(groupId);
         List<GroupScheduleDTO.GroupCalendarEvent> groupCalendarEvents = new ArrayList<>();
-        for(var current = startOfCalendar; !current.isAfter(endOfCalendar); current = current.plusDays(1)) {
+        for (var current = startOfCalendar; !current.isAfter(endOfCalendar); current = current.plusDays(1)) {
             boolean isSchedule = groupScheduleDAO.existsGroupScheduleByDate(groupId, current);
             boolean isBirthday = false;
 
-            for(var memberId : groupMemberIds) {
+            for (var memberId : groupMemberIds) {
                 LocalDate birthday = userDAO.findBirthdayById(memberId);
-                if(birthday == null) {
+                if (birthday == null) {
                     continue;
                 }
-                if(current.getMonthValue() == birthday.getMonthValue() && current.getDayOfMonth() == birthday.getDayOfMonth()) {
+                if (current.getMonthValue() == birthday.getMonthValue() && current.getDayOfMonth() == birthday.getDayOfMonth()) {
                     isBirthday = true;
                     break;
                 }
             }
 
-            if(isBirthday || isSchedule) {
+            if (isBirthday || isSchedule) {
                 groupCalendarEvents.add(new GroupScheduleDTO.GroupCalendarEvent(current.toString(), isSchedule, isBirthday));
             }
         }
@@ -196,7 +217,7 @@ public class GroupScheduleService {
 
     public List<scheduleOverViewResponse> getGroupScheduleByYearMonth(Long groupId, YearMonth yearMonth) {
         checkValidGroupId(groupId);
-        if(yearMonth == null) {
+        if (yearMonth == null) {
             yearMonth = YearMonth.now();
         }
         LocalDate firstDayOfMonth = yearMonth.atDay(1);

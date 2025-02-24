@@ -1,22 +1,18 @@
-package com.planu.group_meeting.entity;
+package com.planu.group_meeting.chat.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class GroupScheduleComment {
+public class ChatMessage {
+
     private Long id;
     private Long userId;
     private Long groupId;
-    private Long groupScheduleId;
-    private String message;
+    private String content;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
 }

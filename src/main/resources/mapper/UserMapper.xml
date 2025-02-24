@@ -26,6 +26,12 @@
         VALUES (#{username}, #{email}, #{password}, #{name}, #{role})
     </insert>
 
+    <select id="findIdByUsername" parameterType="String" resultType="Long">
+        SELECT ID
+        FROM USER
+        WHERE USERNAME = #{username}
+    </select>
+
 
     <select id="findUsernameByEmail" parameterType="String" resultType="String">
         SELECT USERNAME
@@ -162,5 +168,11 @@
         SELECT birth_date
         FROM USER
         WHERE id = #{userId}
+    </select>
+
+    <select id="findUsernameById">
+        select username
+        from USER
+        where id = #{userId}
     </select>
 </mapper>

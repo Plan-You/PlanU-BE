@@ -107,9 +107,10 @@
         WHERE s.ID = #{scheduleId}
     </select>
 
+
     <select id="getScheduleList" resultType="com.planu.group_meeting.dto.ScheduleDto$ScheduleListResponse">
         <![CDATA[
-        SELECT
+    SELECT
         S.ID,
         NULL AS groupId,
         S.TITLE,
@@ -118,10 +119,12 @@
         DATE_FORMAT(S.END_DATETIME, '%Y-%m-%d %H:%i') AS endTime,
         S.COLOR
     FROM SCHEDULE S
-    WHERE S.USER_ID = #{userId} AND
-    (S.START_DATETIME BETWEEN #{startDateTime} AND #{endDateTime})
-    OR (S.END_DATETIME BETWEEN #{startDateTime} AND #{endDateTime})
-    OR (S.START_DATETIME <= #{startDateTime} AND S.END_DATETIME >= #{endDateTime})
+    WHERE
+        S.USER_ID = #{userId} AND (
+            (S.START_DATETIME BETWEEN #{startDateTime} AND #{endDateTime})
+            OR (S.END_DATETIME BETWEEN #{startDateTime} AND #{endDateTime})
+            OR (S.START_DATETIME <= #{startDateTime} AND S.END_DATETIME >= #{endDateTime})
+        )
 
     UNION
 
@@ -135,16 +138,14 @@
         GS.COLOR
     FROM GROUP_SCHEDULE GS
     JOIN GROUP_SCHEDULE_PARTICIPANT GSP ON GS.ID = GSP.GROUP_SCHEDULE_ID
-    WHERE GSP.USER_ID = #{userId} AND
-    (GS.START_DATETIME BETWEEN #{startDateTime} AND #{endDateTime})
-    OR (GS.END_DATETIME BETWEEN #{startDateTime} AND #{endDateTime})
-    OR (GS.START_DATETIME <= #{startDateTime} AND GS.END_DATETIME >= #{endDateTime})
+    WHERE
+        GSP.USER_ID = #{userId} AND (
+            (GS.START_DATETIME BETWEEN #{startDateTime} AND #{endDateTime})
+            OR (GS.END_DATETIME BETWEEN #{startDateTime} AND #{endDateTime})
+            OR (GS.START_DATETIME <= #{startDateTime} AND GS.END_DATETIME >= #{endDateTime})
+        )
 
     ORDER BY startTime
     ]]>
     </select>
-
-
-
-
 </mapper>

@@ -125,9 +125,25 @@ public class ScheduleService {
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
 
         List<ScheduleListResponse> scheduleList = scheduleDAO.getScheduleList(targetUserId, startDateTime, endDateTime);
+        normalizeScheduleTimes(startDate, endDate, scheduleList);
         List<BirthdayPerson> birthdayFriends = userDAO.findBirthdayByDate(targetUserId, startDate, endDate);
 
         return new DailyScheduleResponse(scheduleList, birthdayFriends);
+    }
+
+    private static void normalizeScheduleTimes(LocalDate startDate, LocalDate endDate, List<ScheduleListResponse> scheduleList) {
+        for(ScheduleListResponse scheduleListResponse : scheduleList){
+            LocalDateTime startTime = scheduleListResponse.getStartTime();
+            LocalDateTime endTime = scheduleListResponse.getEndTime();
+
+            if(startDate.isAfter(startTime.toLocalDate())){
+                scheduleListResponse.setStartTime(startDate.atStartOfDay());
+            }
+
+            if(endDate.isAfter(endTime.toLocalDate())){
+                scheduleListResponse.setEndTime(endDate.atTime(LocalTime.MAX));
+            }
+        }
     }
 
     public List<ScheduleCheckResponse> getSchedulesForMonth(Long currentUserId, String username, YearMonth yearMonth) {
