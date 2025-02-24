@@ -120,4 +120,13 @@ public class NotificationDTO {
             this.setContents(contents);
         }
     }
+
+    public static class GroupScheduleCommentNotification extends NotificationDTO{
+        public GroupScheduleCommentNotification(Long senderId, Long receiverId, String contents){
+            this.setEventType(EventType.COMMENT);
+            this.setSenderId(senderId);
+            this.setReceiverId(receiverId);
+            this.setContents(contents);
+        }
+    }
 }

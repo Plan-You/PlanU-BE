@@ -16,9 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-//import static com.planu.group_meeting.dto.NotificationDTO.builder;
-
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
