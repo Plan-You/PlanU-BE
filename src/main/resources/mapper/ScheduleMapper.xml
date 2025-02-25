@@ -80,7 +80,8 @@
         SELECT EXISTS (
             SELECT 1
             FROM SCHEDULE
-            WHERE DATE(START_DATETIME) = #{date} AND USER_ID = #{userId}
+            WHERE USER_ID = #{userId}
+            AND #{date} BETWEEN DATE(START_DATETIME) AND DATE(END_DATETIME)
         )
     </select>
 
