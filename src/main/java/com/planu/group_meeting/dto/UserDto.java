@@ -1,15 +1,15 @@
 package com.planu.group_meeting.dto;
 
-import com.planu.group_meeting.entity.UserTerms;
-import com.planu.group_meeting.entity.common.Gender;
-import com.planu.group_meeting.entity.common.ProfileStatus;
-import com.planu.group_meeting.entity.common.Role;
 import com.planu.group_meeting.entity.User;
+import com.planu.group_meeting.entity.common.CertificationPurpose;
+import com.planu.group_meeting.entity.common.Role;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -71,8 +71,8 @@ public class UserDto {
         @Email(message = "올바른 이메일 주소를 입력해주세요")
         private String email;
 
-        @NotBlank(message = "이메일 인증 목적을 입력해주세요. (register, findUsername, findPassword)")
-        private String purpose;
+        @NotNull(message = "이메일 인증 목적을 입력해주세요. (REGISTER, FIND_USERNAME, FIND_PASSWORD, CHANGE_EMAIL)")
+        private CertificationPurpose purpose;
     }
     @Getter
     public static class EmailVerificationRequest{
@@ -83,8 +83,8 @@ public class UserDto {
         @NotBlank(message = "인증코드를 입력해주세요")
         private String verificationCode;
 
-        @NotBlank(message = "이메일 인증 목적을 입력해주세요. (register, findUsername, findPassword)")
-        private String purpose;
+        @NotNull(message = "이메일 인증 목적을 입력해주세요. (REGISTER, FIND_USERNAME, FIND_PASSWORD, CHANGE_EMAIL)")
+        private CertificationPurpose purpose;
     }
 
     @Getter
@@ -106,6 +106,17 @@ public class UserDto {
         @NotBlank(message = "비밀번호를 입력해주세요")
         @Pattern(regexp = "(?=.*[0-9])(?=.*[a-zA-Z])(?=.*\\W)(?=\\S+$).{8,16}", message = "비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.")
         private String newPassword;
+    }
+
+    @Getter
+    public static class ChangeEmailRequest{
+        @NotBlank(message = "이메일 주소를 입력해주세요")
+        @Email(message = "이메일 주소 형식이 아닙니다")
+        private String email;
+
+        @NotBlank(message = "이메일 주소를 입력해주세요")
+        @Email(message = "이메일 주소 형식이 아닙니다")
+        private String newEmail;
     }
 
     @Getter
