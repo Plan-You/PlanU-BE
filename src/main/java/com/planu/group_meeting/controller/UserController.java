@@ -5,10 +5,6 @@ import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.controller.docs.UserDocs;
 import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.dto.TokenDto;
-import com.planu.group_meeting.dto.UserDto;
-import com.planu.group_meeting.dto.UserDto.ChangePasswordRequest;
-import com.planu.group_meeting.dto.UserDto.EmailRequest;
-import com.planu.group_meeting.dto.UserDto.UserRegistrationRequest;
 import com.planu.group_meeting.dto.UserTermsDto;
 import com.planu.group_meeting.service.UserService;
 import com.planu.group_meeting.util.CookieUtil;
@@ -27,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.beans.PropertyEditorSupport;
 
+import static com.planu.group_meeting.dto.UserDto.*;
 import static com.planu.group_meeting.jwt.JwtFilter.AUTHORIZATION_HEADER;
 import static com.planu.group_meeting.jwt.JwtFilter.BEARER_PREFIX;
 
@@ -38,7 +35,7 @@ public class UserController implements UserDocs {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<BaseResponse> createUser(@Valid @RequestBody UserDto.SignUpRequest userDto) {
+    public ResponseEntity<BaseResponse> createUser(@Valid @RequestBody SignUpRequest userDto) {
         userService.createUser(userDto);
         return BaseResponse.toResponseEntity(HttpStatus.CREATED, "회원가입 성공");
     }
@@ -50,27 +47,27 @@ public class UserController implements UserDocs {
     }
 
     @PostMapping("/email-verification/sends")
-    public ResponseEntity<BaseResponse> sendEmailCode(@Valid @RequestBody UserDto.EmailSendRequest emailRequest) throws MessagingException {
+    public ResponseEntity<BaseResponse> sendEmailCode(@Valid @RequestBody EmailSendRequest emailRequest) throws MessagingException {
         userService.sendCodeToEmail(emailRequest);
         return BaseResponse.toResponseEntity(HttpStatus.OK, "인증 코드 전송 성공");
     }
 
 
     @PostMapping("/email-verification/verify")
-    public ResponseEntity<BaseResponse> verifyEmailCode(@Valid @RequestBody UserDto.EmailVerificationRequest emailVerificationDto) {
+    public ResponseEntity<BaseResponse> verifyEmailCode(@Valid @RequestBody EmailVerificationRequest emailVerificationDto) {
         userService.verifyEmailCode(emailVerificationDto);
         return BaseResponse.toResponseEntity(HttpStatus.OK, "인증 성공");
     }
 
-   @PostMapping("/profile")
-   public ResponseEntity<BaseResponse> createUserProfile(@ModelAttribute @Valid UserRegistrationRequest userDto,
+    @PostMapping("/profile")
+    public ResponseEntity<BaseResponse> createUserProfile(@ModelAttribute @Valid UserRegistrationRequest userDto,
                                                           @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
                                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        userService.createUserProfile(userDetails.getId(),userDto, profileImage);
+        userService.createUserProfile(userDetails.getId(), userDto, profileImage);
         return BaseResponse.toResponseEntity(HttpStatus.CREATED, "프로필 등록 성공");
     }
-    
+
     @GetMapping("/profile/exists")
     public ResponseEntity<BaseResponse> checkProfileExists(@AuthenticationPrincipal CustomUserDetails userDetails) {
         String resultMsg = Boolean.toString(userService.isUserProfileCompleted(userDetails.getUsername()));
@@ -85,7 +82,13 @@ public class UserController implements UserDocs {
     @PostMapping("/find-password")
     public ResponseEntity<BaseResponse> findPassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
         userService.updatePassword(changePasswordRequest);
-        return BaseResponse.toResponseEntity(HttpStatus.OK,"비밀번호 변경 성공");
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "비밀번호 변경 성공");
+    }
+
+    @PostMapping("/change-email")
+    public ResponseEntity<BaseResponse> changeEmail(@Valid @RequestBody EmailRequest emailRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.changeEmail(userDetails.getUsername(), emailRequest);
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "이메일 변경 성공");
     }
 
     @PostMapping("/token/reissue")
@@ -93,7 +96,7 @@ public class UserController implements UserDocs {
         String refresh = CookieUtil.getCookieValue(request, "refresh");
         TokenDto tokenDTO = userService.reissueAccessToken(refresh);
         response.setHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + tokenDTO.getAccess());
-        CookieUtil.createCookie(response,"refresh",tokenDTO.getRefresh());
+        CookieUtil.createCookie(response, "refresh", tokenDTO.getRefresh());
         return BaseResponse.toResponseEntity(HttpStatus.OK, "access 토콘 재발급 성공");
     }
 
@@ -103,11 +106,11 @@ public class UserController implements UserDocs {
         System.out.println("refresh 토큰 : " + refresh);
         userService.logout(refresh);
         response.addCookie(CookieUtil.deleteCookie("refresh"));
-        return BaseResponse.toResponseEntity(HttpStatus.OK,"로그아웃 성공");
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "로그아웃 성공");
     }
 
     @GetMapping("/my-info")
-    public ResponseEntity<UserDto.UserInfoResponse>getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseEntity<UserInfoResponse> getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(userService.getUserInfo(userDetails.getUsername()));
     }
 

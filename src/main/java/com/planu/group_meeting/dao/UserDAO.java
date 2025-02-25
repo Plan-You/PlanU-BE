@@ -29,6 +29,8 @@ public interface UserDAO {
 
     void updatePasswordByUsername(@Param("username") String username, @Param("newPassword") String newPassword);
 
+    void updateEmailByUsername(@Param("username") String username, @Param("email") String email);
+
     boolean existsBirthdayByDate(Long userId, LocalDate date);
 
     List<BirthdayPerson> findBirthdayByDate(Long userId, LocalDate startDate, LocalDate endDate);

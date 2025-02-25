@@ -111,6 +111,12 @@
         WHERE USERNAME = #{username}
     </update>
 
+    <update id="updateEmailByUsername">
+        UPDATE USER
+        SET EMAIL = #{email}
+        WHERE USERNAME = #{username}
+    </update>
+
     <select id="existsBirthdayByDate">
         SELECT EXISTS (
         SELECT 1

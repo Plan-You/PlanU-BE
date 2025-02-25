@@ -1,15 +1,11 @@
 package com.planu.group_meeting.service;
 
-import com.planu.group_meeting.dao.FriendDAO;
 import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dao.UserTermsDAO;
 import com.planu.group_meeting.dto.TokenDto;
-import com.planu.group_meeting.dto.UserDto;
-import com.planu.group_meeting.dto.UserDto.ChangePasswordRequest;
-import com.planu.group_meeting.dto.UserDto.EmailRequest;
-import com.planu.group_meeting.dto.UserTermsDto;
 import com.planu.group_meeting.entity.User;
 import com.planu.group_meeting.entity.UserTerms;
+import com.planu.group_meeting.entity.common.CertificationPurpose;
 import com.planu.group_meeting.entity.common.ProfileStatus;
 import com.planu.group_meeting.exception.user.*;
 import com.planu.group_meeting.jwt.JwtUtil;
@@ -25,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static com.planu.group_meeting.dto.UserDto.*;
+import static com.planu.group_meeting.dto.UserTermsDto.TermsRequest;
 import static com.planu.group_meeting.jwt.JwtUtil.REFRESH_TOKEN_PREFIX;
 
 @Service
@@ -37,7 +35,6 @@ public class UserService{
     private static final String BASE_PROFILE_IMAGE = "https://planu-storage-main.s3.ap-northeast-2.amazonaws.com/defaultProfile.png";
 
     private final UserDAO userDAO;
-    private final FriendDAO friendDAO;
     private final UserTermsDAO userTermsDAO;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
@@ -54,16 +51,16 @@ public class UserService{
     }
 
     @Transactional
-    public void createUser(UserDto.SignUpRequest userDto) {
+    public void createUser(SignUpRequest userDto) {
         validateDuplicateUser(userDto.getUsername(), userDto.getEmail());
-        validateEmailVerification(userDto.getEmail(), "register");
+        validateEmailVerification(userDto.getEmail(), CertificationPurpose.REGISTER);
 
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         userDAO.insertUser(userDto.toEntity());
     }
 
     @Transactional
-    public void createUserProfile(Long userId, UserDto.UserRegistrationRequest registrationRequest, MultipartFile profileImage) {
+    public void createUserProfile(Long userId, UserRegistrationRequest registrationRequest, MultipartFile profileImage) {
         String profileImageUrl = BASE_PROFILE_IMAGE;
         if (profileImage != null && !profileImage.isEmpty()) {
             profileImageUrl = s3Uploader.uploadFile(profileImage);
@@ -72,7 +69,7 @@ public class UserService{
         user.updateProfile(profileImageUrl, registrationRequest.getGender(), registrationRequest.getBirthDate());
         userDAO.updateUserProfile(userId, user);
 
-        UserTermsDto.TermsRequest termsRequest = registrationRequest.getTermsRequest();
+        TermsRequest termsRequest = registrationRequest.getTermsRequest();
 
         UserTerms userTerms = termsRequest.toEntity(userId);
         userTermsDAO.saveTerms(userTerms);
@@ -80,7 +77,7 @@ public class UserService{
 
 
     public String findUsername(EmailRequest emailRequest) {
-        validateEmailVerification(emailRequest.getEmail(), "findUsername");
+        validateEmailVerification(emailRequest.getEmail(), CertificationPurpose.FIND_USERNAME);
 
         String username = userDAO.findUsernameByEmail(emailRequest.getEmail());
         if (username == null) {
@@ -92,7 +89,7 @@ public class UserService{
     @Transactional
     public void updatePassword(ChangePasswordRequest changePasswordRequest) {
         validateUsernameAndEmail(changePasswordRequest.getUsername(), changePasswordRequest.getEmail());
-        validateEmailVerification(changePasswordRequest.getEmail(), "findPassword");
+        validateEmailVerification(changePasswordRequest.getEmail(), CertificationPurpose.FIND_PASSWORD);
 
         String encodedPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
         userDAO.updatePasswordByUsername(changePasswordRequest.getUsername(), encodedPassword);
@@ -121,8 +118,9 @@ public class UserService{
         return new TokenDto(newAccess, newRefresh);
     }
 
-    public void sendCodeToEmail(UserDto.EmailSendRequest emailDto) throws MessagingException {
-        if ("register".equals(emailDto.getPurpose()) && isDuplicatedEmail(emailDto.getEmail())) {
+    public void sendCodeToEmail(EmailSendRequest emailDto) throws MessagingException {
+        if(CertificationPurpose.REGISTER==emailDto.getPurpose() || CertificationPurpose.CHANGE_EMAIL==emailDto.getPurpose()
+        && isDuplicatedEmail(emailDto.getEmail())){
             throw new DuplicatedEmailException();
         }
 
@@ -133,7 +131,7 @@ public class UserService{
         mailService.sendVerificationCode(emailDto.getEmail(), authCode);
     }
 
-    public void verifyEmailCode(UserDto.EmailVerificationRequest emailVerificationDto) {
+    public void verifyEmailCode(EmailVerificationRequest emailVerificationDto) {
         String key = String.format(AUTH_CODE_KEY, emailVerificationDto.getEmail(), emailVerificationDto.getPurpose());
         String storedCode = redisTemplate.opsForValue().get(key);
 
@@ -164,7 +162,7 @@ public class UserService{
         }
     }
 
-    private void validateEmailVerification(String email, String purpose) {
+    private void validateEmailVerification(String email, CertificationPurpose purpose) {
         String key = String.format(VERIFIED_EMAIL_KEY, email, purpose);
         String emailVerificationStatus = redisTemplate.opsForValue().get(key);
 
@@ -196,12 +194,12 @@ public class UserService{
         }
     }
 
-    public UserDto.UserInfoResponse getUserInfo(String username) {
+    public UserInfoResponse getUserInfo(String username) {
         if (!isDuplicatedUsername(username)) {
             throw new NotFoundUserException();
         }
         User user = userDAO.findByUsername(username);
-        return UserDto.UserInfoResponse.builder()
+        return UserInfoResponse.builder()
                 .name(user.getName())
                 .profileImage(user.getProfileImgUrl())
                 .username(user.getUsername())
@@ -211,6 +209,10 @@ public class UserService{
     }
 
 
-
+    public void changeEmail(String username, EmailRequest emailRequest) {
+        String newEmail = emailRequest.getEmail();
+        validateEmailVerification(newEmail, CertificationPurpose.CHANGE_EMAIL);
+        userDAO.updateEmailByUsername(username, newEmail);
+    }
 }
 
