@@ -4,8 +4,43 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.planu.group_meeting.chat.dao.ChatDAO">
-    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+
+    <insert id="saveChatMessage" useGeneratedKeys="true" keyProperty="id" parameterType="com.planu.group_meeting.chat.dto.ChatMessage">
         INSERT INTO CHAT_MESSAGE (USER_ID, GROUP_ID, MESSAGE)
         VALUES (#{userId}, #{groupId}, #{content})
     </insert>
+
+
+    <insert id="saveMessageStatus" parameterType="com.planu.group_meeting.chat.dto.MessageStatus">
+        INSERT INTO MESSAGE_STATUS (MESSAGE_ID, USER_ID)
+        VALUES (#{messageId}, #{userId});
+    </insert>
+
+    <select id="getChatInfo" parameterType="long" resultType="com.planu.group_meeting.chat.dto.ChatInfo">
+        SELECT
+        (SELECT MESSAGE
+        FROM CHAT_MESSAGE
+        WHERE GROUP_ID = #{groupId}
+        ORDER BY CREATED_DATE DESC
+        LIMIT 1) AS lastChat,
+
+        (SELECT DATE_FORMAT(CREATED_DATE, '%Y-%m-%d')
+        FROM CHAT_MESSAGE
+        WHERE GROUP_ID = #{groupId}
+        ORDER BY CREATED_DATE DESC
+        LIMIT 1) AS lastChatDate,
+
+        (SELECT DATE_FORMAT(CREATED_DATE, '%H:%i')
+        FROM CHAT_MESSAGE
+        WHERE GROUP_ID = #{groupId}
+        ORDER BY CREATED_DATE DESC
+        LIMIT 1) AS lastChatTime,
+
+        (SELECT COUNT(*)
+        FROM MESSAGE_STATUS ms
+        JOIN CHAT_MESSAGE cm ON ms.MESSAGE_ID = cm.ID
+        WHERE cm.GROUP_ID = #{groupId}
+        AND ms.IS_READ = FALSE) AS unreadChats
+    </select>
+
 </mapper>
