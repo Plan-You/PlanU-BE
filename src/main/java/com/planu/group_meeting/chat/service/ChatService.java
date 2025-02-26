@@ -72,7 +72,7 @@ public class ChatService {
                             .lastChat(chatInfo.getLastChat())
                             .lastChatDate(chatInfo.getLastChatDate())
                             .lastChatTime(chatInfo.getLastChatTime())
-                            .unreadChats(chatInfo.getUnreadChats())
+                            .unreadChats(chatDAO.countUnreadChatByUserAndGroup(userId, group.getGroupId()))
                             .build();
                 })
                 .sorted(Comparator.comparing(ChatRoomResponse::getIsPin)

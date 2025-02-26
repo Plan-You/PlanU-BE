@@ -15,5 +15,5 @@ public class ChatRoomResponse {
     private String lastChat;
     private String lastChatDate;
     private String lastChatTime;
-    private Long unreadChats;
+    private Integer unreadChats;
 }

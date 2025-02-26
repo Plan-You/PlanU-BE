@@ -13,4 +13,6 @@ public interface ChatDAO {
     void saveMessageStatus(MessageStatus messageStatus);
 
     ChatInfo getChatInfo(Long groupId);
+
+    Integer countUnreadChatByUserAndGroup(Long userId, Long groupId);
 }
