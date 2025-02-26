@@ -84,6 +84,11 @@ public class ChatService {
     }
 
     @Transactional
+    public int getUnreadCount(Long groupId, Long MessageId) {
+
+    }
+
+    @Transactional
     public void expelChat(String username, Long groupId) {
         simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId, username + "님이 나가셨습니다.");
 
