@@ -9,5 +9,4 @@ public class ChatInfo {
     private String lastChat;
     private String lastChatDate;
     private String lastChatTime;
-    private Long unreadChats;
 }
