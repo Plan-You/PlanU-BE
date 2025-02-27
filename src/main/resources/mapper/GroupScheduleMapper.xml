@@ -41,7 +41,7 @@
        SELECT EXISTS (
             SELECT 1
             FROM GROUP_SCHEDULE
-            WHERE GROUP_ID = #{groupId} and DATE(START_DATETIME) = #{date}
+            WHERE GROUP_ID = #{groupId} and #{date} >= DATE(START_DATETIME) and DATE(END_DATETIME) >= #{date}
        )
    </select>
 
