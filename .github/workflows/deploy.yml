@@ -46,9 +46,12 @@ jobs:
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.AWS_EC2_IP }} << 'EOF'
             cd /home/ubuntu/projects/planu-backend
             echo "Copying environment variables..."
+
+            # 기존 .env 파일 삭제
+            rm -f .env
             
-            # 환경 변수 파일(.env)을 생성하고, secrets에서 가져온 값을 할당
-            echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" >> .env
+            # 새로운 환경 변수 설정
+            echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" > .env
             echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> .env
             echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> .env
             echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
@@ -58,14 +61,18 @@ jobs:
             echo "GOOGLE_EMAIL=${{ secrets.GOOGLE_EMAIL }}" >> .env
             echo "GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}" >> .env
             echo "SPRING_JWT_SECRET=${{ secrets.SPRING_JWT_SECRET }}" >> .env
-            
             echo "aws.credentials.access-key=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
             echo "aws.credentials.secret-key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
-
             echo "KAKAO_ID=${{ secrets.KAKAO_ID }}" >> .env
             echo "KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}" >> .env
-
+      
+            echo "Environment variables set successfully."
+      
             # Docker Compose 실행
-            docker-compose down
+            # 기존 컨테이너 강제 종료 및 삭제
+            docker-compose down --remove-orphans
+            docker stop $(docker ps -aq) || true
+            docker rm $(docker ps -aq) || true
+      
             docker-compose up -d --build
           EOF
