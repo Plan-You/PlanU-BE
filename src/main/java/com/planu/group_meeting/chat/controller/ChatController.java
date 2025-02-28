@@ -5,8 +5,7 @@ import com.planu.group_meeting.chat.dto.request.ChatMessageRequest;
 import com.planu.group_meeting.chat.dto.response.ChatRoomResponse;
 import com.planu.group_meeting.chat.service.ChatService;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
-import com.planu.group_meeting.dto.ApiResponse;
-import com.planu.group_meeting.dto.GroupResponseDTO;
+import com.planu.group_meeting.dto.dataResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -38,9 +37,9 @@ public class ChatController {
 
     @ResponseBody
     @GetMapping("/chats")
-    public ResponseEntity<ApiResponse<List<ChatRoomResponse>>> chatRooms(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<dataResponse<List<ChatRoomResponse>>> chatRooms(@AuthenticationPrincipal CustomUserDetails userDetails) {
         List<ChatRoomResponse> chatRooms = chatService.getChatRooms(userDetails.getId());
-        ApiResponse<List<ChatRoomResponse>> response = new ApiResponse<>(chatRooms);
+        dataResponse<List<ChatRoomResponse>> response = new dataResponse<>(chatRooms);
         return ResponseEntity.ok(response);
     }
 
