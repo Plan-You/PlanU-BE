@@ -1,6 +1,7 @@
 package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.controller.docs.GroupDocs;
 import com.planu.group_meeting.dto.*;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRanks;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
@@ -30,7 +31,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/groups")
-public class GroupController {
+public class GroupController implements GroupDocs {
 
     private final GroupService groupService;
     private final FriendService friendService;
@@ -73,16 +74,16 @@ public class GroupController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<ApiResponse<List<GroupResponseDTO>>> groupList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<dataResponse<List<GroupResponseDTO>>> groupList(@AuthenticationPrincipal CustomUserDetails userDetails) {
         List<GroupResponseDTO> groupList = groupService.getGroupList(userDetails.getId());
-        ApiResponse<List<GroupResponseDTO>> response = new ApiResponse<>(groupList);
+        dataResponse<List<GroupResponseDTO>> response = new dataResponse<>(groupList);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/inviteList")
-    public ResponseEntity<ApiResponse<List<GroupResponseDTO>>> groupInviteList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<dataResponse<List<GroupResponseDTO>>> groupInviteList(@AuthenticationPrincipal CustomUserDetails userDetails) {
         List<GroupResponseDTO> groupList = groupService.getGroupInviteList(userDetails.getId());
-        ApiResponse<List<GroupResponseDTO>> response = new ApiResponse<>(groupList);
+        dataResponse<List<GroupResponseDTO>> response = new dataResponse<>(groupList);
         return ResponseEntity.ok(response);
     }
 

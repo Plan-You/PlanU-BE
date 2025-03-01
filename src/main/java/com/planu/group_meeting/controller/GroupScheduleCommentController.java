@@ -1,6 +1,7 @@
 package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.controller.docs.GroupScheduleCommentDocs;
 import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.dto.GroupScheduleCommentDTO;
 import com.planu.group_meeting.service.GroupScheduleCommentService;
@@ -17,7 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("groups/{groupId}/schedules/{scheduleId}")
-public class GroupScheduleCommentController {
+public class GroupScheduleCommentController implements GroupScheduleCommentDocs {
 
     private final GroupUserService groupUserService;
     private final GroupScheduleService groupScheduleService;
