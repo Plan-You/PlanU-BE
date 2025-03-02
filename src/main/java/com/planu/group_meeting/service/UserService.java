@@ -4,7 +4,6 @@ import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dao.UserTermsDAO;
 import com.planu.group_meeting.dto.TokenDto;
 import com.planu.group_meeting.entity.User;
-import com.planu.group_meeting.entity.UserTerms;
 import com.planu.group_meeting.entity.common.CertificationPurpose;
 import com.planu.group_meeting.entity.common.ProfileStatus;
 import com.planu.group_meeting.exception.user.*;
@@ -22,14 +21,14 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import static com.planu.group_meeting.dto.UserDto.*;
-import static com.planu.group_meeting.dto.UserTermsDto.TermsRequest;
 import static com.planu.group_meeting.jwt.JwtUtil.REFRESH_TOKEN_PREFIX;
 
 @Service
 @RequiredArgsConstructor
-public class UserService{
+public class UserService {
 
     private static final String VERIFIED_EMAIL_KEY = "verifiedEmail : %s : %s";
+    private static final String VERIFIED_PASSWORD_KEY = "verifiedPassword : %s";
     private static final String AUTH_CODE_KEY = "authCode : %s : %s";
     private static final long AUTH_CODE_EXPIRATION_TIME = 300000L; // 5분
     private static final String BASE_PROFILE_IMAGE = "https://planu-storage-main.s3.ap-northeast-2.amazonaws.com/defaultProfile.png";
@@ -61,24 +60,15 @@ public class UserService{
 
     @Transactional
     public void createUserProfile(Long userId, UserRegistrationRequest registrationRequest, MultipartFile profileImage) {
-        String profileImageUrl = BASE_PROFILE_IMAGE;
-        if (profileImage != null && !profileImage.isEmpty()) {
-            profileImageUrl = s3Uploader.uploadFile(profileImage);
-        }
+        String profileImageUrl = (profileImage != null && !profileImage.isEmpty()) ? s3Uploader.uploadFile(profileImage) : BASE_PROFILE_IMAGE;
         User user = new User();
         user.updateProfile(profileImageUrl, registrationRequest.getGender(), registrationRequest.getBirthDate());
         userDAO.updateUserProfile(userId, user);
-
-        TermsRequest termsRequest = registrationRequest.getTermsRequest();
-
-        UserTerms userTerms = termsRequest.toEntity(userId);
-        userTermsDAO.saveTerms(userTerms);
+        userTermsDAO.saveTerms(registrationRequest.getTermsRequest().toEntity(userId));
     }
-
 
     public String findUsername(EmailRequest emailRequest) {
         validateEmailVerification(emailRequest.getEmail(), CertificationPurpose.FIND_USERNAME);
-
         String username = userDAO.findUsernameByEmail(emailRequest.getEmail());
         if (username == null) {
             throw new NotFoundUserException();
@@ -87,12 +77,12 @@ public class UserService{
     }
 
     @Transactional
-    public void updatePassword(ChangePasswordRequest changePasswordRequest) {
-        validateUsernameAndEmail(changePasswordRequest.getUsername(), changePasswordRequest.getEmail());
-        validateEmailVerification(changePasswordRequest.getEmail(), CertificationPurpose.FIND_PASSWORD);
+    public void updatePassword(FindPasswordRequest findPasswordRequest) {
+        validateUsernameAndEmail(findPasswordRequest.getUsername(), findPasswordRequest.getEmail());
+        validateEmailVerification(findPasswordRequest.getEmail(), CertificationPurpose.FIND_PASSWORD);
 
-        String encodedPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
-        userDAO.updatePasswordByUsername(changePasswordRequest.getUsername(), encodedPassword);
+        String encodedPassword = passwordEncoder.encode(findPasswordRequest.getNewPassword());
+        userDAO.updatePasswordByUsername(findPasswordRequest.getUsername(), encodedPassword);
     }
 
     public boolean isUserProfileCompleted(String username) {
@@ -102,27 +92,24 @@ public class UserService{
 
     public TokenDto reissueAccessToken(String refresh) {
         validateRefreshToken(refresh);
-
         String username = jwtUtil.getUsername(refresh);
         String storedRefresh = redisTemplate.opsForValue().get(REFRESH_TOKEN_PREFIX + username);
-        if (storedRefresh == null || !storedRefresh.equals(refresh)) {
-            System.out.println("리프레쉬 토큰 에러 발생2 ->" + refresh);
+        if (!refresh.equals(storedRefresh)) {
             throw new InvalidRefreshTokenException();
         }
         redisTemplate.delete(username);
-
         String role = jwtUtil.getRole(refresh);
         String newAccess = jwtUtil.createAccessToken(username, role);
         String newRefresh = jwtUtil.createRefreshToken(username, role);
-        System.out.println(username + " 토큰 재발행 성공");
         return new TokenDto(newAccess, newRefresh);
     }
 
     public void sendCodeToEmail(EmailSendRequest emailDto) throws MessagingException {
-        if((CertificationPurpose.REGISTER==emailDto.getPurpose() || CertificationPurpose.CHANGE_EMAIL==emailDto.getPurpose())
-            && isDuplicatedEmail(emailDto.getEmail())){
-                throw new DuplicatedEmailException();
-            }
+
+        if ((CertificationPurpose.REGISTER == emailDto.getPurpose() || CertificationPurpose.CHANGE_EMAIL == emailDto.getPurpose())
+                && isDuplicatedEmail(emailDto.getEmail())) {
+            throw new DuplicatedEmailException();
+        }
 
         String authCode = generateRandomCode();
         String key = String.format(AUTH_CODE_KEY, emailDto.getEmail(), emailDto.getPurpose());
@@ -131,18 +118,18 @@ public class UserService{
         mailService.sendVerificationCode(emailDto.getEmail(), authCode);
     }
 
-    public void verifyEmailCode(EmailVerificationRequest emailVerificationDto) {
-        String key = String.format(AUTH_CODE_KEY, emailVerificationDto.getEmail(), emailVerificationDto.getPurpose());
+    public void verifyEmailCode(EmailVerificationRequest request) {
+        String key = String.format(AUTH_CODE_KEY, request.getEmail(), request.getPurpose());
         String storedCode = redisTemplate.opsForValue().get(key);
 
         if (storedCode == null) {
             throw new ExpiredAuthCodeException();
         }
-        if (!storedCode.equals(emailVerificationDto.getVerificationCode())) {
+        if (!storedCode.equals(request.getVerificationCode())) {
             throw new InvalidAuthCodeException();
         }
 
-        String verifiedKey = String.format(VERIFIED_EMAIL_KEY, emailVerificationDto.getEmail(), emailVerificationDto.getPurpose());
+        String verifiedKey = String.format(VERIFIED_EMAIL_KEY, request.getEmail(), request.getPurpose());
         redisTemplate.opsForValue().set(verifiedKey, "true");
         redisTemplate.delete(key);
     }
@@ -189,7 +176,6 @@ public class UserService{
 
     private void validateRefreshToken(String refresh) {
         if (refresh == null || jwtUtil.isExpired(refresh) || !"refresh".equals(jwtUtil.getCategory(refresh))) {
-            System.out.println("리프레쉬 토큰 에러 발생1 ->" + refresh);
             throw new InvalidRefreshTokenException();
         }
     }
@@ -213,6 +199,31 @@ public class UserService{
         String newEmail = emailRequest.getEmail();
         validateEmailVerification(newEmail, CertificationPurpose.CHANGE_EMAIL);
         userDAO.updateEmailByUsername(username, newEmail);
+    }
+
+    public void verifyPassword(Long userId, PasswordRequest passwordRequest) {
+        String password = passwordRequest.getPassword();
+        User currentUser = userDAO.findById(userId);
+        if (!passwordEncoder.matches(password, currentUser.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+        String key = String.format(VERIFIED_PASSWORD_KEY, currentUser.getUsername());
+        redisTemplate.opsForValue().set(key, "true", AUTH_CODE_EXPIRATION_TIME, TimeUnit.MILLISECONDS);
+    }
+
+    public void changePassword(Long userId, ChangePasswordRequest passwordRequest) {
+        User user = userDAO.findById(userId);
+        String key = String.format(VERIFIED_PASSWORD_KEY, user.getUsername());
+        String passwordVerificationStatus = redisTemplate.opsForValue().get(key);
+        if (!"true".equals(passwordVerificationStatus)) {
+            throw new UnverifiedPasswordException();
+        }
+
+        if (!passwordRequest.getConfirmPassword().equals(passwordRequest.getNewPassword())) {
+            throw new IllegalArgumentException("새 비밀번호가 일치하지 않습니다.");
+        }
+        userDAO.updatePasswordByUsername(user.getUsername(), passwordEncoder.encode(passwordRequest.getNewPassword()));
+        redisTemplate.delete(key);
     }
 }
 

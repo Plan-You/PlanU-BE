@@ -80,8 +80,8 @@ public class UserController implements UserDocs {
     }
 
     @PostMapping("/find-password")
-    public ResponseEntity<BaseResponse> findPassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
-        userService.updatePassword(changePasswordRequest);
+    public ResponseEntity<BaseResponse> findPassword(@Valid @RequestBody FindPasswordRequest findPasswordRequest) {
+        userService.updatePassword(findPasswordRequest);
         return BaseResponse.toResponseEntity(HttpStatus.OK, "비밀번호 변경 성공");
     }
 
@@ -112,6 +112,19 @@ public class UserController implements UserDocs {
     @GetMapping("/my-info")
     public ResponseEntity<UserInfoResponse> getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(userService.getUserInfo(userDetails.getUsername()));
+    }
+
+    @PostMapping("/verify-password")
+    public ResponseEntity<BaseResponse> verifyPassword(@RequestBody PasswordRequest passwordRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.verifyPassword(userDetails.getId(), passwordRequest);
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "인증 성공");
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<BaseResponse> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest,
+                                                       @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.changePassword(userDetails.getId(), changePasswordRequest);
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "비밀번호 변경 성공");
     }
 
     @InitBinder

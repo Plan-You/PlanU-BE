@@ -186,7 +186,7 @@ public interface UserDocs {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(example = "{ \"resultCode\": 400, \"resultMsg\": \"비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.\" }")))
     })
-    ResponseEntity<BaseResponse> findPassword(@Valid @RequestBody UserDto.ChangePasswordRequest changePasswordRequest);
+    ResponseEntity<BaseResponse> findPassword(@Valid @RequestBody UserDto.FindPasswordRequest findPasswordRequest);
 
 
     @Operation(summary = "Access Token 재발급", description = "유효한 Refresh Token을 사용하여 새로운 Access Token을 발급받습니다.")
