@@ -35,6 +35,12 @@ public class ChatController {
         simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId, message);
     }
 
+    @Transactional
+    @MessageMapping("/chat/read/{messageId}")
+    public void readChat(@DestinationVariable("groupId") Long groupId, @DestinationVariable("messageId") Long messageId, StompHeaderAccessor accessor) {
+        String username = (String) accessor.getSessionAttributes().get("username");
+    }
+
     @ResponseBody
     @GetMapping("/chats")
     public ResponseEntity<dataResponse<List<ChatRoomResponse>>> chatRooms(@AuthenticationPrincipal CustomUserDetails userDetails) {

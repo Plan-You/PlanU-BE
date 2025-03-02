@@ -34,10 +34,10 @@
         FROM CHAT_MESSAGE
         WHERE GROUP_ID = #{groupId}
         ORDER BY CREATED_DATE DESC
-        LIMIT 1) AS lastChatTime,
+        LIMIT 1) AS lastChatTime
     </select>
 
-    <select id="countUnreadMessages" resultType="int">
+    <select id="countUnreadChatByUserAndGroup" resultType="int">
         SELECT COUNT(*)
         FROM MESSAGE_STATUS ms
         INNER JOIN CHAT_MESSAGE cm ON ms.MESSAGE_ID = cm.ID
