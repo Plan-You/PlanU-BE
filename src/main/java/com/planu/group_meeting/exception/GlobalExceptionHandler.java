@@ -73,6 +73,11 @@ public class GlobalExceptionHandler {
         return BaseResponse.toResponseEntity(HttpStatus.BAD_REQUEST, "이메일 인증이 완료되지 않았습니다.");
     }
 
+    @ExceptionHandler(UnverifiedPasswordException.class)
+    public ResponseEntity<BaseResponse>handleUnverifiedPasswordException(UnverifiedPasswordException e){
+        return BaseResponse.toResponseEntity(HttpStatus.BAD_REQUEST, "비밀번호 인증이 필요합니다.");
+    }
+
     @ExceptionHandler(NotFoundUserException.class)
     public ResponseEntity<BaseResponse> handleNotFoundUserException(NotFoundUserException e) {
         return BaseResponse.toResponseEntity(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다.");

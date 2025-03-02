@@ -65,8 +65,9 @@ public class UserDto {
         @Valid
         private UserTermsDto.TermsRequest termsRequest;
     }
+
     @Getter
-    public static class EmailSendRequest{
+    public static class EmailSendRequest {
         @NotBlank(message = "이메일 주소를 입력해주세요")
         @Email(message = "올바른 이메일 주소를 입력해주세요")
         private String email;
@@ -74,8 +75,9 @@ public class UserDto {
         @NotNull(message = "이메일 인증 목적을 입력해주세요. (REGISTER, FIND_USERNAME, FIND_PASSWORD, CHANGE_EMAIL)")
         private CertificationPurpose purpose;
     }
+
     @Getter
-    public static class EmailVerificationRequest{
+    public static class EmailVerificationRequest {
         @NotBlank(message = "이메일 주소를 입력해주세요")
         @Email(message = "올바른 이메일 주소를 입력해주세요")
         private String email;
@@ -88,14 +90,14 @@ public class UserDto {
     }
 
     @Getter
-    public static class EmailRequest{
+    public static class EmailRequest {
         @NotBlank(message = "이메일 주소를 입력해주세요")
         @Email(message = "이메일 주소 형식이 아닙니다")
         private String email;
     }
 
     @Getter
-    public static class ChangePasswordRequest{
+    public static class FindPasswordRequest {
         @NotBlank(message = "아이디를 입력해주세요")
         private String username;
 
@@ -109,7 +111,7 @@ public class UserDto {
     }
 
     @Getter
-    public static class ChangeEmailRequest{
+    public static class ChangeEmailRequest {
         @NotBlank(message = "이메일 주소를 입력해주세요")
         @Email(message = "이메일 주소 형식이 아닙니다")
         private String email;
@@ -121,12 +123,27 @@ public class UserDto {
 
     @Getter
     @Builder
-    public static class UserInfoResponse{
+    public static class UserInfoResponse {
         private String name;
         private String profileImage;
         private String username;
         private String email;
         private LocalDate birthday;
+    }
+
+    @Getter
+    public static class PasswordRequest {
+        @NotBlank(message = "비밀번호를 입력해주세요")
+        private String password;
+    }
+
+    @Getter
+    public static class ChangePasswordRequest {
+        @NotBlank(message = "비밀번호를 입력해주세요")
+        private String newPassword;
+
+        @NotBlank(message = "비밀번호를 입력해주세요")
+        private String confirmPassword;
     }
 
 
