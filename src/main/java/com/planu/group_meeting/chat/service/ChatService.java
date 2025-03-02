@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -69,9 +70,9 @@ public class ChatService {
                             .groupImageUrl(group.getGroupImageUrl())
                             .participant(Long.parseLong(group.getParticipant()))
                             .isPin(group.getIsPin())
-                            .lastChat(chatInfo.getLastChat())
-                            .lastChatDate(chatInfo.getLastChatDate())
-                            .lastChatTime(chatInfo.getLastChatTime())
+                            .lastChat(Optional.ofNullable(chatInfo).map(ChatInfo::getLastChat).orElse(""))
+                            .lastChatDate(Optional.ofNullable(chatInfo).map(ChatInfo::getLastChatDate).orElse(""))
+                            .lastChatTime(Optional.ofNullable(chatInfo).map(ChatInfo::getLastChatTime).orElse(""))
                             .unreadChats(chatDAO.countUnreadChatByUserAndGroup(userId, group.getGroupId()))
                             .build();
                 })
@@ -82,6 +83,11 @@ public class ChatService {
                 .collect(Collectors.toList());
 
     }
+
+//    @Transactional
+//    public int getUnreadCount(Long groupId, Long MessageId) {
+//
+//    }
 
     @Transactional
     public void expelChat(String username, Long groupId) {
