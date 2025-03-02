@@ -119,10 +119,10 @@ public class UserService{
     }
 
     public void sendCodeToEmail(EmailSendRequest emailDto) throws MessagingException {
-        if(CertificationPurpose.REGISTER==emailDto.getPurpose() || CertificationPurpose.CHANGE_EMAIL==emailDto.getPurpose()
-        && isDuplicatedEmail(emailDto.getEmail())){
-            throw new DuplicatedEmailException();
-        }
+        if((CertificationPurpose.REGISTER==emailDto.getPurpose() || CertificationPurpose.CHANGE_EMAIL==emailDto.getPurpose())
+            && isDuplicatedEmail(emailDto.getEmail())){
+                throw new DuplicatedEmailException();
+            }
 
         String authCode = generateRandomCode();
         String key = String.format(AUTH_CODE_KEY, emailDto.getEmail(), emailDto.getPurpose());
