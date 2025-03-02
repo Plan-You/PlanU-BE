@@ -105,6 +105,7 @@ public class UserService {
     }
 
     public void sendCodeToEmail(EmailSendRequest emailDto) throws MessagingException {
+
         if ((CertificationPurpose.REGISTER == emailDto.getPurpose() || CertificationPurpose.CHANGE_EMAIL == emailDto.getPurpose())
                 && isDuplicatedEmail(emailDto.getEmail())) {
             throw new DuplicatedEmailException();
