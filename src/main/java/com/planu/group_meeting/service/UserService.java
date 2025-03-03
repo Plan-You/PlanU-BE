@@ -11,6 +11,7 @@ import com.planu.group_meeting.jwt.JwtUtil;
 import com.planu.group_meeting.service.file.S3Uploader;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,10 +26,12 @@ import static com.planu.group_meeting.jwt.JwtUtil.REFRESH_TOKEN_PREFIX;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private static final String VERIFIED_EMAIL_KEY = "verifiedEmail : %s : %s";
     private static final String VERIFIED_PASSWORD_KEY = "verifiedPassword : %s";
+    private static final String PASSWORD_CHANGE_VERIFIED_KEY = "passwordChangeVerified:%s";
     private static final String AUTH_CODE_KEY = "authCode : %s : %s";
     private static final long AUTH_CODE_EXPIRATION_TIME = 300000L; // 5분
     private static final String BASE_PROFILE_IMAGE = "https://planu-storage-main.s3.ap-northeast-2.amazonaws.com/defaultProfile.png";
@@ -61,10 +64,36 @@ public class UserService {
     @Transactional
     public void createUserProfile(Long userId, UserRegistrationRequest registrationRequest, MultipartFile profileImage) {
         String profileImageUrl = (profileImage != null && !profileImage.isEmpty()) ? s3Uploader.uploadFile(profileImage) : BASE_PROFILE_IMAGE;
-        User user = new User();
+        User user = userDAO.findById(userId);
         user.updateProfile(profileImageUrl, registrationRequest.getGender(), registrationRequest.getBirthDate());
-        userDAO.updateUserProfile(userId, user);
+        userDAO.updateUserProfile(user);
         userTermsDAO.saveTerms(registrationRequest.getTermsRequest().toEntity(userId));
+    }
+
+    @Transactional
+    public void updateUserProfile(Long userId, UserProfileUpdateRequest request, MultipartFile profileImage) {
+        User user = userDAO.findById(userId);
+        validateEmailChange(user, request.getEmail());
+        validatePasswordChange(user, request.getPassword());
+
+        String newProfileImageUrl = updateProfileImage(user.getProfileImgUrl(), profileImage);
+        request.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.updateProfile(request, newProfileImageUrl);
+        userDAO.updateUserProfile(user);
+    }
+
+    public UserInfoResponse getUserInfo(String username) {
+        if (!isDuplicatedUsername(username)) {
+            throw new NotFoundUserException();
+        }
+        User user = userDAO.findByUsername(username);
+        return UserInfoResponse.builder()
+                .name(user.getName())
+                .profileImage(user.getProfileImgUrl())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .birthday(user.getBirthDate())
+                .build();
     }
 
     public String findUsername(EmailRequest emailRequest) {
@@ -74,6 +103,49 @@ public class UserService {
             throw new NotFoundUserException();
         }
         return username;
+    }
+
+    public void verifyPassword(Long userId, PasswordRequest passwordRequest) {
+        User currentUser = userDAO.findById(userId);
+        validatePasswordMatch(currentUser.getPassword(), passwordRequest.getPassword());
+        String key = getPasswordVerificationKey(currentUser.getUsername());
+        redisTemplate.opsForValue().set(key, "true", AUTH_CODE_EXPIRATION_TIME, TimeUnit.MILLISECONDS);
+    }
+
+    public void validateNewPassword(Long userId, ChangePasswordRequest passwordRequest) {
+        User user = userDAO.findById(userId);
+        String passwordVerificationStatus = redisTemplate.opsForValue().get(getPasswordVerificationKey(user.getUsername()));
+        if (!"true".equals(passwordVerificationStatus)) {
+            throw new UnverifiedPasswordException();
+        }
+
+        if (!passwordRequest.getConfirmPassword().equals(passwordRequest.getNewPassword())) {
+            throw new IllegalArgumentException("새 비밀번호가 일치하지 않습니다.");
+        }
+        String passwordChangeKey = getPasswordChangeKey(user.getUsername());
+        redisTemplate.opsForValue().set(passwordChangeKey, "true", AUTH_CODE_EXPIRATION_TIME, TimeUnit.MILLISECONDS);
+        redisTemplate.delete(getPasswordVerificationKey(user.getUsername()));
+    }
+
+    private void validateEmailChange(User user, String newEmail) {
+        if (!user.getEmail().equals(newEmail)) {
+            validateEmailVerification(newEmail, CertificationPurpose.CHANGE_EMAIL);
+        }
+    }
+
+    private void validatePasswordMatch(String storedPassword, String inputPassword) {
+        if (!passwordEncoder.matches(inputPassword, storedPassword)) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+    }
+
+    private String getPasswordVerificationKey(String username) {
+        return String.format(VERIFIED_PASSWORD_KEY, username);
+    }
+
+    private String updateProfileImage(String currentImageUrl, MultipartFile newImage) {
+        s3Uploader.deleteFile(currentImageUrl);
+        return s3Uploader.uploadFile(newImage);
     }
 
     @Transactional
@@ -105,7 +177,6 @@ public class UserService {
     }
 
     public void sendCodeToEmail(EmailSendRequest emailDto) throws MessagingException {
-
         if ((CertificationPurpose.REGISTER == emailDto.getPurpose() || CertificationPurpose.CHANGE_EMAIL == emailDto.getPurpose())
                 && isDuplicatedEmail(emailDto.getEmail())) {
             throw new DuplicatedEmailException();
@@ -114,7 +185,6 @@ public class UserService {
         String authCode = generateRandomCode();
         String key = String.format(AUTH_CODE_KEY, emailDto.getEmail(), emailDto.getPurpose());
         redisTemplate.opsForValue().set(key, authCode, AUTH_CODE_EXPIRATION_TIME, TimeUnit.MILLISECONDS);
-
         mailService.sendVerificationCode(emailDto.getEmail(), authCode);
     }
 
@@ -180,50 +250,18 @@ public class UserService {
         }
     }
 
-    public UserInfoResponse getUserInfo(String username) {
-        if (!isDuplicatedUsername(username)) {
-            throw new NotFoundUserException();
+    private void validatePasswordChange(User user, String newPassword) {
+        if (!passwordEncoder.matches(newPassword, user.getPassword())) {
+            String passwordChangeKey = getPasswordChangeKey(user.getUsername());
+            if (!"true".equals(redisTemplate.opsForValue().get(passwordChangeKey))) {
+                throw new UnverifiedPasswordException();
+            }
         }
-        User user = userDAO.findByUsername(username);
-        return UserInfoResponse.builder()
-                .name(user.getName())
-                .profileImage(user.getProfileImgUrl())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .birthday(user.getBirthDate())
-                .build();
     }
 
-
-    public void changeEmail(String username, EmailRequest emailRequest) {
-        String newEmail = emailRequest.getEmail();
-        validateEmailVerification(newEmail, CertificationPurpose.CHANGE_EMAIL);
-        userDAO.updateEmailByUsername(username, newEmail);
+    private String getPasswordChangeKey(String username) {
+        return String.format(PASSWORD_CHANGE_VERIFIED_KEY, username);
     }
 
-    public void verifyPassword(Long userId, PasswordRequest passwordRequest) {
-        String password = passwordRequest.getPassword();
-        User currentUser = userDAO.findById(userId);
-        if (!passwordEncoder.matches(password, currentUser.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
-        String key = String.format(VERIFIED_PASSWORD_KEY, currentUser.getUsername());
-        redisTemplate.opsForValue().set(key, "true", AUTH_CODE_EXPIRATION_TIME, TimeUnit.MILLISECONDS);
-    }
-
-    public void changePassword(Long userId, ChangePasswordRequest passwordRequest) {
-        User user = userDAO.findById(userId);
-        String key = String.format(VERIFIED_PASSWORD_KEY, user.getUsername());
-        String passwordVerificationStatus = redisTemplate.opsForValue().get(key);
-        if (!"true".equals(passwordVerificationStatus)) {
-            throw new UnverifiedPasswordException();
-        }
-
-        if (!passwordRequest.getConfirmPassword().equals(passwordRequest.getNewPassword())) {
-            throw new IllegalArgumentException("새 비밀번호가 일치하지 않습니다.");
-        }
-        userDAO.updatePasswordByUsername(user.getUsername(), passwordEncoder.encode(passwordRequest.getNewPassword()));
-        redisTemplate.delete(key);
-    }
 }
 

@@ -68,6 +68,15 @@ public class UserController implements UserDocs {
         return BaseResponse.toResponseEntity(HttpStatus.CREATED, "프로필 등록 성공");
     }
 
+    @PutMapping("/profile")
+    public ResponseEntity<BaseResponse> updateUserProfile(@ModelAttribute @Valid UserProfileUpdateRequest request,
+                                                          @RequestParam(value = "profileImage") MultipartFile profileImage,
+                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.updateUserProfile(userDetails.getId(), request, profileImage);
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "프로필 수정 성공");
+    }
+
+
     @GetMapping("/profile/exists")
     public ResponseEntity<BaseResponse> checkProfileExists(@AuthenticationPrincipal CustomUserDetails userDetails) {
         String resultMsg = Boolean.toString(userService.isUserProfileCompleted(userDetails.getUsername()));
@@ -85,11 +94,11 @@ public class UserController implements UserDocs {
         return BaseResponse.toResponseEntity(HttpStatus.OK, "비밀번호 변경 성공");
     }
 
-    @PostMapping("/change-email")
-    public ResponseEntity<BaseResponse> changeEmail(@Valid @RequestBody EmailRequest emailRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        userService.changeEmail(userDetails.getUsername(), emailRequest);
-        return BaseResponse.toResponseEntity(HttpStatus.OK, "이메일 변경 성공");
-    }
+//    @PostMapping("/change-email")
+//    public ResponseEntity<BaseResponse> changeEmail(@Valid @RequestBody EmailRequest emailRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
+//        userService.changeEmail(userDetails.getUsername(), emailRequest);
+//        return BaseResponse.toResponseEntity(HttpStatus.OK, "이메일 변경 성공");
+//    }
 
     @PostMapping("/token/reissue")
     public ResponseEntity<BaseResponse> reissueAccessToken(HttpServletResponse response, HttpServletRequest request) {
@@ -120,11 +129,11 @@ public class UserController implements UserDocs {
         return BaseResponse.toResponseEntity(HttpStatus.OK, "인증 성공");
     }
 
-    @PostMapping("/change-password")
+    @PostMapping("/validate-new-password")
     public ResponseEntity<BaseResponse> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest,
                                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
-        userService.changePassword(userDetails.getId(), changePasswordRequest);
-        return BaseResponse.toResponseEntity(HttpStatus.OK, "비밀번호 변경 성공");
+        userService.validateNewPassword(userDetails.getId(), changePasswordRequest);
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "새 비밀번호 검증 성공");
     }
 
     @InitBinder
