@@ -67,6 +67,27 @@ public class UserDto {
     }
 
     @Getter
+    @Setter
+    public static class UserProfileUpdateRequest{
+        @NotBlank(message = "이름을 입력해주세요")
+        @Pattern(regexp = "^[가-힣]{2,6}$", message = "이름은 2자 이상 6자 이하의 한글만 입력 가능합니다.")
+        private String name;
+
+        @NotBlank(message = "이메일 주소를 입력해주세요")
+        @Email(message = "올바른 이메일 주소를 입력해주세요")
+        private String email;
+
+        @NotBlank(message = "비밀번호를 입력해주세요")
+        @Pattern(regexp = "(?=.*[0-9])(?=.*[a-zA-Z])(?=.*\\W)(?=\\S+$).{8,16}", message = "비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.")
+        private String password;
+
+        @NotNull(message = "생년월일을 입력해주세요")
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        @Past(message = "생년월일은 오늘 이전 날짜여야 합니다.")
+        private LocalDate birthDate;
+    }
+
+    @Getter
     public static class EmailSendRequest {
         @NotBlank(message = "이메일 주소를 입력해주세요")
         @Email(message = "올바른 이메일 주소를 입력해주세요")
@@ -140,6 +161,7 @@ public class UserDto {
     @Getter
     public static class ChangePasswordRequest {
         @NotBlank(message = "비밀번호를 입력해주세요")
+        @Pattern(regexp = "(?=.*[0-9])(?=.*[a-zA-Z])(?=.*\\W)(?=\\S+$).{8,16}", message = "비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.")
         private String newPassword;
 
         @NotBlank(message = "비밀번호를 입력해주세요")

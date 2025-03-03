@@ -92,17 +92,17 @@
     <update id="updateUserProfile" parameterType="com.planu.group_meeting.entity.User">
         UPDATE USER
         <set>
-            <if test="user.username != null">USERNAME = #{user.username},</if>
-            <if test="user.password != null">PASSWORD = #{user.password},</if>
-            <if test="user.name != null">NAME = #{user.name},</if>
-            <if test="user.email != null">EMAIL = #{user.email},</if>
-            <if test="user.role != null">ROLE = #{user.role},</if>
-            <if test="user.gender != null">GENDER = #{user.gender},</if>
-            <if test="user.profileImgUrl != null">PROFILE_IMG_URL = #{user.profileImgUrl},</if>
-            <if test="user.birthDate != null">BIRTH_DATE = #{user.birthDate},</if>
-            <if test="user.profileStatus != null">PROFILE_STATUS = #{user.profileStatus},</if>
+            <if test="username != null">USERNAME = #{username},</if>
+            <if test="password != null">PASSWORD = #{password},</if>
+            <if test="name != null">NAME = #{name},</if>
+            <if test="email != null">EMAIL = #{email},</if>
+            <if test="role != null">ROLE = #{role},</if>
+            <if test="gender != null">GENDER = #{gender},</if>
+            <if test="profileImgUrl != null">PROFILE_IMG_URL = #{profileImgUrl},</if>
+            <if test="birthDate != null">BIRTH_DATE = #{birthDate},</if>
+            <if test="profileStatus != null">PROFILE_STATUS = #{profileStatus},</if>
         </set>
-        WHERE ID = #{userId}
+        WHERE ID = #{id}
     </update>
 
     <update id="updatePasswordByUsername">
