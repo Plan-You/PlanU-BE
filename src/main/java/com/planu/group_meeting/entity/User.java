@@ -8,6 +8,8 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import static com.planu.group_meeting.dto.UserDto.UserProfileUpdateRequest;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,6 +34,14 @@ public class User {
         this.gender = Gender.valueOf(gender);
         this.birthDate = birthDate;
         this.profileStatus = ProfileStatus.COMPLETED;
+    }
+
+    public void updateProfile(UserProfileUpdateRequest request, String profileImgUrl){
+        this.name = request.getName();
+        this.email = request.getEmail();
+        this.password = request.getPassword();
+        this.birthDate = request.getBirthDate();
+        this.profileImgUrl = profileImgUrl;
     }
 
 }

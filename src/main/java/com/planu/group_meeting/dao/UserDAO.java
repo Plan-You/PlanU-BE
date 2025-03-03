@@ -13,7 +13,7 @@ import static com.planu.group_meeting.dto.ScheduleDto.BirthdayPerson;
 public interface UserDAO {
     void insertUser(User user);
 
-    void updateUserProfile(@Param("userId") Long userId, @Param("user") User user);
+    void updateUserProfile(User user);
 
     User findByUsername(String username);
 
