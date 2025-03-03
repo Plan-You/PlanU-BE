@@ -539,7 +539,7 @@ public class GroupService {
                 ranks++;
                 previousCount = entry.getValue();
             }
-            response.add(new AvailableDateDto.AvailableDateRanks(ranks, entry.getKey().toString()));
+            response.add(new AvailableDateDto.AvailableDateRanks(ranks, entry.getValue(), entry.getKey().toString()));
         }
 
         return response;
