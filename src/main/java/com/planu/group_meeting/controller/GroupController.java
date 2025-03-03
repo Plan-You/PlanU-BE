@@ -74,16 +74,16 @@ public class GroupController implements GroupDocs {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<dataResponse<List<GroupResponseDTO>>> groupList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<DataResponse<List<GroupResponseDTO>>> groupList(@AuthenticationPrincipal CustomUserDetails userDetails) {
         List<GroupResponseDTO> groupList = groupService.getGroupList(userDetails.getId());
-        dataResponse<List<GroupResponseDTO>> response = new dataResponse<>(groupList);
+        DataResponse<List<GroupResponseDTO>> response = new DataResponse<>(groupList);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/inviteList")
-    public ResponseEntity<dataResponse<List<GroupResponseDTO>>> groupInviteList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<DataResponse<List<GroupResponseDTO>>> groupInviteList(@AuthenticationPrincipal CustomUserDetails userDetails) {
         List<GroupResponseDTO> groupList = groupService.getGroupInviteList(userDetails.getId());
-        dataResponse<List<GroupResponseDTO>> response = new dataResponse<>(groupList);
+        DataResponse<List<GroupResponseDTO>> response = new DataResponse<>(groupList);
         return ResponseEntity.ok(response);
     }
 
