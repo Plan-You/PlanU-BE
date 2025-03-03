@@ -4,8 +4,9 @@ import com.planu.group_meeting.exception.file.InvalidFileTypeException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.util.UUID;
@@ -17,6 +18,7 @@ public class S3Uploader {
     private final String bucketName;
     private final Region region; // Region 필드를 추가
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    private static final String DEFAULT_PROFILE_IMAGE = "defaultProfile.png"; // 기본 프로필 이미지 파일명
     private static final String[] ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/gif"};
 
     public S3Uploader(S3Client s3Client, String bucketName, Region region) {
@@ -55,6 +57,43 @@ public class S3Uploader {
             throw new RuntimeException("파일 업로드 실패: " + e.getMessage(), e);
         }
     }
+
+    /**
+     * S3에서 파일 삭제
+     *
+     * @param profileImageUrl 삭제할 이미지 URL
+     */
+    public void deleteFile(String profileImageUrl) {
+        if (profileImageUrl == null || profileImageUrl.isEmpty()) {
+            return; // 삭제할 파일 없음
+        }
+
+        String fileName = extractFileNameFromUrl(profileImageUrl);
+
+        // 기본 프로필 이미지는 삭제하지 않음
+        if (DEFAULT_PROFILE_IMAGE.equals(fileName)) {
+            return;
+        }
+
+        try {
+            s3Client.deleteObject(
+                    DeleteObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(fileName)
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("파일 삭제 실패: " + e.getMessage(), e);
+        }
+    }
+
+    private String extractFileNameFromUrl(String profileImageUrl) {
+        if (profileImageUrl == null || !profileImageUrl.contains("/")) {
+            throw new IllegalArgumentException("잘못된 URL 형식입니다.");
+        }
+        return profileImageUrl.substring(profileImageUrl.lastIndexOf("/") + 1);
+    }
+
 
     /**
      * 파일 유효성 검사 (크기 및 형식)
