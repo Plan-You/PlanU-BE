@@ -2,31 +2,44 @@ package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.controller.docs.GroupDocs;
-import com.planu.group_meeting.dto.*;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRanks;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
+import com.planu.group_meeting.dto.BaseResponse;
+import com.planu.group_meeting.dto.DataResponse;
+import com.planu.group_meeting.dto.GroupDTO;
 import com.planu.group_meeting.dto.GroupDTO.AvailableDateInfos;
 import com.planu.group_meeting.dto.GroupDTO.AvailableMemberInfos;
+import com.planu.group_meeting.dto.GroupDTO.CountOfGroupMembers;
 import com.planu.group_meeting.dto.GroupDTO.GroupMembersResponse;
+import com.planu.group_meeting.dto.GroupDTO.Member;
 import com.planu.group_meeting.dto.GroupDTO.NonGroupFriendsResponse;
+import com.planu.group_meeting.dto.GroupInviteResponseDTO;
+import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.service.FriendService;
 import com.planu.group_meeting.service.GroupService;
 import com.planu.group_meeting.service.GroupUserService;
 import com.planu.group_meeting.valid.InputValidator;
 import jakarta.annotation.Nullable;
-import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @RestController
@@ -224,5 +237,15 @@ public class GroupController implements GroupDocs {
         Map<String, Object> response = new HashMap<>();
         response.put("groupInfo", groupInfo);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("{groupId}/members/count")
+    public ResponseEntity<CountOfGroupMembers> getCountOfGroupMembers(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable("groupId") Long groupId
+    )
+    {
+        List<Member> groupMembers = groupService.findGroupMembers(groupId, userDetails.getId(), null);
+        return ResponseEntity.ok(new CountOfGroupMembers(groupMembers.size()));
     }
 }
