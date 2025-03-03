@@ -132,4 +132,9 @@ public class FriendService {
             member.setFriendStatus(friendStatus.name());
         }
     }
+
+    public FriendListResponse getRecommendationFriends(Long userId){
+         List<FriendInfo> friendInfo = friendDAO.getRecommendationFriendInfo(userId);
+         return new FriendListResponse(friendInfo.size(), friendInfo);
+    }
 }
