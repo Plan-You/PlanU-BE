@@ -14,6 +14,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -82,6 +83,39 @@ public class ChatService {
                         .thenComparing(Comparator.comparing(ChatRoomResponse::getLastChatTime).reversed()))
                 .collect(Collectors.toList());
 
+    }
+
+    @Transactional
+    public List<ChatRoomResponse> searchChatRooms(Long userId, String searchName) {
+        if (searchName == null || searchName.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        String keyword = searchName.trim().toLowerCase();
+
+        List<GroupResponseDTO> groupList = groupDAO.findGroupsByUserId(userId);
+
+        return groupList.stream()
+                .filter(group -> group.getGroupName().toLowerCase().contains(keyword)) // 검색 필터 적용
+                .map(group -> {
+                    ChatInfo chatInfo = chatDAO.getChatInfo(group.getGroupId());
+                    return ChatRoomResponse.builder()
+                            .groupId(group.getGroupId())
+                            .groupName(group.getGroupName())
+                            .groupImageUrl(group.getGroupImageUrl())
+                            .participant(Long.parseLong(group.getParticipant()))
+                            .isPin(group.getIsPin())
+                            .lastChat(Optional.ofNullable(chatInfo).map(ChatInfo::getLastChat).orElse(""))
+                            .lastChatDate(Optional.ofNullable(chatInfo).map(ChatInfo::getLastChatDate).orElse(""))
+                            .lastChatTime(Optional.ofNullable(chatInfo).map(ChatInfo::getLastChatTime).orElse(""))
+                            .unreadChats(chatDAO.countUnreadChatByUserAndGroup(userId, group.getGroupId()))
+                            .build();
+                })
+                .sorted(Comparator.comparing(ChatRoomResponse::getIsPin)
+                        .reversed()
+                        .thenComparing(Comparator.comparing(ChatRoomResponse::getLastChatDate).reversed())
+                        .thenComparing(Comparator.comparing(ChatRoomResponse::getLastChatTime).reversed()))
+                .collect(Collectors.toList());
     }
 
 //    @Transactional

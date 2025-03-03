@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class dataResponse<T> {
+public class DataResponse<T> {
     private T data;
 }

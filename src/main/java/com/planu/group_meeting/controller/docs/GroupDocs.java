@@ -10,7 +10,7 @@ import com.planu.group_meeting.dto.GroupDTO.GroupMembersResponse;
 import com.planu.group_meeting.dto.GroupDTO.NonGroupFriendsResponse;
 import com.planu.group_meeting.dto.GroupInviteResponseDTO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
-import com.planu.group_meeting.dto.dataResponse;
+import com.planu.group_meeting.dto.DataResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -47,10 +47,10 @@ public interface GroupDocs {
     ResponseEntity<BaseResponse> joinGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
                                            @PathVariable("groupId") Long groupId);
 
-    ResponseEntity<dataResponse<List<GroupResponseDTO>>> groupList(
+    ResponseEntity<DataResponse<List<GroupResponseDTO>>> groupList(
             @AuthenticationPrincipal CustomUserDetails userDetails);
 
-    ResponseEntity<dataResponse<List<GroupResponseDTO>>> groupInviteList(
+    ResponseEntity<DataResponse<List<GroupResponseDTO>>> groupInviteList(
             @AuthenticationPrincipal CustomUserDetails userDetails);
 
     ResponseEntity<BaseResponse> leaveGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
