@@ -72,7 +72,7 @@ public class GroupController implements GroupDocs {
     @DeleteMapping("/invite")
     public ResponseEntity<BaseResponse> inviteUserCancel(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                          @RequestParam("groupId") Long groupId,
-                                                         @RequestParam("username") String username){
+                                                         @RequestParam("username") String username) {
         groupService.inviteUserCancel(userDetails.getId(), username, groupId);
 
         return BaseResponse.toResponseEntity(HttpStatus.OK, "초대 취소 성공");
@@ -87,14 +87,16 @@ public class GroupController implements GroupDocs {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<DataResponse<List<GroupResponseDTO>>> groupList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<DataResponse<List<GroupResponseDTO>>> groupList(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         List<GroupResponseDTO> groupList = groupService.getGroupList(userDetails.getId());
         DataResponse<List<GroupResponseDTO>> response = new DataResponse<>(groupList);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/inviteList")
-    public ResponseEntity<DataResponse<List<GroupResponseDTO>>> groupInviteList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<DataResponse<List<GroupResponseDTO>>> groupInviteList(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         List<GroupResponseDTO> groupList = groupService.getGroupInviteList(userDetails.getId());
         DataResponse<List<GroupResponseDTO>> response = new DataResponse<>(groupList);
         return ResponseEntity.ok(response);
@@ -141,42 +143,37 @@ public class GroupController implements GroupDocs {
     }
 
     @GetMapping("/{groupId}/members")
-    public ResponseEntity<GroupMembersResponse> findGroupMembers(
-            @RequestParam("search") @Nullable String keyword,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable("groupId") Long groupId
-    ) {
-        GroupMembersResponse groupMembers = new GroupMembersResponse(groupService.findGroupMembers(groupId, userDetails.getId(), keyword));
+    public ResponseEntity<GroupMembersResponse> findGroupMembers(@RequestParam("search") @Nullable String keyword,
+                                                                 @AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                 @PathVariable("groupId") Long groupId) {
+        GroupMembersResponse groupMembers = new GroupMembersResponse(
+                groupService.findGroupMembers(groupId, userDetails.getId(), keyword));
         friendService.setFriendStatus(userDetails.getId(), groupMembers, userDetails.getUsername());
         return ResponseEntity.ok(groupMembers);
     }
 
     @GetMapping("{groupId}/invite-list")
-    public ResponseEntity<NonGroupFriendsResponse> findNonGroupFriends(
-            @RequestParam("search") @Nullable String keyword,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable("groupId") Long groupId
-    ) {
-        NonGroupFriendsResponse nonGroupFriends = groupService.getMemberInviteList(groupId, userDetails.getId(), keyword);
+    public ResponseEntity<NonGroupFriendsResponse> findNonGroupFriends(@RequestParam("search") @Nullable String keyword,
+                                                                       @AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                       @PathVariable("groupId") Long groupId) {
+        NonGroupFriendsResponse nonGroupFriends = groupService.getMemberInviteList(groupId, userDetails.getId(),
+                keyword);
         return ResponseEntity.ok(nonGroupFriends);
     }
 
     @GetMapping("{groupId}/available-dates")
     public ResponseEntity<AvailableDateRatios> findAvailableDateRatios(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable("groupId") Long groupId,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth
-    ) {
-        AvailableDateRatios availableDateRatios = groupService.findAvailableDateRatios(groupId, yearMonth, userDetails.getId());
+            @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("groupId") Long groupId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth) {
+        AvailableDateRatios availableDateRatios = groupService.findAvailableDateRatios(groupId, yearMonth,
+                userDetails.getId());
         return ResponseEntity.ok(availableDateRatios);
     }
 
     @GetMapping("{groupId}/available-dates/members")
     public ResponseEntity<Map<String, Object>> getAvailableMembers(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable("groupId") Long groupId,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-mm-dd") @Nullable LocalDate date
-    ) {
+            @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("groupId") Long groupId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-mm-dd") @Nullable LocalDate date) {
         if (date == null) {
             date = LocalDate.now();
         }
@@ -188,51 +185,45 @@ public class GroupController implements GroupDocs {
 
     @GetMapping("{groupId}/available-dates/member-info")
     public ResponseEntity<AvailableMemberInfos> getAvailableMemberInfos(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable("groupId") Long groupId,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth
-    ) {
+            @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("groupId") Long groupId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth) {
         if (yearMonth == null) {
             yearMonth = YearMonth.now();
         }
 
-        AvailableMemberInfos memberInfos = groupService.getAvailableMemberInfos(groupId, yearMonth, userDetails.getId());
+        AvailableMemberInfos memberInfos = groupService.getAvailableMemberInfos(groupId, yearMonth,
+                userDetails.getId());
         return ResponseEntity.ok(memberInfos);
     }
 
     @GetMapping("{groupId}/available-dates/date-info")
     public ResponseEntity<AvailableDateInfos> getAvailableDateInfos(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable("groupId") Long groupId,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth
-    ) {
+            @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("groupId") Long groupId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth) {
         if (yearMonth == null) {
             yearMonth = YearMonth.now();
         }
 
-        AvailableDateInfos availableDateInfos = groupService.getAvailableDateInfos(groupId, yearMonth, userDetails.getId());
+        AvailableDateInfos availableDateInfos = groupService.getAvailableDateInfos(groupId, yearMonth,
+                userDetails.getId());
         return ResponseEntity.ok(availableDateInfos);
     }
-
     @GetMapping("{groupId}/available-dates/ranks")
-    public ResponseEntity<List<AvailableDateRanks>> getAvailableDateRanks(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable("groupId") Long groupId,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth
-    ) {
+    public ResponseEntity<AvailableDateRanks> getAvailableDateRanks(
+            @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("groupId") Long groupId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth) {
         if (yearMonth == null) {
             yearMonth = YearMonth.now();
         }
-        List<AvailableDateRanks> availableDateRanks = groupService.getAvailableDateRanks(groupId, yearMonth, userDetails.getId());
+        AvailableDateRanks availableDateRanks = new AvailableDateRanks(
+                groupService.getAvailableDateRanks(groupId, yearMonth, userDetails.getId()));
         return ResponseEntity.ok(availableDateRanks);
     }
 
+
     @GetMapping("{groupId}/details")
-    public ResponseEntity<Map<String, Object>> getGroupDetails(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable("groupId") Long groupId
-    )
-    {
+    public ResponseEntity<Map<String, Object>> getGroupDetails(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                               @PathVariable("groupId") Long groupId) {
         GroupDTO.GroupInfo groupInfo = groupService.getGroupDetails(groupId, userDetails.getId());
         Map<String, Object> response = new HashMap<>();
         response.put("groupInfo", groupInfo);
@@ -241,10 +232,7 @@ public class GroupController implements GroupDocs {
 
     @GetMapping("{groupId}/members/count")
     public ResponseEntity<CountOfGroupMembers> getCountOfGroupMembers(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable("groupId") Long groupId
-    )
-    {
+            @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("groupId") Long groupId) {
         List<Member> groupMembers = groupService.findGroupMembers(groupId, userDetails.getId(), null);
         return ResponseEntity.ok(new CountOfGroupMembers(groupMembers.size()));
     }

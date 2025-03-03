@@ -32,9 +32,15 @@ public class AvailableDateDto {
     @Setter
     @Getter
     @AllArgsConstructor
-    public static class AvailableDateRanks{
+    public static class AvailableDateRank {
         private Long ranks;
         private Integer countOfAvailableMembers;
         private String date;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class AvailableDateRanks {
+        private List<AvailableDateRank> availableDateRanks;
     }
 }

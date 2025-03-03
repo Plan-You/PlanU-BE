@@ -12,7 +12,7 @@ import com.planu.group_meeting.dao.FriendDAO;
 import com.planu.group_meeting.dao.GroupDAO;
 import com.planu.group_meeting.dao.GroupUserDAO;
 import com.planu.group_meeting.dao.UserDAO;
-import com.planu.group_meeting.dto.AvailableDateDto;
+import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRank;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatio;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
 import com.planu.group_meeting.dto.FriendDto.FriendInfo;
@@ -491,7 +491,7 @@ public class GroupService {
     }
 
     @Transactional
-    public List<AvailableDateDto.AvailableDateRanks> getAvailableDateRanks(Long groupId, YearMonth yearMonth, Long userId) {
+    public List<AvailableDateRank> getAvailableDateRanks(Long groupId, YearMonth yearMonth, Long userId) {
         if (groupDAO.findGroupById(groupId) == null) {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
         }
@@ -526,7 +526,7 @@ public class GroupService {
                 }
         );
 
-        List<AvailableDateDto.AvailableDateRanks> response = new ArrayList<>();
+        List<AvailableDateRank> response = new ArrayList<>();
 
         if(availableDateRanks.isEmpty()) {
             return response;
@@ -539,7 +539,7 @@ public class GroupService {
                 ranks++;
                 previousCount = entry.getValue();
             }
-            response.add(new AvailableDateDto.AvailableDateRanks(ranks, entry.getValue(), entry.getKey().toString()));
+            response.add(new AvailableDateRank(ranks, entry.getValue(), entry.getKey().toString()));
         }
 
         return response;
