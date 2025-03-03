@@ -34,6 +34,7 @@ public class AvailableDateDto {
     @AllArgsConstructor
     public static class AvailableDateRanks{
         private Long ranks;
+        private Integer countOfAvailableMembers;
         private String date;
     }
 }
