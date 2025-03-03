@@ -8,6 +8,12 @@ public class GroupDTO {
 
     @Getter
     @AllArgsConstructor
+    public static class CountOfGroupMembers {
+        Integer countOfMembers;
+    }
+
+    @Getter
+    @AllArgsConstructor
     public static class GroupMembersResponse {
         List<Member> members;
     }
