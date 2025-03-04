@@ -46,4 +46,25 @@
         AND ms.IS_READ = FALSE
     </select>
 
+    <select id="existsByIdAndGroupId" resultType="int">
+        SELECT COUNT(*)
+        FROM CHAT_MESSAGE
+        WHERE ID = #{messageId}
+        AND GROUP_ID = #{groupId}
+    </select>
+
+    <update id="markAsRead">
+        UPDATE MESSAGE_STATUS
+        SET IS_READ = TRUE, UPDATED_DATE = CURRENT_TIMESTAMP
+        WHERE USER_ID = #{userId}
+        AND MESSAGE_ID = #{messageId}
+    </update>
+
+    <select id="countUnreadByMessageId" resultType="int">
+        SELECT COUNT(*)
+        FROM MESSAGE_STATUS
+        WHERE MESSAGE_ID = #{messageId}
+        AND IS_READ = FALSE
+    </select>
+
 </mapper>

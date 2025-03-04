@@ -30,7 +30,7 @@ public class ChatService {
     private final GroupDAO groupDAO;
 
     @Transactional
-    public void save(Long groupId, String username, String content){
+    public Long save(Long groupId, String username, String content){
         Long userId = userDAO.findIdByUsername(username);
 
         ChatMessage chatMessage = ChatMessage.builder()
@@ -42,6 +42,8 @@ public class ChatService {
         chatDAO.saveChatMessage(chatMessage);
 
         saveMessageStatus(groupId, chatMessage.getId());
+
+        return chatMessage.getId();
     }
 
     @Transactional
@@ -118,10 +120,17 @@ public class ChatService {
                 .collect(Collectors.toList());
     }
 
-//    @Transactional
-//    public int getUnreadCount(Long groupId, Long MessageId) {
-//
-//    }
+    @Transactional
+    public int getUnreadCount(Long messageId) {
+        return chatDAO.countUnreadByMessageId(messageId);
+    }
+
+    @Transactional
+    public void updateReadStatus(Long messageId, String username) {
+        Long userId = userDAO.findIdByUsername(username);
+
+        chatDAO.markAsRead(userId, messageId);
+    }
 
     @Transactional
     public void expelChat(String username, Long groupId) {
