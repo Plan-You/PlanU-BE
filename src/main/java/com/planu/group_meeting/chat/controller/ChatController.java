@@ -36,13 +36,16 @@ public class ChatController {
     public void chat(ChatMessageRequest message, @DestinationVariable("groupId") Long groupId, StompHeaderAccessor accessor){
         String username = (String) accessor.getSessionAttributes().get("username");
 
-        Long messageId = chatService.save(groupId, username, message.getMessage());
+        Long messageId = chatService.save(groupId, username, message.getType(), message.getMessage());
+
+        chatService.updateReadStatus(messageId, username);
 
         ChatMessageResponse chatMessageResponse = ChatMessageResponse.builder()
                                                     .messageId(messageId)
                                                     .type(message.getType())
                                                     .sender(username)
                                                     .message(message.getMessage())
+                                                    .unReadCount(chatService.getUnreadCount(messageId))
                                                     .build();
 
         simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId, chatMessageResponse);

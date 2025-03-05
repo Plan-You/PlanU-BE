@@ -6,8 +6,8 @@
 <mapper namespace="com.planu.group_meeting.chat.dao.ChatDAO">
 
     <insert id="saveChatMessage" useGeneratedKeys="true" keyProperty="id" parameterType="com.planu.group_meeting.chat.dto.ChatMessage">
-        INSERT INTO CHAT_MESSAGE (USER_ID, GROUP_ID, MESSAGE)
-        VALUES (#{userId}, #{groupId}, #{content})
+        INSERT INTO CHAT_MESSAGE (SENDER_ID, GROUP_ID, MESSAGE_TYPE, MESSAGE)
+        VALUES (#{userId}, #{groupId}, #{type}, #{content})
     </insert>
 
 

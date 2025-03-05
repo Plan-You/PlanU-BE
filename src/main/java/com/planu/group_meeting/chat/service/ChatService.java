@@ -4,6 +4,7 @@ import com.planu.group_meeting.chat.dao.ChatDAO;
 import com.planu.group_meeting.chat.dto.ChatInfo;
 import com.planu.group_meeting.chat.dto.ChatMessage;
 import com.planu.group_meeting.chat.dto.MessageStatus;
+import com.planu.group_meeting.chat.dto.response.ChatMessageResponse;
 import com.planu.group_meeting.chat.dto.response.ChatRoomResponse;
 import com.planu.group_meeting.dao.GroupDAO;
 import com.planu.group_meeting.dao.UserDAO;
@@ -30,12 +31,13 @@ public class ChatService {
     private final GroupDAO groupDAO;
 
     @Transactional
-    public Long save(Long groupId, String username, String content){
+    public Long save(Long groupId, String username, Integer type, String content){
         Long userId = userDAO.findIdByUsername(username);
 
         ChatMessage chatMessage = ChatMessage.builder()
                 .userId(userId)
                 .groupId(groupId)
+                .type(type)
                 .content(content)
                 .build();
 
@@ -134,7 +136,14 @@ public class ChatService {
 
     @Transactional
     public void expelChat(String username, Long groupId) {
-        simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId, username + "님이 나가셨습니다.");
+        save(groupId, username, 6, null);
+
+        ChatMessageResponse chatMessage = ChatMessageResponse.builder()
+                                            .type(6)
+                                            .sender(username)
+                                            .build();
+
+        simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId,chatMessage);
 
         simpMessageSendingOperations.convertAndSend("/sub/disconnect/" + username, "웹소켓 연결 종료요청 보내주세요.");
     }

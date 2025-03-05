@@ -1,5 +1,6 @@
 package com.planu.group_meeting.chat.handler;
 
+import com.planu.group_meeting.chat.dto.response.ChatMessageResponse;
 import com.planu.group_meeting.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -40,10 +41,12 @@ public class ReadMessageBatchProcessor {
     }
 
     private void sendUnreadMessage(Long groupId, Long messageId, int unReadCount) {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("messageId", messageId);
-        payload.put("unReadCount", unReadCount);
+        ChatMessageResponse chatMessage = ChatMessageResponse.builder()
+                                            .messageId(messageId)
+                                            .type(4)
+                                            .unReadCount(unReadCount)
+                                            .build();
 
-        messagingTemplate.convertAndSend("/sub/chat/group/" + groupId, payload);
+        messagingTemplate.convertAndSend("/sub/chat/group/" + groupId, chatMessage);
     }
 }

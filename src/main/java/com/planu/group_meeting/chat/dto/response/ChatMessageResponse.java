@@ -8,7 +8,8 @@ import lombok.Data;
 public class ChatMessageResponse {
 
     private Long messageId;
-    private Long type;
+    private Integer type;
     private String message;
     private String sender;
+    private Integer unReadCount;
 }

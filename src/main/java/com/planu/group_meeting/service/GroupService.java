@@ -224,6 +224,7 @@ public class GroupService {
         groupDAO.deleteGroupScheduleParticipant(groupId);
         groupDAO.deleteGroupScheduleComment(groupId);
         groupDAO.deleteGroupUser(groupId);
+        groupDAO.deleteMessageStatus(groupId);
         groupDAO.deleteChatMessage(groupId);
         groupDAO.deleteGroupSchedule(groupId);
         groupDAO.deleteGroup(groupId);
