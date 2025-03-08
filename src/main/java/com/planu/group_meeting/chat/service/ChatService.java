@@ -10,11 +10,13 @@ import com.planu.group_meeting.dao.GroupDAO;
 import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.dto.GroupUserDTO;
+import com.planu.group_meeting.entity.GroupUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -31,7 +33,7 @@ public class ChatService {
     private final GroupDAO groupDAO;
 
     @Transactional
-    public Long save(Long groupId, String username, Integer type, String content){
+    public ChatMessage save(Long groupId, String username, Integer type, String content){
         Long userId = userDAO.findIdByUsername(username);
 
         ChatMessage chatMessage = ChatMessage.builder()
@@ -45,7 +47,7 @@ public class ChatService {
 
         saveMessageStatus(groupId, chatMessage.getId());
 
-        return chatMessage.getId();
+        return chatDAO.findById(chatMessage.getId());
     }
 
     @Transactional
@@ -135,15 +137,56 @@ public class ChatService {
     }
 
     @Transactional
-    public void expelChat(String username, Long groupId) {
-        save(groupId, username, 6, null);
+    public List<ChatMessageResponse> getMessages(Long userId, Long groupId, Long offset) {
+        GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
 
-        ChatMessageResponse chatMessage = ChatMessageResponse.builder()
-                                            .type(6)
+        if(groupUser == null){
+            throw new IllegalArgumentException("해당 그룹의 멤버가 아닙니다.");
+        }
+        if(groupUser.getGroupState() == 0) {
+            throw new IllegalArgumentException("해당 그룹의 멤버가 아닙니다.");
+        }
+
+        int limit = 50;
+
+        List<ChatMessage> chatMessageList = chatDAO.findChatMessages(groupId, offset, limit);
+
+        return chatMessageList.stream().map(this::convertToResponse).collect(Collectors.toList());
+    }
+
+    private ChatMessageResponse convertToResponse(ChatMessage chatMessage) {
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+        return ChatMessageResponse.builder()
+                .messageId(chatMessage.getId())
+                .type(chatMessage.getType())
+                .message(chatMessage.getContent())
+                .sender(userDAO.findUsernameById(chatMessage.getUserId())) // sender 변환
+                .unReadCount(chatDAO.countUnreadByMessageId(chatMessage.getId())) // 안 읽은 사람 수 조회
+                .ChatDate(chatMessage.getCreatedDate().format(dateFormatter)) // 날짜 변환
+                .ChatTime(chatMessage.getCreatedDate().format(timeFormatter)) // 시간 변환
+                .build();
+    }
+
+    @Transactional
+    public void expelChat(String username, Long groupId) {
+        ChatMessage chatMessage = save(groupId, username, 6, null);
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String date = chatMessage.getCreatedDate().format(dateFormatter);
+
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        String time = chatMessage.getCreatedDate().format(timeFormatter);
+
+        ChatMessageResponse chatMessageResponse = ChatMessageResponse.builder()
+                                            .type(chatMessage.getType())
                                             .sender(username)
+                                            .ChatDate(date)
+                                            .ChatTime(time)
                                             .build();
 
-        simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId,chatMessage);
+        simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId,chatMessageResponse);
 
         simpMessageSendingOperations.convertAndSend("/sub/disconnect/" + username, "웹소켓 연결 종료요청 보내주세요.");
     }

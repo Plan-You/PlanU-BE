@@ -67,4 +67,31 @@
         AND IS_READ = FALSE
     </select>
 
+    <resultMap id="ChatMessageMap" type="com.planu.group_meeting.chat.dto.ChatMessage">
+        <id property="id" column="ID"/>
+        <result property="userId" column="SENDER_ID"/>
+        <result property="groupId" column="GROUP_ID"/>
+        <result property="type" column="MESSAGE_TYPE"/>
+        <result property="content" column="MESSAGE"/>
+        <result property="createdDate" column="CREATED_DATE"/>
+        <result property="updatedDate" column="UPDATED_DATE"/>
+    </resultMap>
+
+    <select id="findById" resultMap="ChatMessageMap">
+        SELECT ID, SENDER_ID, GROUP_ID, MESSAGE_TYPE, MESSAGE, CREATED_DATE, UPDATED_DATE
+        FROM CHAT_MESSAGE
+        WHERE ID = #{messageId}
+    </select>
+
+    <select id="findChatMessages" resultMap="ChatMessageMap">
+        SELECT ID, SENDER_ID, GROUP_ID, MESSAGE_TYPE, MESSAGE, CREATED_DATE, UPDATED_DATE
+        FROM CHAT_MESSAGE
+        WHERE GROUP_ID = #{groupId}
+        <if test="messageId != null">
+            AND ID &lt; #{messageId}
+        </if>
+        ORDER BY ID DESC
+        LIMIT #{limit}
+    </select>
+
 </mapper>

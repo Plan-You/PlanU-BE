@@ -188,7 +188,8 @@ public class GroupService {
     }
 
     @Transactional
-    public void leaveGroup(Long userId, Long groupId) {
+    public void leaveGroup(String username, Long groupId) {
+        Long userId = userDAO.findIdByUsername(username);
         GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
         if(groupUser == null){
             throw new IllegalArgumentException("이미 그룹에 속하지 않습니다.");
@@ -199,6 +200,8 @@ public class GroupService {
         if(groupUser.getGroupRole() == GroupUser.GroupRole.LEADER){
             throw new IllegalArgumentException("그룹 리더는 그룹을 떠날 수 없습니다.");
         }
+
+        chatService.expelChat(username, groupId);
 
         groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
 

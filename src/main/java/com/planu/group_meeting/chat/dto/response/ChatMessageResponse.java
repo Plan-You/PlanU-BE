@@ -12,4 +12,6 @@ public class ChatMessageResponse {
     private String message;
     private String sender;
     private Integer unReadCount;
+    private String ChatDate;
+    private String ChatTime;
 }
