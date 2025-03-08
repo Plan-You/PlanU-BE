@@ -151,7 +151,17 @@ public class ChatService {
 
         List<ChatMessage> chatMessageList = chatDAO.findChatMessages(groupId, offset, limit);
 
+        updateMessageStatusAsRead(userId, groupId);
+
+        Integer type = 3;
+
+        simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId,type);
+
         return chatMessageList.stream().map(this::convertToResponse).collect(Collectors.toList());
+    }
+
+    private void updateMessageStatusAsRead(Long userId, Long groupId) {
+        chatDAO.updateMessageStatusAsRead(userId, groupId);
     }
 
     private ChatMessageResponse convertToResponse(ChatMessage chatMessage) {

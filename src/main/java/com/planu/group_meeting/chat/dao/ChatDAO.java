@@ -31,4 +31,6 @@ public interface ChatDAO {
             @Param("groupId") Long groupId,
             @Param("messageId") Long messageId,
             @Param("limit") int limit);
+
+    void updateMessageStatusAsRead(@Param("userId") Long userId, @Param("groupId") Long groupId);
 }

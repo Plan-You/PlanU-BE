@@ -94,4 +94,12 @@
         LIMIT #{limit}
     </select>
 
+    <update id="updateMessageStatusAsRead">
+        UPDATE MESSAGE_STATUS
+        SET IS_READ = TRUE
+        WHERE USER_ID = #{userId}
+        AND MESSAGE_ID IN (
+        SELECT ID FROM CHAT_MESSAGE WHERE GROUP_ID = #{groupId}
+        )
+    </update>
 </mapper>
