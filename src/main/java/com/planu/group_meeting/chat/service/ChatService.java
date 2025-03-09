@@ -188,7 +188,7 @@ public class ChatService {
             throw new IllegalArgumentException("해당 그룹의 멤버가 아닙니다.");
         }
 
-        List<Long> messageIds = chatDAO.getMessagesByGroupAndRange(groupId, startId, endId);
+        List<Long> messageIds = chatDAO.getMessageIdsByGroupAndRange(groupId, startId, endId);
 
         return messageIds.stream()
                 .map(messageId -> ChatMessageResponse.builder()
