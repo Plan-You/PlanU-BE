@@ -172,6 +172,8 @@ public class GroupService {
         }
         groupDAO.updateGroupUserGroupStatus(customUserDetails.getId(), groupId);
 
+        chatService.joinChat(customUserDetails.getUsername(), groupId);
+        
         User leader = groupUserDAO.findLeaderByGroupId(groupId);
         GroupAcceptNotification groupAcceptNotification = new GroupAcceptNotification(customUserDetails.getId(), leader.getId(), customUserDetails.getName() + "님이 그룹 초대 요청을 수락하였습니다.");
         notificationService.sendNotification(EventType.GROUP_ACCEPT, groupAcceptNotification);
