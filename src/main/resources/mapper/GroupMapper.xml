@@ -183,4 +183,8 @@
         FROM GROUP_USER
         WHERE GROUP_ID = #{groupId}
     </select>
+
+    <delete id="deleteByUserId">
+        DELETE FROM MESSAGE_STATUS WHERE USER_ID = #{userId}
+    </delete>
 </mapper>

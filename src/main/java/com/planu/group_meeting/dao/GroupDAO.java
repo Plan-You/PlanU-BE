@@ -64,4 +64,6 @@ public interface GroupDAO {
     List<Long> findUserIdsByGroupId(Long groupId);
 
     List<GroupUserDTO> findGroupsByGroupId(Long groupId);
+
+    void deleteByUserId(Long userId);
 }

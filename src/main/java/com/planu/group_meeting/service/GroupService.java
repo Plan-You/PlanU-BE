@@ -206,6 +206,7 @@ public class GroupService {
         chatService.expelChat(username, groupId);
 
         groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
+        groupDAO.deleteByUserId(userId);
 
     }
 
@@ -287,6 +288,7 @@ public class GroupService {
         notificationService.sendNotification(EventType.GROUP_EXPEL, groupExpelNotification);
 
         groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
+        groupDAO.deleteByUserId(userId);
     }
 
     @Transactional

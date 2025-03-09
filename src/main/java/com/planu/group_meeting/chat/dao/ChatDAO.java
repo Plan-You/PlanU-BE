@@ -32,7 +32,7 @@ public interface ChatDAO {
             @Param("messageId") Long messageId,
             @Param("limit") int limit);
 
-    List<Long> getMessagesByGroupAndRange(@Param("groupId") Long groupId,
+    List<Long> getMessageIdsByGroupAndRange(@Param("groupId") Long groupId,
                                                  @Param("startId") Long startId,
                                                  @Param("endId") Long endId);
 
