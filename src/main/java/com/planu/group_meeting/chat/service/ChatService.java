@@ -153,9 +153,7 @@ public class ChatService {
 
         updateMessageStatusAsRead(userId, groupId);
 
-        Integer type = 3;
-
-        simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId,type);
+        simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId, ChatMessageResponse.builder().type(3).build());
 
         return chatMessageList.stream().map(this::convertToResponse).collect(Collectors.toList());
     }
@@ -177,6 +175,27 @@ public class ChatService {
                 .ChatDate(chatMessage.getCreatedDate().format(dateFormatter)) // 날짜 변환
                 .ChatTime(chatMessage.getCreatedDate().format(timeFormatter)) // 시간 변환
                 .build();
+    }
+
+    public List<ChatMessageResponse> getUpdateMessages(Long userId, Long groupId, Long startId, Long endId) {
+        GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
+
+        if(groupUser == null){
+            throw new IllegalArgumentException("해당 그룹의 멤버가 아닙니다.");
+        }
+        if(groupUser.getGroupState() == 0) {
+            throw new IllegalArgumentException("해당 그룹의 멤버가 아닙니다.");
+        }
+
+        List<Long> messageIds = chatDAO.getMessagesByGroupAndRange(groupId, startId, endId);
+
+        return messageIds.stream()
+                .map(messageId -> ChatMessageResponse.builder()
+                        .messageId(messageId)
+                        .unReadCount(chatDAO.countUnreadByMessageId(messageId))
+                        .build()
+                )
+                .collect(Collectors.toList());
     }
 
     @Transactional

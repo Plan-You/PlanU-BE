@@ -94,6 +94,13 @@
         LIMIT #{limit}
     </select>
 
+    <select id="getMessageIdsByGroupAndRange" resultType="java.lang.Long">
+        SELECT ID FROM CHAT_MESSAGE
+        WHERE GROUP_ID = #{groupId}
+        AND ID BETWEEN #{startId} AND #{endId}
+        ORDER BY ID ASC
+    </select>
+
     <update id="updateMessageStatusAsRead">
         UPDATE MESSAGE_STATUS
         SET IS_READ = TRUE

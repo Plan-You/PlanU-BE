@@ -94,8 +94,21 @@ public class ChatController {
             @RequestParam("groupId") Long groupId,
             @RequestParam(value = "messageId", required = false) Long messageId) {
 
-            List<ChatMessageResponse> chatMessageResponseList = chatService.getMessages(userDetails.getId(), groupId, messageId);
-            DataResponse<List<ChatMessageResponse>> response = new DataResponse<>(chatMessageResponseList);
-            return ResponseEntity.ok(response);
+        List<ChatMessageResponse> chatMessageResponseList = chatService.getMessages(userDetails.getId(), groupId, messageId);
+        DataResponse<List<ChatMessageResponse>> response = new DataResponse<>(chatMessageResponseList);
+        return ResponseEntity.ok(response);
+    }
+
+    @ResponseBody
+    @GetMapping("/chats/messages/update")
+    public ResponseEntity<DataResponse<List<ChatMessageResponse>>> getUpdateChats(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam("groupId") Long groupId,
+            @RequestParam("startId") Long startId,
+            @RequestParam("endId") Long endId
+    ) {
+        List<ChatMessageResponse> chatMessageResponseList = chatService.getUpdateMessages(userDetails.getId(), groupId, startId, endId);
+        DataResponse<List<ChatMessageResponse>> response = new DataResponse<>(chatMessageResponseList);
+        return ResponseEntity.ok(response);
     }
 }

@@ -32,5 +32,9 @@ public interface ChatDAO {
             @Param("messageId") Long messageId,
             @Param("limit") int limit);
 
+    List<Long> getMessagesByGroupAndRange(@Param("groupId") Long groupId,
+                                                 @Param("startId") Long startId,
+                                                 @Param("endId") Long endId);
+
     void updateMessageStatusAsRead(@Param("userId") Long userId, @Param("groupId") Long groupId);
 }
