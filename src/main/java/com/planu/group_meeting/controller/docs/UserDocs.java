@@ -16,10 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "USER API", description = "사용자 관련 API")
@@ -138,6 +135,30 @@ public interface UserDocs {
                                                   @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
                                                   @AuthenticationPrincipal CustomUserDetails userDetails);
 
+
+    @Operation(summary = "프로필 수정", description = "사용자의 프로필 정보를 수정합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "프로필 수정 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(example = "{ \"resultCode\": 200, \"resultMsg\": \"프로필 수정 성공\" }"))),
+            @ApiResponse(responseCode = "400", description = "이메일 인증이 완료되지 않았습니다.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(example = "{ \"resultCode\": 400, \"resultMsg\": \"이메일 인증이 완료되지 않았습니다.\" }"))),
+            @ApiResponse(responseCode = "400", description = "비밀번호 인증이 필요합니다.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(example = "{ \"resultCode\": 400, \"resultMsg\": \"비밀번호 인증이 필요합니다.\" }")))
+    })
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "프로필 수정을 위한 데이터. `form-data` 형식으로 요청해야 합니다.",
+            content = @Content(
+                    mediaType = "multipart/form-data",
+                    schema = @Schema(implementation = UserDto.UserProfileUpdateRequest.class)
+            )
+    )
+    ResponseEntity<BaseResponse> updateUserProfile(
+            @RequestPart(value = "request") @Valid UserDto.UserProfileUpdateRequest request,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+            @AuthenticationPrincipal CustomUserDetails userDetails);
 
 
     @Operation(summary = "프로필 여부 확인", description = "사용자의 프로필 등록 여부를 확인합니다.")

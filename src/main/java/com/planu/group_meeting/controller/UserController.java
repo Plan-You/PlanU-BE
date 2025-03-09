@@ -70,7 +70,7 @@ public class UserController implements UserDocs {
 
     @PutMapping("/profile")
     public ResponseEntity<BaseResponse> updateUserProfile(@ModelAttribute @Valid UserProfileUpdateRequest request,
-                                                          @RequestParam(value = "profileImage") MultipartFile profileImage,
+                                                          @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
                                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
         userService.updateUserProfile(userDetails.getId(), request, profileImage);
         return BaseResponse.toResponseEntity(HttpStatus.OK, "프로필 수정 성공");
