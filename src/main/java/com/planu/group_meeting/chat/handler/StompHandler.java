@@ -1,5 +1,6 @@
 package com.planu.group_meeting.chat.handler;
 
+import com.planu.group_meeting.chat.dao.ChatDAO;
 import com.planu.group_meeting.dao.GroupDAO;
 import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.entity.GroupUser;
@@ -14,6 +15,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -24,12 +26,14 @@ public class StompHandler implements ChannelInterceptor {
 
     public static final String DEFAULT_SUB_PATH = "/sub/chat/group/";
     public static final String DEFAULT_PUB_PATH = "/pub/chat/group/";
+    public static final String DEFAULT_READ_PUB_PATH = "/pub/chat/read/";
 
     public static final String DEFAULT_DISCONNECT_SUB_PATH = "/sub/disconnect/";
 
     private final JwtUtil jwtUtil;
     private final GroupDAO groupDAO;
     private final UserDAO userDAO;
+    private final ChatDAO chatDAO;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -55,9 +59,14 @@ public class StompHandler implements ChannelInterceptor {
         
         else if (StompCommand.SEND.equals(command)) {
             String username = (String)getValue(accessor, "username");
-            Long groupId = parseGroupIdFromPubPath(accessor);
+            String destination = accessor.getDestination();
+            if(destination.startsWith(DEFAULT_PUB_PATH)){
+                Long groupId = parseGroupIdFromPubPath(accessor);
+                validateUserInGroup(username, groupId);
+            } else {
+                validateReadPubPath(accessor, username);
+            }
 
-            validateUserInGroup(username, groupId);
         }
 
         else if (StompCommand.DISCONNECT.equals(command)) {
@@ -111,6 +120,26 @@ public class StompHandler implements ChannelInterceptor {
     private Long parseGroupIdFromPubPath(StompHeaderAccessor accessor) {
         String destination = accessor.getDestination();
         return Long.parseLong(destination.substring(DEFAULT_PUB_PATH.length()));
+    }
+
+    private void validateReadPubPath(StompHeaderAccessor accessor, String username) {
+        Map<String, Long> values = parseMessageIdAndGroupId(accessor.getDestination());
+
+        if(chatDAO.existsByIdAndGroupId(values.get("messageId"), values.get("groupId")) == 0){
+            throw new IllegalArgumentException();
+        }
+
+        validateUserInGroup(username, values.get("groupId"));
+    }
+
+    private Map<String, Long> parseMessageIdAndGroupId(String destination) {
+        Map<String, Long> result = new HashMap<>();
+        String values = destination.substring(DEFAULT_READ_PUB_PATH.length());
+        String[] parts = values.split("/");
+        result.put("messageId", Long.parseLong(parts[0]));
+        result.put("groupId", Long.parseLong(parts[1]));
+
+        return result;
     }
 
     private String parseUsernameFromSubpath(StompHeaderAccessor accessor) {

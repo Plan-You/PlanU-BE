@@ -12,7 +12,7 @@ import com.planu.group_meeting.dao.FriendDAO;
 import com.planu.group_meeting.dao.GroupDAO;
 import com.planu.group_meeting.dao.GroupUserDAO;
 import com.planu.group_meeting.dao.UserDAO;
-import com.planu.group_meeting.dto.AvailableDateDto;
+import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRank;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatio;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
 import com.planu.group_meeting.dto.FriendDto.FriendInfo;
@@ -172,6 +172,8 @@ public class GroupService {
         }
         groupDAO.updateGroupUserGroupStatus(customUserDetails.getId(), groupId);
 
+        chatService.joinChat(customUserDetails.getUsername(), groupId);
+        
         User leader = groupUserDAO.findLeaderByGroupId(groupId);
         GroupAcceptNotification groupAcceptNotification = new GroupAcceptNotification(customUserDetails.getId(), leader.getId(), customUserDetails.getName() + "님이 그룹 초대 요청을 수락하였습니다.");
         notificationService.sendNotification(EventType.GROUP_ACCEPT, groupAcceptNotification);
@@ -188,7 +190,8 @@ public class GroupService {
     }
 
     @Transactional
-    public void leaveGroup(Long userId, Long groupId) {
+    public void leaveGroup(String username, Long groupId) {
+        Long userId = userDAO.findIdByUsername(username);
         GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
         if(groupUser == null){
             throw new IllegalArgumentException("이미 그룹에 속하지 않습니다.");
@@ -199,6 +202,8 @@ public class GroupService {
         if(groupUser.getGroupRole() == GroupUser.GroupRole.LEADER){
             throw new IllegalArgumentException("그룹 리더는 그룹을 떠날 수 없습니다.");
         }
+
+        chatService.expelChat(username, groupId);
 
         groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
 
@@ -224,6 +229,7 @@ public class GroupService {
         groupDAO.deleteGroupScheduleParticipant(groupId);
         groupDAO.deleteGroupScheduleComment(groupId);
         groupDAO.deleteGroupUser(groupId);
+        groupDAO.deleteMessageStatus(groupId);
         groupDAO.deleteChatMessage(groupId);
         groupDAO.deleteGroupSchedule(groupId);
         groupDAO.deleteGroup(groupId);
@@ -491,7 +497,7 @@ public class GroupService {
     }
 
     @Transactional
-    public List<AvailableDateDto.AvailableDateRanks> getAvailableDateRanks(Long groupId, YearMonth yearMonth, Long userId) {
+    public List<AvailableDateRank> getAvailableDateRanks(Long groupId, YearMonth yearMonth, Long userId) {
         if (groupDAO.findGroupById(groupId) == null) {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
         }
@@ -526,7 +532,7 @@ public class GroupService {
                 }
         );
 
-        List<AvailableDateDto.AvailableDateRanks> response = new ArrayList<>();
+        List<AvailableDateRank> response = new ArrayList<>();
 
         if(availableDateRanks.isEmpty()) {
             return response;
@@ -539,7 +545,7 @@ public class GroupService {
                 ranks++;
                 previousCount = entry.getValue();
             }
-            response.add(new AvailableDateDto.AvailableDateRanks(ranks, entry.getValue(), entry.getKey().toString()));
+            response.add(new AvailableDateRank(ranks, entry.getValue(), entry.getKey().toString()));
         }
 
         return response;

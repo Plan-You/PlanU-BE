@@ -4,13 +4,13 @@ import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRanks;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
 import com.planu.group_meeting.dto.BaseResponse;
+import com.planu.group_meeting.dto.DataResponse;
 import com.planu.group_meeting.dto.GroupDTO.AvailableDateInfos;
 import com.planu.group_meeting.dto.GroupDTO.AvailableMemberInfos;
 import com.planu.group_meeting.dto.GroupDTO.GroupMembersResponse;
 import com.planu.group_meeting.dto.GroupDTO.NonGroupFriendsResponse;
 import com.planu.group_meeting.dto.GroupInviteResponseDTO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
-import com.planu.group_meeting.dto.DataResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -608,7 +608,7 @@ public interface GroupDocs {
                                             )
                             )
             })
-    ResponseEntity<List<AvailableDateRanks>> getAvailableDateRanks(
+    ResponseEntity<AvailableDateRanks> getAvailableDateRanks(
             @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("groupId") Long groupId,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth);
 

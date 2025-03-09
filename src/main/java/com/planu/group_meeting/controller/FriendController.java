@@ -55,19 +55,24 @@ public class FriendController implements FriendDocs {
     }
 
     @GetMapping
-    public ResponseEntity<FriendListResponse> getFriendList(@RequestParam(value="search" , defaultValue = "") String keyword,
-                                                                     @AuthenticationPrincipal CustomUserDetails userDetails){
-        return ResponseEntity.ok(friendService.getFriendList(userDetails.getId(),keyword));
+    public ResponseEntity<FriendListResponse> getFriendList(@RequestParam(value = "search", defaultValue = "") String keyword,
+                                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(friendService.getFriendList(userDetails.getId(), keyword));
     }
 
     @GetMapping("/request")
-    public ResponseEntity<FriendListResponse> getFriendRequestList(@RequestParam(value="search" , defaultValue = "") String keyword,@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<FriendListResponse> getFriendRequestList(@RequestParam(value = "search", defaultValue = "") String keyword, @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(friendService.getFriendRequestList(userDetails.getId(), keyword));
     }
 
     @GetMapping("/receive")
-    public ResponseEntity<FriendListResponse> getFriendReceiveList(@RequestParam(value="search" , defaultValue = "") String keyword,@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<FriendListResponse> getFriendReceiveList(@RequestParam(value = "search", defaultValue = "") String keyword, @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(friendService.getFriendReceiveList(userDetails.getId(), keyword));
+    }
+
+    @GetMapping("/recommendations")
+    public ResponseEntity<FriendListResponse> getRecommendationFriends(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(friendService.getRecommendationFriends(userDetails.getId()));
     }
 
 }

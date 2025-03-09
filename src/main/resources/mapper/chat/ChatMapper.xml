@@ -6,8 +6,8 @@
 <mapper namespace="com.planu.group_meeting.chat.dao.ChatDAO">
 
     <insert id="saveChatMessage" useGeneratedKeys="true" keyProperty="id" parameterType="com.planu.group_meeting.chat.dto.ChatMessage">
-        INSERT INTO CHAT_MESSAGE (USER_ID, GROUP_ID, MESSAGE)
-        VALUES (#{userId}, #{groupId}, #{content})
+        INSERT INTO CHAT_MESSAGE (SENDER_ID, GROUP_ID, MESSAGE_TYPE, MESSAGE)
+        VALUES (#{userId}, #{groupId}, #{type}, #{content})
     </insert>
 
 
@@ -46,4 +46,67 @@
         AND ms.IS_READ = FALSE
     </select>
 
+    <select id="existsByIdAndGroupId" resultType="int">
+        SELECT COUNT(*)
+        FROM CHAT_MESSAGE
+        WHERE ID = #{messageId}
+        AND GROUP_ID = #{groupId}
+    </select>
+
+    <update id="markAsRead">
+        UPDATE MESSAGE_STATUS
+        SET IS_READ = TRUE, UPDATED_DATE = CURRENT_TIMESTAMP
+        WHERE USER_ID = #{userId}
+        AND MESSAGE_ID = #{messageId}
+    </update>
+
+    <select id="countUnreadByMessageId" resultType="int">
+        SELECT COUNT(*)
+        FROM MESSAGE_STATUS
+        WHERE MESSAGE_ID = #{messageId}
+        AND IS_READ = FALSE
+    </select>
+
+    <resultMap id="ChatMessageMap" type="com.planu.group_meeting.chat.dto.ChatMessage">
+        <id property="id" column="ID"/>
+        <result property="userId" column="SENDER_ID"/>
+        <result property="groupId" column="GROUP_ID"/>
+        <result property="type" column="MESSAGE_TYPE"/>
+        <result property="content" column="MESSAGE"/>
+        <result property="createdDate" column="CREATED_DATE"/>
+        <result property="updatedDate" column="UPDATED_DATE"/>
+    </resultMap>
+
+    <select id="findById" resultMap="ChatMessageMap">
+        SELECT ID, SENDER_ID, GROUP_ID, MESSAGE_TYPE, MESSAGE, CREATED_DATE, UPDATED_DATE
+        FROM CHAT_MESSAGE
+        WHERE ID = #{messageId}
+    </select>
+
+    <select id="findChatMessages" resultMap="ChatMessageMap">
+        SELECT ID, SENDER_ID, GROUP_ID, MESSAGE_TYPE, MESSAGE, CREATED_DATE, UPDATED_DATE
+        FROM CHAT_MESSAGE
+        WHERE GROUP_ID = #{groupId}
+        <if test="messageId != null">
+            AND ID &lt; #{messageId}
+        </if>
+        ORDER BY ID DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="getMessageIdsByGroupAndRange" resultType="java.lang.Long">
+        SELECT ID FROM CHAT_MESSAGE
+        WHERE GROUP_ID = #{groupId}
+        AND ID BETWEEN #{startId} AND #{endId}
+        ORDER BY ID ASC
+    </select>
+
+    <update id="updateMessageStatusAsRead">
+        UPDATE MESSAGE_STATUS
+        SET IS_READ = TRUE
+        WHERE USER_ID = #{userId}
+        AND MESSAGE_ID IN (
+        SELECT ID FROM CHAT_MESSAGE WHERE GROUP_ID = #{groupId}
+        )
+    </update>
 </mapper>

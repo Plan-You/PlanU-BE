@@ -1,6 +1,5 @@
 package com.planu.group_meeting.dao;
 
-import com.planu.group_meeting.dto.FriendDto;
 import com.planu.group_meeting.dto.FriendDto.FriendInfo;
 import com.planu.group_meeting.entity.common.FriendStatus;
 import org.apache.ibatis.annotations.Mapper;
@@ -18,8 +17,8 @@ public interface FriendDAO {
 
     void deleteFriend(Long fromUserId, Long toUserId);
 
-    List<FriendInfo> getFriendsInfo(@Param("userId") Long userId, @Param("friendStatus") FriendStatus friendStatus);
-
     List<FriendInfo> getFriendsInfo(@Param("userId") Long userId, @Param("friendStatus") FriendStatus friendStatus,
                                    @Param("keyword") String keyword);
+
+    List<FriendInfo> getRecommendationFriendInfo(Long userId);
 }
