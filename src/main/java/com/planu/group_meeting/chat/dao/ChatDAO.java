@@ -4,6 +4,9 @@ import com.planu.group_meeting.chat.dto.ChatInfo;
 import com.planu.group_meeting.chat.dto.ChatMessage;
 import com.planu.group_meeting.chat.dto.MessageStatus;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 
 @Mapper
@@ -14,5 +17,24 @@ public interface ChatDAO {
 
     ChatInfo getChatInfo(Long groupId);
 
-    Integer countUnreadChatByUserAndGroup(Long userId, Long groupId);
+    int countUnreadChatByUserAndGroup(Long userId, Long groupId);
+
+    int existsByIdAndGroupId(@Param("messageId") Long messageId, @Param("groupId") Long groupId);
+
+    void markAsRead(@Param("userId") Long userId, @Param("messageId") Long messageId);
+
+    int countUnreadByMessageId(@Param("messageId") Long messageId);
+
+    ChatMessage findById(@Param("messageId") Long messageId);
+
+    List<ChatMessage> findChatMessages(
+            @Param("groupId") Long groupId,
+            @Param("messageId") Long messageId,
+            @Param("limit") int limit);
+
+    List<Long> getMessagesByGroupAndRange(@Param("groupId") Long groupId,
+                                                 @Param("startId") Long startId,
+                                                 @Param("endId") Long endId);
+
+    void updateMessageStatusAsRead(@Param("userId") Long userId, @Param("groupId") Long groupId);
 }

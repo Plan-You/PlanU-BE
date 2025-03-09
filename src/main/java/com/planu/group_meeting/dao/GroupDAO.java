@@ -35,23 +35,27 @@ public interface GroupDAO {
 
     List<GroupResponseDTO> findGroupsByUserId(Long userId);
 
-    // 1. GROUP_SCHEDULE_PARTICIPANT 삭제
+    // 1. GROUP_SCHEDULE_PARTICIPANT 삭제 (그룹 일정 참가자 삭제)
     void deleteGroupScheduleParticipant(@Param("groupId") Long groupId);
 
-    // 3. GROUP_SCHEDULE_COMMENT 삭제
+    // 2. GROUP_SCHEDULE_COMMENT 삭제 (그룹 일정 댓글 삭제)
     void deleteGroupScheduleComment(@Param("groupId") Long groupId);
 
-    // 4. GROUP_USER 삭제
+    // 3. GROUP_USER 삭제 (그룹에 속한 사용자 삭제)
     void deleteGroupUser(@Param("groupId") Long groupId);
 
-    // 5. CHAT_MESSAGE 삭제
+    // 4. MESSAGE_STATUS 삭제 (메시지 상태 정보 삭제)
+    void deleteMessageStatus(@Param("groupId") Long groupId);
+
+    // 5. CHAT_MESSAGE 삭제 (채팅 메시지 삭제)
     void deleteChatMessage(@Param("groupId") Long groupId);
 
-    // 6. GROUP_SCHEDULE 삭제
+    // 6. GROUP_SCHEDULE 삭제 (그룹 일정 삭제)
     void deleteGroupSchedule(@Param("groupId") Long groupId);
 
-    // 7. GROUP_ 삭제
+    // 7. GROUP_ 삭제 (그룹 자체 삭제)
     void deleteGroup(@Param("groupId") Long groupId);
+
 
     List<GroupResponseDTO> getGroupInviteList(Long userId);
 

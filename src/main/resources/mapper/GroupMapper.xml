@@ -101,6 +101,11 @@
         DELETE FROM GROUP_USER WHERE GROUP_ID = #{groupId}
     </delete>
 
+    <delete id="deleteMessageStatus" parameterType="long">
+        DELETE FROM MESSAGE_STATUS
+        WHERE MESSAGE_ID IN (SELECT ID FROM CHAT_MESSAGE WHERE GROUP_ID = #{groupId});
+    </delete>
+
     <delete id="deleteChatMessage" parameterType="long">
         DELETE FROM CHAT_MESSAGE WHERE GROUP_ID = #{groupId}
     </delete>

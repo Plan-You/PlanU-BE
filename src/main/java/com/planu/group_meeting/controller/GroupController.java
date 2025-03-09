@@ -105,7 +105,7 @@ public class GroupController implements GroupDocs {
     @DeleteMapping("/leave/{groupId}")
     public ResponseEntity<BaseResponse> leaveGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                    @PathVariable("groupId") Long groupId) {
-        groupService.leaveGroup(userDetails.getId(), groupId);
+        groupService.leaveGroup(userDetails.getUsername(), groupId);
 
         return BaseResponse.toResponseEntity(HttpStatus.OK, "그룹 탈퇴 성공");
     }

@@ -4,16 +4,19 @@ import com.planu.group_meeting.chat.dao.ChatDAO;
 import com.planu.group_meeting.chat.dto.ChatInfo;
 import com.planu.group_meeting.chat.dto.ChatMessage;
 import com.planu.group_meeting.chat.dto.MessageStatus;
+import com.planu.group_meeting.chat.dto.response.ChatMessageResponse;
 import com.planu.group_meeting.chat.dto.response.ChatRoomResponse;
 import com.planu.group_meeting.dao.GroupDAO;
 import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.dto.GroupUserDTO;
+import com.planu.group_meeting.entity.GroupUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -30,18 +33,21 @@ public class ChatService {
     private final GroupDAO groupDAO;
 
     @Transactional
-    public void save(Long groupId, String username, String content){
+    public ChatMessage save(Long groupId, String username, Integer type, String content){
         Long userId = userDAO.findIdByUsername(username);
 
         ChatMessage chatMessage = ChatMessage.builder()
                 .userId(userId)
                 .groupId(groupId)
+                .type(type)
                 .content(content)
                 .build();
 
         chatDAO.saveChatMessage(chatMessage);
 
         saveMessageStatus(groupId, chatMessage.getId());
+
+        return chatDAO.findById(chatMessage.getId());
     }
 
     @Transactional
@@ -118,14 +124,98 @@ public class ChatService {
                 .collect(Collectors.toList());
     }
 
-//    @Transactional
-//    public int getUnreadCount(Long groupId, Long MessageId) {
-//
-//    }
+    @Transactional
+    public int getUnreadCount(Long messageId) {
+        return chatDAO.countUnreadByMessageId(messageId);
+    }
+
+    @Transactional
+    public void updateReadStatus(Long messageId, String username) {
+        Long userId = userDAO.findIdByUsername(username);
+
+        chatDAO.markAsRead(userId, messageId);
+    }
+
+    @Transactional
+    public List<ChatMessageResponse> getMessages(Long userId, Long groupId, Long offset) {
+        GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
+
+        if(groupUser == null){
+            throw new IllegalArgumentException("해당 그룹의 멤버가 아닙니다.");
+        }
+        if(groupUser.getGroupState() == 0) {
+            throw new IllegalArgumentException("해당 그룹의 멤버가 아닙니다.");
+        }
+
+        int limit = 50;
+
+        List<ChatMessage> chatMessageList = chatDAO.findChatMessages(groupId, offset, limit);
+
+        updateMessageStatusAsRead(userId, groupId);
+
+        simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId, ChatMessageResponse.builder().type(3).build());
+
+        return chatMessageList.stream().map(this::convertToResponse).collect(Collectors.toList());
+    }
+
+    private void updateMessageStatusAsRead(Long userId, Long groupId) {
+        chatDAO.updateMessageStatusAsRead(userId, groupId);
+    }
+
+    private ChatMessageResponse convertToResponse(ChatMessage chatMessage) {
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+        return ChatMessageResponse.builder()
+                .messageId(chatMessage.getId())
+                .type(chatMessage.getType())
+                .message(chatMessage.getContent())
+                .sender(userDAO.findUsernameById(chatMessage.getUserId())) // sender 변환
+                .unReadCount(chatDAO.countUnreadByMessageId(chatMessage.getId())) // 안 읽은 사람 수 조회
+                .ChatDate(chatMessage.getCreatedDate().format(dateFormatter)) // 날짜 변환
+                .ChatTime(chatMessage.getCreatedDate().format(timeFormatter)) // 시간 변환
+                .build();
+    }
+
+    public List<ChatMessageResponse> getUpdateMessages(Long userId, Long groupId, Long startId, Long endId) {
+        GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
+
+        if(groupUser == null){
+            throw new IllegalArgumentException("해당 그룹의 멤버가 아닙니다.");
+        }
+        if(groupUser.getGroupState() == 0) {
+            throw new IllegalArgumentException("해당 그룹의 멤버가 아닙니다.");
+        }
+
+        List<Long> messageIds = chatDAO.getMessagesByGroupAndRange(groupId, startId, endId);
+
+        return messageIds.stream()
+                .map(messageId -> ChatMessageResponse.builder()
+                        .messageId(messageId)
+                        .unReadCount(chatDAO.countUnreadByMessageId(messageId))
+                        .build()
+                )
+                .collect(Collectors.toList());
+    }
 
     @Transactional
     public void expelChat(String username, Long groupId) {
-        simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId, username + "님이 나가셨습니다.");
+        ChatMessage chatMessage = save(groupId, username, 6, null);
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String date = chatMessage.getCreatedDate().format(dateFormatter);
+
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        String time = chatMessage.getCreatedDate().format(timeFormatter);
+
+        ChatMessageResponse chatMessageResponse = ChatMessageResponse.builder()
+                                            .type(chatMessage.getType())
+                                            .sender(username)
+                                            .ChatDate(date)
+                                            .ChatTime(time)
+                                            .build();
+
+        simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId,chatMessageResponse);
 
         simpMessageSendingOperations.convertAndSend("/sub/disconnect/" + username, "웹소켓 연결 종료요청 보내주세요.");
     }

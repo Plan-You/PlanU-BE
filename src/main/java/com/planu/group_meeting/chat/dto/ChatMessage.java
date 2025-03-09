@@ -12,6 +12,7 @@ public class ChatMessage {
     private Long id;
     private Long userId;
     private Long groupId;
+    private Integer type;
     private String content;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
