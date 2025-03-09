@@ -177,6 +177,7 @@ public class ChatService {
                 .build();
     }
 
+    @Transactional
     public List<ChatMessageResponse> getUpdateMessages(Long userId, Long groupId, Long startId, Long endId) {
         GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
 
@@ -198,6 +199,26 @@ public class ChatService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public void joinChat(String username, Long groupId) {
+        ChatMessage chatMessage = save(groupId, username, 5, null);
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String date = chatMessage.getCreatedDate().format(dateFormatter);
+
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        String time = chatMessage.getCreatedDate().format(timeFormatter);
+
+        ChatMessageResponse chatMessageResponse = ChatMessageResponse.builder()
+                .type(chatMessage.getType())
+                .sender(username)
+                .ChatDate(date)
+                .ChatTime(time)
+                .build();
+
+        simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId,chatMessageResponse);
+    }
+    
     @Transactional
     public void expelChat(String username, Long groupId) {
         ChatMessage chatMessage = save(groupId, username, 6, null);
