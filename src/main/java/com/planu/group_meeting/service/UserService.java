@@ -76,8 +76,10 @@ public class UserService {
         validateEmailChange(user, request.getEmail());
         validatePasswordChange(user, request.getPassword());
 
-        String newProfileImageUrl = updateProfileImage(user.getProfileImgUrl(), profileImage);
-        request.setPassword(passwordEncoder.encode(request.getPassword()));
+        String newProfileImageUrl = getUpdateProfileImage(user.getProfileImgUrl(), profileImage);
+        String newPassword = getUpdatedPassword(user.getPassword(), request.getPassword());
+
+        request.setPassword(newPassword);
         user.updateProfile(request, newProfileImageUrl);
         userDAO.updateUserProfile(user);
     }
@@ -128,7 +130,7 @@ public class UserService {
     }
 
     private void validateEmailChange(User user, String newEmail) {
-        if (!user.getEmail().equals(newEmail)) {
+        if (!user.getEmail().equals(newEmail) && newEmail!=null) {
             validateEmailVerification(newEmail, CertificationPurpose.CHANGE_EMAIL);
         }
     }
@@ -143,9 +145,16 @@ public class UserService {
         return String.format(VERIFIED_PASSWORD_KEY, username);
     }
 
-    private String updateProfileImage(String currentImageUrl, MultipartFile newImage) {
-        s3Uploader.deleteFile(currentImageUrl);
-        return s3Uploader.uploadFile(newImage);
+    private String getUpdateProfileImage(String currentImageUrl, MultipartFile newImage) {
+        if(newImage!=null && !newImage.isEmpty()){
+            s3Uploader.deleteFile(currentImageUrl);
+            return s3Uploader.uploadFile(newImage);
+        }
+        return currentImageUrl;
+    }
+
+    private String getUpdatedPassword(String currentPassword, String newPassword) {
+        return (newPassword!=null) ? passwordEncoder.encode(newPassword) : currentPassword;
     }
 
     @Transactional
@@ -251,7 +260,7 @@ public class UserService {
     }
 
     private void validatePasswordChange(User user, String newPassword) {
-        if (!passwordEncoder.matches(newPassword, user.getPassword())) {
+        if (newPassword!=null && !passwordEncoder.matches(newPassword, user.getPassword())) {
             String passwordChangeKey = getPasswordChangeKey(user.getUsername());
             if (!"true".equals(redisTemplate.opsForValue().get(passwordChangeKey))) {
                 throw new UnverifiedPasswordException();
