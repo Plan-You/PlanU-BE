@@ -67,6 +67,13 @@
         AND IS_READ = FALSE
     </select>
 
+    <select id="countUnreadByUserId" resultType="int">
+        SELECT COUNT(*)
+        FROM MESSAGE_STATUS
+        WHERE USER_ID = #{userId}
+        AND IS_READ = FALSE
+    </select>
+
     <resultMap id="ChatMessageMap" type="com.planu.group_meeting.chat.dto.ChatMessage">
         <id property="id" column="ID"/>
         <result property="userId" column="SENDER_ID"/>
