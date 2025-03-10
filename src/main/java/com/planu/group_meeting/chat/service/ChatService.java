@@ -208,6 +208,8 @@ public class ChatService {
     public void joinChat(String username, Long groupId) {
         ChatMessage chatMessage = save(groupId, username, 5, null);
 
+        chatDAO.updateIsReadByMessageId(chatMessage.getId());
+
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String date = chatMessage.getCreatedDate().format(dateFormatter);
 
@@ -227,6 +229,8 @@ public class ChatService {
     @Transactional
     public void expelChat(String username, Long groupId) {
         ChatMessage chatMessage = save(groupId, username, 6, null);
+
+        chatDAO.updateIsReadByMessageId(chatMessage.getId());
 
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String date = chatMessage.getCreatedDate().format(dateFormatter);

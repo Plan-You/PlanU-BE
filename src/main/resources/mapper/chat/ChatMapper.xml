@@ -116,4 +116,11 @@
         SELECT ID FROM CHAT_MESSAGE WHERE GROUP_ID = #{groupId}
         )
     </update>
+
+    <update id="updateIsReadByMessageId">
+        UPDATE MESSAGE_STATUS
+        SET IS_READ = TRUE
+        WHERE MESSAGE_ID = #{messageId}
+    </update>
+
 </mapper>
