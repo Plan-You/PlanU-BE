@@ -25,6 +25,8 @@ public interface ChatDAO {
 
     int countUnreadByMessageId(@Param("messageId") Long messageId);
 
+    int countUnreadByUserId(@Param("userId") Long userId);
+
     ChatMessage findById(@Param("messageId") Long messageId);
 
     List<ChatMessage> findChatMessages(

@@ -34,7 +34,7 @@ public class ReadMessageBatchProcessor {
             Long messageId = entry.getKey();
             Long groupId = entry.getValue();
 
-            int unReadCount = chatService.getUnreadCount(messageId);
+            int unReadCount = chatService.getUnreadCountforMessage(messageId);
 
             sendUnreadMessage(groupId, messageId, unReadCount);
         }

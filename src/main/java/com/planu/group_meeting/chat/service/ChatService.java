@@ -125,8 +125,13 @@ public class ChatService {
     }
 
     @Transactional
-    public int getUnreadCount(Long messageId) {
+    public int getUnreadCountforMessage(Long messageId) {
         return chatDAO.countUnreadByMessageId(messageId);
+    }
+
+    @Transactional
+    public Integer getUnreadCountforUser(Long userId) {
+        return chatDAO.countUnreadByUserId(userId);
     }
 
     @Transactional
