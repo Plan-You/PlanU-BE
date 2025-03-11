@@ -8,6 +8,7 @@ import com.planu.group_meeting.chat.dto.response.ChatRoomResponse;
 import com.planu.group_meeting.chat.handler.ReadMessageBatchProcessor;
 import com.planu.group_meeting.chat.service.ChatService;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dto.DataResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,7 @@ public class ChatController {
     private final SimpMessageSendingOperations simpMessageSendingOperations;
     private final ChatService chatService;
     private final ReadMessageBatchProcessor batchProcessor;
+    private final UserDAO userDAO;
 
     @Transactional
     @MessageMapping("/chat/group/{groupId}")
@@ -53,6 +55,7 @@ public class ChatController {
                                                     .messageId(chatMessage.getId())
                                                     .type(message.getType())
                                                     .sender(username)
+                                                    .profileImageUrl(userDAO.findProfileImageById(userDAO.findIdByUsername(username)))
                                                     .message(message.getMessage())
                                                     .unReadCount(chatService.getUnreadCountforMessage(chatMessage.getId()))
                                                     .ChatDate(date)
