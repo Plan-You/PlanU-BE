@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.planu.group_meeting.dto.NotificationDTO.*;
+
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -70,7 +73,7 @@ public class NotificationService {
 
     private NotificationDTO createNotification(EventType eventType, Object object) {
         if (eventType == EventType.DUMMY) {
-            return NotificationDTO.builder()
+            return builder()
                     .eventType(EventType.DUMMY)
                     .contents("Dummy Notification")
                     .receiverId(0L)
@@ -85,16 +88,18 @@ public class NotificationService {
     }
 
     private NotificationDTO createNotificationFromDetail(EventType eventType, NotificationDTO notification) {
-        return NotificationDTO.builder()
+        return builder()
                 .eventType(eventType)
                 .senderId(notification.getSenderId())
                 .receiverId(notification.getReceiverId())
                 .contents(notification.getContents())
+                .relatedUrl(notification.getRelatedUrl())
                 .build();
     }
 
-    public List<NotificationDTO> getNotificationList(Long userId) {
-        return notificationDAO.findAllByUserId(userId);
+    public NotificationListResponse getNotificationList(Long userId) {
+        List<NotificationDTO> notifications = notificationDAO.findAllByUserId(userId);
+        return new NotificationListResponse(notifications);
     }
 
     public void readNotification(Long userId, Long notificationId) throws NotFoundException {

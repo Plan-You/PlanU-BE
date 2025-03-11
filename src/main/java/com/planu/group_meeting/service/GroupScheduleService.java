@@ -82,17 +82,15 @@ public class GroupScheduleService {
             LocalDateTime startTime = LocalDateTime.parse(schedule.getStartTime(), formatter);
             LocalDateTime endTime = LocalDateTime.parse(schedule.getEndTime(), formatter);
 
-            if(startTime.toLocalDate().isBefore(startDate)) {
+            if (startTime.toLocalDate().isBefore(startDate)) {
                 schedule.setStartTime(startDate.atTime(0, 0).format(outputFormatter));
-            }
-            else if(startTime.toLocalDate().equals(startDate)) {
+            } else if (startTime.toLocalDate().equals(startDate)) {
                 schedule.setStartTime(startTime.format(outputFormatter));
             }
 
-            if(endTime.toLocalDate().isAfter(startDate)) {
+            if (endTime.toLocalDate().isAfter(startDate)) {
                 schedule.setEndTime(startDate.atTime(23, 59).format(outputFormatter));
-            }
-            else if(endTime.toLocalDate().equals(startDate)) {
+            } else if (endTime.toLocalDate().equals(startDate)) {
                 schedule.setEndTime(endTime.format(outputFormatter));
             }
         }
@@ -111,7 +109,8 @@ public class GroupScheduleService {
         insertParticipants(groupSchedule, groupScheduleParticipants);
 
         for (Long groupScheduleParticipant : groupScheduleParticipants) {
-            GroupScheduleCreateNotification groupScheduleCreateNotification = new GroupScheduleCreateNotification(groupScheduleParticipant, "그룹 일정 '" + groupSchedule.getTitle() + "'이(가) 생성되었습니다.");
+            GroupScheduleCreateNotification groupScheduleCreateNotification =
+                    new GroupScheduleCreateNotification(groupScheduleParticipant, "그룹 일정 '" + groupSchedule.getTitle() + "'이(가) 생성되었습니다.", groupId, groupSchedule.getId());
             notificationService.sendNotification(EventType.GROUP_SCHEDULE_CREATE, groupScheduleCreateNotification);
         }
         scheduleNotificationService.reserveGroupScheduleNotification(groupSchedule, groupScheduleParticipants);
@@ -153,7 +152,8 @@ public class GroupScheduleService {
                 .toList();
 
         for (Long participantId : participantIds) {
-            GroupScheduleDeleteNotification groupScheduleDeleteNotification = new GroupScheduleDeleteNotification(participantId, "그룹 일정 '" + groupSchedule.getTitle() + "'이(가) 삭제되었습니다.");
+            GroupScheduleDeleteNotification groupScheduleDeleteNotification =
+                    new GroupScheduleDeleteNotification(participantId, "그룹 일정 '" + groupSchedule.getTitle() + "'이(가) 삭제되었습니다.", groupId);
             notificationService.sendNotification(EventType.GROUP_SCHEDULE_DELETE, groupScheduleDeleteNotification);
         }
 
