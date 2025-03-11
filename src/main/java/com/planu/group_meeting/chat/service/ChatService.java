@@ -125,8 +125,13 @@ public class ChatService {
     }
 
     @Transactional
-    public int getUnreadCount(Long messageId) {
+    public int getUnreadCountforMessage(Long messageId) {
         return chatDAO.countUnreadByMessageId(messageId);
+    }
+
+    @Transactional
+    public Integer getUnreadCountforUser(Long userId) {
+        return chatDAO.countUnreadByUserId(userId);
     }
 
     @Transactional
@@ -170,7 +175,8 @@ public class ChatService {
                 .messageId(chatMessage.getId())
                 .type(chatMessage.getType())
                 .message(chatMessage.getContent())
-                .sender(userDAO.findUsernameById(chatMessage.getUserId())) // sender 변환
+                .sender(userDAO.findUsernameById(chatMessage.getUserId()))// sender 변환
+                .profileImageUrl(userDAO.findProfileImageById(chatMessage.getUserId()))// 프로필 이미지
                 .unReadCount(chatDAO.countUnreadByMessageId(chatMessage.getId())) // 안 읽은 사람 수 조회
                 .ChatDate(chatMessage.getCreatedDate().format(dateFormatter)) // 날짜 변환
                 .ChatTime(chatMessage.getCreatedDate().format(timeFormatter)) // 시간 변환
@@ -203,6 +209,8 @@ public class ChatService {
     public void joinChat(String username, Long groupId) {
         ChatMessage chatMessage = save(groupId, username, 5, null);
 
+        chatDAO.updateIsReadByMessageId(chatMessage.getId());
+
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String date = chatMessage.getCreatedDate().format(dateFormatter);
 
@@ -222,6 +230,8 @@ public class ChatService {
     @Transactional
     public void expelChat(String username, Long groupId) {
         ChatMessage chatMessage = save(groupId, username, 6, null);
+
+        chatDAO.updateIsReadByMessageId(chatMessage.getId());
 
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String date = chatMessage.getCreatedDate().format(dateFormatter);

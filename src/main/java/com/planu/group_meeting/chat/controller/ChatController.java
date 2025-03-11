@@ -8,8 +8,8 @@ import com.planu.group_meeting.chat.dto.response.ChatRoomResponse;
 import com.planu.group_meeting.chat.handler.ReadMessageBatchProcessor;
 import com.planu.group_meeting.chat.service.ChatService;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dto.DataResponse;
-import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -34,6 +34,7 @@ public class ChatController {
     private final SimpMessageSendingOperations simpMessageSendingOperations;
     private final ChatService chatService;
     private final ReadMessageBatchProcessor batchProcessor;
+    private final UserDAO userDAO;
 
     @Transactional
     @MessageMapping("/chat/group/{groupId}")
@@ -54,8 +55,9 @@ public class ChatController {
                                                     .messageId(chatMessage.getId())
                                                     .type(message.getType())
                                                     .sender(username)
+                                                    .profileImageUrl(userDAO.findProfileImageById(userDAO.findIdByUsername(username)))
                                                     .message(message.getMessage())
-                                                    .unReadCount(chatService.getUnreadCount(chatMessage.getId()))
+                                                    .unReadCount(chatService.getUnreadCountforMessage(chatMessage.getId()))
                                                     .ChatDate(date)
                                                     .ChatTime(time)
                                                     .build();
@@ -110,5 +112,11 @@ public class ChatController {
         List<ChatMessageResponse> chatMessageResponseList = chatService.getUpdateMessages(userDetails.getId(), groupId, startId, endId);
         DataResponse<List<ChatMessageResponse>> response = new DataResponse<>(chatMessageResponseList);
         return ResponseEntity.ok(response);
+    }
+
+    @ResponseBody
+    @GetMapping("/chats/new")
+    public ResponseEntity<Integer> countNewChat(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(chatService.getUnreadCountforUser(userDetails.getId()));
     }
 }
