@@ -50,7 +50,8 @@ public class GroupScheduleCommentService {
 
     private void sendCommentNotification(Long userId, List<Long> participantIds, GroupSchedule groupSchedule) {
         for (Long id : participantIds) {
-            GroupScheduleCommentNotification groupScheduleCommentNotification = new GroupScheduleCommentNotification(userId, id, "[" + groupSchedule.getTitle() + "] " + userDAO.findNameById(userId) + "님이 댓글을 작성했습니다.");
+            GroupScheduleCommentNotification groupScheduleCommentNotification =
+                    new GroupScheduleCommentNotification(userId, id, "[" + groupSchedule.getTitle() + "] " + userDAO.findNameById(userId) + "님이 댓글을 작성했습니다.", groupSchedule.getGroupId(), groupSchedule.getId());
             notificationService.sendNotification(EventType.COMMENT, groupScheduleCommentNotification);
         }
     }

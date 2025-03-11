@@ -2,7 +2,6 @@ package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dto.BaseResponse;
-import com.planu.group_meeting.dto.NotificationDTO;
 import com.planu.group_meeting.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.javassist.NotFoundException;
@@ -13,7 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.List;
+import static com.planu.group_meeting.dto.NotificationDTO.NotificationListResponse;
 
 @RestController
 @RequestMapping("/notification")
@@ -28,7 +27,7 @@ public class NotificationController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<NotificationDTO>> getNotificationList(@AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseEntity<NotificationListResponse> getNotificationList(@AuthenticationPrincipal CustomUserDetails userDetails){
         return ResponseEntity.ok(notificationService.getNotificationList(userDetails.getId()));
     }
 
