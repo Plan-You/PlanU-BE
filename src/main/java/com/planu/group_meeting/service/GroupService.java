@@ -1,29 +1,13 @@
 package com.planu.group_meeting.service;
 
-import static com.planu.group_meeting.dto.NotificationDTO.GroupAcceptNotification;
-import static com.planu.group_meeting.dto.NotificationDTO.GroupDeleteNotification;
-import static com.planu.group_meeting.dto.NotificationDTO.GroupExpelNotification;
-import static com.planu.group_meeting.dto.NotificationDTO.GroupInviteNotification;
-
 import com.planu.group_meeting.chat.service.ChatService;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
-import com.planu.group_meeting.dao.AvailableDateDAO;
-import com.planu.group_meeting.dao.FriendDAO;
-import com.planu.group_meeting.dao.GroupDAO;
-import com.planu.group_meeting.dao.GroupUserDAO;
-import com.planu.group_meeting.dao.UserDAO;
+import com.planu.group_meeting.dao.*;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRank;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatio;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
 import com.planu.group_meeting.dto.FriendDto.FriendInfo;
-import com.planu.group_meeting.dto.GroupDTO.AvailableDateInfo;
-import com.planu.group_meeting.dto.GroupDTO.AvailableDateInfos;
-import com.planu.group_meeting.dto.GroupDTO.AvailableMemberInfo;
-import com.planu.group_meeting.dto.GroupDTO.AvailableMemberInfos;
-import com.planu.group_meeting.dto.GroupDTO.GroupInfo;
-import com.planu.group_meeting.dto.GroupDTO.Member;
-import com.planu.group_meeting.dto.GroupDTO.NonGroupFriend;
-import com.planu.group_meeting.dto.GroupDTO.NonGroupFriendsResponse;
+import com.planu.group_meeting.dto.GroupDTO.*;
 import com.planu.group_meeting.dto.GroupInviteResponseDTO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.entity.Group;
@@ -34,19 +18,17 @@ import com.planu.group_meeting.entity.common.FriendStatus;
 import com.planu.group_meeting.exception.group.GroupNotFoundException;
 import com.planu.group_meeting.exception.group.UnauthorizedAccessException;
 import com.planu.group_meeting.service.file.S3Uploader;
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.*;
+
+import static com.planu.group_meeting.dto.NotificationDTO.*;
 
 @Service
 @Slf4j
@@ -94,7 +76,7 @@ public class GroupService {
     public GroupInviteResponseDTO inviteUser(CustomUserDetails customUserDetails, String username, Long groupId) {
         GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(customUserDetails.getId(), groupId);
 
-        if(groupUser.getGroupRole() != GroupUser.GroupRole.LEADER){
+        if (groupUser.getGroupRole() != GroupUser.GroupRole.LEADER) {
             throw new IllegalArgumentException("초대 권한이 없습니다.");
         }
 
@@ -117,7 +99,7 @@ public class GroupService {
                 .build());
 
         GroupInviteNotification groupInviteNotification =
-                new GroupInviteNotification(customUserDetails.getId(), user.getId(),customUserDetails.getName() +"님이 그룹 초대 요청을 보냈습니다.");
+                new GroupInviteNotification(customUserDetails.getId(), user.getId(), customUserDetails.getName() + "님이 그룹 초대 요청을 보냈습니다.");
         notificationService.sendNotification(EventType.GROUP_INVITE, groupInviteNotification);
 
         return GroupInviteResponseDTO.builder()
@@ -129,10 +111,10 @@ public class GroupService {
     }
 
     @Transactional
-    public void inviteUserCancel(Long leaderId, String username, Long groupId){
+    public void inviteUserCancel(Long leaderId, String username, Long groupId) {
         GroupUser groupUserLeader = groupDAO.findGroupUserByUserIdAndGroupId(leaderId, groupId);
 
-        if(groupUserLeader.getGroupRole() != GroupUser.GroupRole.LEADER){
+        if (groupUserLeader.getGroupRole() != GroupUser.GroupRole.LEADER) {
             throw new IllegalArgumentException("초대 권한이 없습니다.");
         }
 
@@ -148,7 +130,7 @@ public class GroupService {
             throw new IllegalArgumentException("사용자 '" + username + "'을 찾을 수 없습니다.");
         }
 
-        if (groupUserUser.getGroupState() == 1){
+        if (groupUserUser.getGroupState() == 1) {
             throw new IllegalArgumentException("사용자 '" + username + "'은 이미 그룹의 멤버입니다.");
         }
 
@@ -173,9 +155,10 @@ public class GroupService {
         groupDAO.updateGroupUserGroupStatus(customUserDetails.getId(), groupId);
 
         chatService.joinChat(customUserDetails.getUsername(), groupId);
-        
+
         User leader = groupUserDAO.findLeaderByGroupId(groupId);
-        GroupAcceptNotification groupAcceptNotification = new GroupAcceptNotification(customUserDetails.getId(), leader.getId(), customUserDetails.getName() + "님이 그룹 초대 요청을 수락하였습니다.");
+        GroupAcceptNotification groupAcceptNotification =
+                new GroupAcceptNotification(customUserDetails.getId(), leader.getId(), customUserDetails.getName() + "님이 그룹 초대 요청을 수락하였습니다.", groupId);
         notificationService.sendNotification(EventType.GROUP_ACCEPT, groupAcceptNotification);
     }
 
@@ -193,13 +176,13 @@ public class GroupService {
     public void leaveGroup(String username, Long groupId) {
         Long userId = userDAO.findIdByUsername(username);
         GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
-        if(groupUser == null){
+        if (groupUser == null) {
             throw new IllegalArgumentException("이미 그룹에 속하지 않습니다.");
         }
-        if(groupUser.getGroupState() == 0){
+        if (groupUser.getGroupState() == 0) {
             throw new IllegalArgumentException("초대 수락/거절을 먼저 수행하십시오.");
         }
-        if(groupUser.getGroupRole() == GroupUser.GroupRole.LEADER){
+        if (groupUser.getGroupRole() == GroupUser.GroupRole.LEADER) {
             throw new IllegalArgumentException("그룹 리더는 그룹을 떠날 수 없습니다.");
         }
 
@@ -218,7 +201,7 @@ public class GroupService {
         if (group == null) {
             throw new IllegalArgumentException("해당 그룹이 존재하지 않습니다.");
         }
-        if (groupUser == null){
+        if (groupUser == null) {
             throw new IllegalArgumentException("그룹을 삭제할 권한이 없습니다.");
         }
         if (groupUser.getGroupRole() != GroupUser.GroupRole.LEADER) {
@@ -239,7 +222,7 @@ public class GroupService {
     private void createGroupDeleteNotification(Long groupId, Group group) {
         List<Long> groupUserIds = groupDAO.findUserIdsByGroupId(groupId);
         log.info("groupUserIds={}", groupUserIds);
-        for(Long groupUserId : groupUserIds){
+        for (Long groupUserId : groupUserIds) {
             log.info("groupUserId={}", groupUserId);
             GroupDeleteNotification groupDeleteNotification =
                     new GroupDeleteNotification(groupUserId, group.getName() + " 그룹이 삭제되었습니다.");
@@ -268,10 +251,10 @@ public class GroupService {
     public void forceExpelMember(Long leaderId, Long groupId, String username) {
         Long userId = groupDAO.findUserIdByUsername(username);
         GroupUser leaderGroupUser = groupDAO.findGroupUserByUserIdAndGroupId(leaderId, groupId);
-        if(Objects.equals(leaderId, userId)){
+        if (Objects.equals(leaderId, userId)) {
             throw new IllegalArgumentException("자기자신을 퇴출시킬 수 없습니다.");
         }
-        if(leaderGroupUser == null){
+        if (leaderGroupUser == null) {
             throw new IllegalArgumentException("강제 퇴출시킬 권한이 없습니다.");
         }
         if (leaderGroupUser.getGroupRole() != GroupUser.GroupRole.LEADER) {
@@ -315,7 +298,6 @@ public class GroupService {
             throw new ConcurrentModificationException("다른 사용자가 데이터를 먼저 변경했습니다. 다시 시도하세요.");
         }
     }
-
 
 
     @Transactional
@@ -479,7 +461,7 @@ public class GroupService {
 
         List<Long> groupMembers = groupUserDAO.getGroupMemberIds(groupId);
         HashMap<LocalDate, List<String>> membersByAvailableDate = new HashMap<>();
-        for(var memberId : groupMembers) {
+        for (var memberId : groupMembers) {
             for (var availableDate : availableDateDAO.findAvailableDatesByUserIdInRange(memberId, startOfCalendar, endOfCalendar)) {
                 if (!membersByAvailableDate.containsKey(availableDate)) {
                     membersByAvailableDate.put(availableDate, new ArrayList<>());
@@ -513,7 +495,7 @@ public class GroupService {
 
         List<Long> groupMemberIds = groupUserDAO.getGroupMemberIds(groupId);
         Map<LocalDate, Integer> countOfAvailableDate = new HashMap<>();
-        for(var memberId : groupMemberIds) {
+        for (var memberId : groupMemberIds) {
             for (var availableDate : availableDateDAO.findAvailableDatesByUserIdInRange(memberId, startOfCalendar, endOfCalendar)) {
                 if (!countOfAvailableDate.containsKey(availableDate)) {
                     countOfAvailableDate.put(availableDate, 0);
@@ -527,7 +509,7 @@ public class GroupService {
         availableDateRanks.sort(
                 (entryA, entryB) -> {
                     int countComparison = entryB.getValue().compareTo(entryA.getValue());
-                    if(countComparison != 0) {
+                    if (countComparison != 0) {
                         return countComparison;
                     }
                     return entryA.getKey().compareTo(entryB.getKey());
@@ -536,14 +518,14 @@ public class GroupService {
 
         List<AvailableDateRank> response = new ArrayList<>();
 
-        if(availableDateRanks.isEmpty()) {
+        if (availableDateRanks.isEmpty()) {
             return response;
         }
 
         var ranks = 1L;
         var previousCount = availableDateRanks.get(0).getValue();
-        for(var entry : availableDateRanks) {
-            if(!previousCount.equals(entry.getValue())) {
+        for (var entry : availableDateRanks) {
+            if (!previousCount.equals(entry.getValue())) {
                 ranks++;
                 previousCount = entry.getValue();
             }

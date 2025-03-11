@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.planu.group_meeting.entity.common.EventType;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
@@ -21,112 +24,111 @@ public class NotificationDTO {
 
     private EventType eventType;
     private String contents;
+    private String relatedUrl;
     private boolean isRead;
 
+    protected NotificationDTO(EventType eventType, Long senderId, Long receiverId, String contents, String relatedUrl) {
+        this.eventType = eventType;
+        this.senderId = senderId;
+        this.receiverId = receiverId;
+        this.contents = contents;
+        this.relatedUrl = relatedUrl;
+    }
 
+    @AllArgsConstructor
     @Getter
     @Setter
+    public static class NotificationListResponse{
+        List<NotificationDTO> notificationList = new ArrayList<>();
+    }
+
+    protected static String formatUrl(NotificationUrl url, Object... params) {
+        return String.format(url.getPattern(), params);
+    }
+
+    @Getter
+    public enum NotificationUrl {
+        SCHEDULE_DETAIL("/mySchedule/%s"),
+        GROUP_SCHEDULE_DETAIL("/group/%s/calendar/schedule/%s"),
+        FRIEND_MANAGEMENT("/myPage/friendsManagement"),
+        GROUP_LIST("/groupList"),
+        GROUP_MEMBER_LIST("/group/%s/members"),
+        GROUP_CALENDAR("/group/%s/groupCalendar");
+
+        private final String pattern;
+
+        NotificationUrl(String pattern) {
+            this.pattern = pattern;
+        }
+
+    }
+
     public static class ScheduleNotification extends NotificationDTO {
-        public ScheduleNotification(Long receiverId, String contents) {
-            this.setEventType(EventType.SCHEDULE_REMINDER);
-            this.setSenderId(SYSTEM_SENDER_ID);
-            this.setReceiverId(receiverId);
-            this.setContents(contents);
+        public ScheduleNotification(Long receiverId, String contents, Long scheduleId) {
+            super(EventType.SCHEDULE_REMINDER, SYSTEM_SENDER_ID, receiverId, contents,
+                    formatUrl(NotificationUrl.SCHEDULE_DETAIL, scheduleId));
         }
     }
 
-    @Getter
-    @Setter
-    public static class GroupScheduleNotification extends NotificationDTO{
-        public GroupScheduleNotification(Long receiverId, String contents){
-            this.setEventType(EventType.SCHEDULE_REMINDER);
-            this.setSenderId(SYSTEM_SENDER_ID);
-            this.setReceiverId(receiverId);
-            this.setContents(contents);
+    public static class GroupScheduleNotification extends NotificationDTO {
+        public GroupScheduleNotification(Long receiverId, String contents, Long groupId, Long scheduleId) {
+            super(EventType.SCHEDULE_REMINDER, SYSTEM_SENDER_ID, receiverId, contents,
+                    formatUrl(NotificationUrl.GROUP_SCHEDULE_DETAIL, groupId, scheduleId));
         }
     }
 
-    @Getter
-    @Setter
     public static class FriendNotification extends NotificationDTO {
         public FriendNotification(EventType eventType, Long senderId, Long receiverId, String contents) {
-            this.setEventType(eventType);
-            this.setSenderId(senderId);
-            this.setReceiverId(receiverId);
-            this.setContents(contents);
+            super(eventType, senderId, receiverId, contents, NotificationUrl.FRIEND_MANAGEMENT.getPattern());
         }
     }
 
-    @Getter
-    @Setter
     public static class GroupDeleteNotification extends NotificationDTO {
         public GroupDeleteNotification(Long receiverId, String contents) {
-            this.setEventType(EventType.GROUP_DELETE);
-            this.setSenderId(SYSTEM_SENDER_ID);
-            this.setReceiverId(receiverId);
-            this.setContents(contents);
+            super(EventType.GROUP_DELETE, SYSTEM_SENDER_ID, receiverId, contents,
+                    NotificationUrl.GROUP_LIST.getPattern());
         }
     }
 
-    @Getter
-    @Setter
     public static class GroupInviteNotification extends NotificationDTO {
         public GroupInviteNotification(Long senderId, Long receiverId, String contents) {
-            this.setEventType(EventType.GROUP_INVITE);
-            this.setSenderId(senderId);
-            this.setReceiverId(receiverId);
-            this.setContents(contents);
+            super(EventType.GROUP_INVITE, senderId, receiverId, contents,
+                    NotificationUrl.GROUP_LIST.getPattern());
         }
     }
 
-    @Getter
-    @Setter
     public static class GroupAcceptNotification extends NotificationDTO {
-        public GroupAcceptNotification(Long senderId, Long receiverId, String contents) {
-            this.setEventType(EventType.GROUP_ACCEPT);
-            this.setSenderId(senderId);
-            this.setReceiverId(receiverId);
-            this.setContents(contents);
+        public GroupAcceptNotification(Long senderId, Long receiverId, String contents, Long groupId) {
+            super(EventType.GROUP_ACCEPT, senderId, receiverId, contents,
+                    formatUrl(NotificationUrl.GROUP_MEMBER_LIST, groupId));
         }
     }
 
-    @Getter
-    @Setter
     public static class GroupExpelNotification extends NotificationDTO {
         public GroupExpelNotification(Long senderId, Long receiverId, String contents) {
-            this.setEventType(EventType.GROUP_EXPEL);
-            this.setSenderId(senderId);
-            this.setReceiverId(receiverId);
-            this.setContents(contents);
+            super(EventType.GROUP_EXPEL, senderId, receiverId, contents,
+                    NotificationUrl.GROUP_LIST.getPattern());
         }
     }
 
-    @Getter
-    @Setter
     public static class GroupScheduleDeleteNotification extends NotificationDTO {
-        public GroupScheduleDeleteNotification(Long receiverId, String contents) {
-            this.setEventType(EventType.GROUP_SCHEDULE_DELETE);
-            this.setSenderId(SYSTEM_SENDER_ID);
-            this.setReceiverId(receiverId);
-            this.setContents(contents);
+        public GroupScheduleDeleteNotification(Long receiverId, String contents, Long groupId) {
+            super(EventType.GROUP_SCHEDULE_DELETE, SYSTEM_SENDER_ID, receiverId, contents,
+                    formatUrl(NotificationUrl.GROUP_CALENDAR, groupId));
         }
     }
 
-    public static class GroupScheduleCreateNotification extends NotificationDTO{
-        public GroupScheduleCreateNotification(Long receiverId, String contents){
-            this.setEventType(EventType.GROUP_SCHEDULE_CREATE);
-            this.setSenderId(SYSTEM_SENDER_ID);
-            this.setReceiverId(receiverId);
-            this.setContents(contents);
+    public static class GroupScheduleCreateNotification extends NotificationDTO {
+        public GroupScheduleCreateNotification(Long receiverId, String contents, Long groupId, Long scheduleId) {
+            super(EventType.GROUP_SCHEDULE_CREATE, SYSTEM_SENDER_ID, receiverId, contents,
+                    formatUrl(NotificationUrl.GROUP_SCHEDULE_DETAIL, groupId, scheduleId));
         }
     }
 
-    public static class GroupScheduleCommentNotification extends NotificationDTO{
-        public GroupScheduleCommentNotification(Long senderId, Long receiverId, String contents){
-            this.setEventType(EventType.COMMENT);
-            this.setSenderId(senderId);
-            this.setReceiverId(receiverId);
-            this.setContents(contents);
+    public static class GroupScheduleCommentNotification extends NotificationDTO {
+        public GroupScheduleCommentNotification(Long senderId, Long receiverId, String contents, Long groupId, Long scheduleId) {
+            super(EventType.COMMENT, senderId, receiverId, contents,
+                    formatUrl(NotificationUrl.GROUP_SCHEDULE_DETAIL, groupId, scheduleId));
         }
     }
 }

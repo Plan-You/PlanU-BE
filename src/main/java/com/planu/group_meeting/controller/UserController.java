@@ -94,12 +94,6 @@ public class UserController implements UserDocs {
         return BaseResponse.toResponseEntity(HttpStatus.OK, "비밀번호 변경 성공");
     }
 
-//    @PostMapping("/change-email")
-//    public ResponseEntity<BaseResponse> changeEmail(@Valid @RequestBody EmailRequest emailRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
-//        userService.changeEmail(userDetails.getUsername(), emailRequest);
-//        return BaseResponse.toResponseEntity(HttpStatus.OK, "이메일 변경 성공");
-//    }
-
     @PostMapping("/token/reissue")
     public ResponseEntity<BaseResponse> reissueAccessToken(HttpServletResponse response, HttpServletRequest request) {
         String refresh = CookieUtil.getCookieValue(request, "refresh");
