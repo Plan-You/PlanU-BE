@@ -11,6 +11,7 @@ public class ChatMessageResponse {
     private Integer type;
     private String message;
     private String sender;
+    private String profileImageUrl;
     private Integer unReadCount;
     private String ChatDate;
     private String ChatTime;
