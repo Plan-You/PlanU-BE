@@ -175,7 +175,8 @@ public class ChatService {
                 .messageId(chatMessage.getId())
                 .type(chatMessage.getType())
                 .message(chatMessage.getContent())
-                .sender(userDAO.findUsernameById(chatMessage.getUserId())) // sender 변환
+                .sender(userDAO.findUsernameById(chatMessage.getUserId()))// sender 변환
+                .profileImageUrl(userDAO.findProfileImageById(chatMessage.getUserId()))// 프로필 이미지
                 .unReadCount(chatDAO.countUnreadByMessageId(chatMessage.getId())) // 안 읽은 사람 수 조회
                 .ChatDate(chatMessage.getCreatedDate().format(dateFormatter)) // 날짜 변환
                 .ChatTime(chatMessage.getCreatedDate().format(timeFormatter)) // 시간 변환
