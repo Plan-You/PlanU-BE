@@ -126,7 +126,7 @@ public class ScheduleService {
 
         List<ScheduleListResponse> scheduleList = scheduleDAO.getScheduleList(targetUserId, startDateTime, endDateTime);
         normalizeScheduleTimes(startDate, endDate, scheduleList);
-        List<BirthdayPerson> birthdayFriends = userDAO.findBirthdayByDate(targetUserId, startDate, endDate);
+        List<BirthdayPerson> birthdayFriends = userDAO.findFriendsAndGroupMembersBirthdays(targetUserId, startDate, endDate);
 
         return new DailyScheduleResponse(scheduleList, birthdayFriends);
     }

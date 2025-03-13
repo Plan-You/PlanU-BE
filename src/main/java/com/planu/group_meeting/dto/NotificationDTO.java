@@ -61,7 +61,8 @@ public class NotificationDTO {
         FRIEND_MANAGEMENT("/myPage/friendsManagement"),
         GROUP_LIST("/groupList"),
         GROUP_MEMBER_LIST("/group/%s/members"),
-        GROUP_CALENDAR("/group/%s/groupCalendar");
+        GROUP_CALENDAR("/group/%s/groupCalendar"),
+        MY_CALENDAR("/myCalendar");
 
         private final String pattern;
 
@@ -137,6 +138,12 @@ public class NotificationDTO {
         public GroupScheduleCommentNotification(Long senderId, Long receiverId, String contents, Long groupId, Long scheduleId) {
             super(EventType.COMMENT, senderId, receiverId, contents,
                     formatUrl(NotificationUrl.GROUP_SCHEDULE_DETAIL, groupId, scheduleId));
+        }
+    }
+
+    public static class BirthdayFriendNotification extends NotificationDTO{
+        public BirthdayFriendNotification(Long receiverId, String contents){
+            super(EventType.BIRTHDAY, SYSTEM_SENDER_ID ,receiverId, contents, NotificationUrl.MY_CALENDAR.getPattern());
         }
     }
 }
