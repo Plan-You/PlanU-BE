@@ -128,9 +128,9 @@
     </select>
 
 
-    <select id="findBirthdayByDate" resultType="java.lang.String">
+    <select id="findFriendsAndGroupMembersBirthdays" resultType="java.lang.String">
     <![CDATA[
-        SELECT U.NAME
+        SELECT U.NAME, U.ID
         FROM FRIEND F
         JOIN USER U ON F.FROM_USER_ID = U.ID
         WHERE F.FRIEND_STATUS = 'FRIEND'
@@ -140,7 +140,7 @@
 
         UNION
 
-        SELECT U.NAME
+        SELECT U.NAME, U.ID
         FROM GROUP_USER GU
         JOIN USER U ON GU.USER_ID = U.ID
         WHERE GU.GROUP_ID IN (
@@ -180,5 +180,11 @@
         select username
         from USER
         where id = #{userId}
+    </select>
+
+    <select id="findBirthdayPersonByDate">
+        SELECT ID, NAME
+        FROM USER
+        WHERE BIRTH_DATE = ${date}
     </select>
 </mapper>

@@ -19,7 +19,8 @@
         EVENT_TYPE AS eventType,
         CONTENT AS contents,
         RELATED_URL AS relatedUrl,
-        IS_READ AS isRead
+        IS_READ AS isRead,
+        CREATED_DATE AS createdDate
         FROM NOTIFICATION
         WHERE RECEIVER_ID = #{userId} AND ID = #{notificationId}
     </select>
@@ -32,7 +33,8 @@
         EVENT_TYPE AS eventType,
         CONTENT AS contents,
         RELATED_URL AS relatedUrl,
-        IS_READ AS isRead
+        IS_READ AS isRead,
+        CREATED_DATE AS createdDate
         FROM NOTIFICATION
         WHERE RECEIVER_ID = #{userId}
     </select>
@@ -47,5 +49,14 @@
         DELETE FROM NOTIFICATION
         WHERE CREATED_DATE &lt; DATE_SUB(NOW(), INTERVAL 6 MONTH)
     </delete>
+
+    <select id="hasUnreadNotification" parameterType="Long" resultType="com.planu.group_meeting.dto.NotificationDTO$UnreadNotificationResponse">
+        SELECT EXISTS (
+        SELECT 1
+        FROM NOTIFICATION
+        WHERE RECEIVER_ID = #{userId} AND IS_READ = 0
+        ) AS isExistUnReadNotification
+    </select>
+
 
 </mapper>

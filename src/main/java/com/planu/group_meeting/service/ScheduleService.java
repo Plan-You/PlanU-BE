@@ -40,6 +40,9 @@ public class ScheduleService {
 
     @Transactional
     public void createSchedule(Long userId, ScheduleSaveRequest scheduleDto) {
+        if (scheduleDto.getStartDateTime().isAfter(scheduleDto.getEndDateTime())) {
+            throw new IllegalArgumentException("시작 날짜와 시간은 종료 날짜와 시간보다 늦을 수 없습니다.");
+        }
         Schedule schedule = scheduleDto.toEntity(userId);
         List<Long> participantIds = getParticipantIds(scheduleDto.getParticipants());
         validateParticipants(userId, participantIds);
@@ -126,7 +129,7 @@ public class ScheduleService {
 
         List<ScheduleListResponse> scheduleList = scheduleDAO.getScheduleList(targetUserId, startDateTime, endDateTime);
         normalizeScheduleTimes(startDate, endDate, scheduleList);
-        List<BirthdayPerson> birthdayFriends = userDAO.findBirthdayByDate(targetUserId, startDate, endDate);
+        List<BirthdayPerson> birthdayFriends = userDAO.findFriendsAndGroupMembersBirthdays(targetUserId, startDate, endDate);
 
         return new DailyScheduleResponse(scheduleList, birthdayFriends);
     }

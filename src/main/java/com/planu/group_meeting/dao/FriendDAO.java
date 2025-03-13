@@ -21,4 +21,7 @@ public interface FriendDAO {
                                    @Param("keyword") String keyword);
 
     List<FriendInfo> getRecommendationFriendInfo(Long userId);
+
+    List<Long> findFriendOfUser(Long userId);
+
 }

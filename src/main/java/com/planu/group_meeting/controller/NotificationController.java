@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import static com.planu.group_meeting.dto.NotificationDTO.NotificationListResponse;
+import static com.planu.group_meeting.dto.NotificationDTO.UnreadNotificationResponse;
 
 @RestController
 @RequestMapping("/notification")
@@ -36,6 +37,11 @@ public class NotificationController {
                                                          @AuthenticationPrincipal CustomUserDetails userDetails) throws NotFoundException {
         notificationService.readNotification(userDetails.getId(), notificationId);
         return BaseResponse.toResponseEntity(HttpStatus.OK, "알림 읽기 성공");
+    }
+
+    @GetMapping("/unread-exists")
+    public ResponseEntity<UnreadNotificationResponse>hasUnreadNotification(@AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok(notificationService.hasUnreadNotification(userDetails.getId()));
     }
 
 }

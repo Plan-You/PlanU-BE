@@ -6,9 +6,7 @@ import com.planu.group_meeting.entity.common.EventType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.javassist.NotFoundException;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -109,9 +107,8 @@ public class NotificationService {
         notificationDAO.updateIsRead(notificationId);
     }
 
-    @Scheduled(cron = "0 0 3 * * ?")
-    @Transactional
-    public void deleteOldNotification() {
-        notificationDAO.deleteOldNotification();
+    public UnreadNotificationResponse hasUnreadNotification(Long userId){
+        return notificationDAO.hasUnreadNotification(userId);
     }
+
 }
