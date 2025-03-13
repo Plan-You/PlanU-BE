@@ -111,11 +111,4 @@ public class NotificationService {
         return notificationDAO.hasUnreadNotification(userId);
     }
 
-//    @Scheduled(cron = "0 0 3 * * ?")
-//    @Transactional
-//    public void deleteOldNotification() {
-//        notificationDAO.deleteOldNotification();
-//    }
-
-
 }
