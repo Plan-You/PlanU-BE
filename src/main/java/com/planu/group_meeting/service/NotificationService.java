@@ -109,6 +109,10 @@ public class NotificationService {
         notificationDAO.updateIsRead(notificationId);
     }
 
+    public UnreadNotificationResponse hasUnreadNotification(Long userId){
+        return notificationDAO.hasUnreadNotification(userId);
+    }
+
     @Scheduled(cron = "0 0 3 * * ?")
     @Transactional
     public void deleteOldNotification() {
