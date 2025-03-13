@@ -20,7 +20,7 @@ import static com.planu.group_meeting.dto.NotificationDTO.BirthdayFriendNotifica
 @RequiredArgsConstructor
 public class NotificationScheduler {
 
-    private static final String BIRTHDAY_NOTIFICATION_MESSAGE = "%s님의 생일입니다!";
+    private static final String BIRTHDAY_NOTIFICATION_MESSAGE = "오늘은 %s님의 생일입니다!";
 
     private final NotificationDAO notificationDAO;
     private final UserDAO userDAO;
@@ -34,6 +34,7 @@ public class NotificationScheduler {
     }
 
     @Scheduled(cron = "0 0 8 * * ?")
+    @Transactional
     public void sendBirthdayNotifications(){
         // 오늘 생일자 조회
         LocalDate today = LocalDate.now();
