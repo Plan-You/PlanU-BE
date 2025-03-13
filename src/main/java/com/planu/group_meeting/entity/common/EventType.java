@@ -11,5 +11,6 @@ public enum EventType {
     GROUP_EXPEL,
     GROUP_SCHEDULE_CREATE,
     GROUP_SCHEDULE_DELETE,
+    BIRTHDAY,
     DUMMY
 }

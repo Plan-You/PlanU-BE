@@ -84,5 +84,11 @@
         )
     </select>
 
+    <select id="findFriendOfUser" parameterType="Long" resultType="Long">
+        SELECT TO_USER_ID
+        FROM FRIEND
+        WHERE FROM_USER_ID = #{userId} AND FRIEND_STATUS = 'FRIEND'
+    </select>
+
 
 </mapper>

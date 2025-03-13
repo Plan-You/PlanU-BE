@@ -1,5 +1,6 @@
 package com.planu.group_meeting.dao;
 
+import com.planu.group_meeting.dto.UserDto;
 import com.planu.group_meeting.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.data.repository.query.Param;
@@ -33,7 +34,7 @@ public interface UserDAO {
 
     boolean existsBirthdayByDate(Long userId, LocalDate date);
 
-    List<BirthdayPerson> findBirthdayByDate(Long userId, LocalDate startDate, LocalDate endDate);
+    List<BirthdayPerson> findFriendsAndGroupMembersBirthdays(Long userId, LocalDate startDate, LocalDate endDate);
 
     String findNameById(Long userId);
 
@@ -42,4 +43,8 @@ public interface UserDAO {
     LocalDate findBirthdayById(Long groupMemberIds);
 
     String findUsernameById(Long userId);
+
+    List<UserDto.BirthdayPerson> findBirthdayPersonByDate(LocalDate date);
+
+
 }

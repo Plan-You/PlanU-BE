@@ -26,4 +26,9 @@ public class FriendDto {
         private String username;
         private String profileImageUrl;
     }
+
+    public static class BirthdayFriendResponse{
+        private Long userId;
+        private String name;
+    }
 }
