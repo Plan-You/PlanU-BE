@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.planu.group_meeting.entity.common.EventType;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +28,8 @@ public class NotificationDTO {
     private String relatedUrl;
     private boolean isRead;
 
+    private LocalDateTime createdDate;
+
     protected NotificationDTO(EventType eventType, Long senderId, Long receiverId, String contents, String relatedUrl) {
         this.eventType = eventType;
         this.senderId = senderId;
@@ -40,6 +43,11 @@ public class NotificationDTO {
     @Setter
     public static class NotificationListResponse{
         List<NotificationDTO> notificationList = new ArrayList<>();
+    }
+
+    @Getter
+    public static class UnreadNotificationResponse{
+        private boolean isExistUnReadNotification;
     }
 
     protected static String formatUrl(NotificationUrl url, Object... params) {
