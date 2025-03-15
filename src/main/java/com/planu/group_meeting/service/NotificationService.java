@@ -10,6 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -75,6 +79,7 @@ public class NotificationService {
                     .eventType(EventType.DUMMY)
                     .contents("Dummy Notification")
                     .receiverId(0L)
+                    .createdDate(LocalDateTime.now())
                     .build();
         }
 
@@ -86,12 +91,17 @@ public class NotificationService {
     }
 
     private NotificationDTO createNotificationFromDetail(EventType eventType, NotificationDTO notification) {
+        LocalDateTime createdAt = ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
+                .toLocalDateTime()
+                .truncatedTo(ChronoUnit.SECONDS);
+
         return builder()
                 .eventType(eventType)
                 .senderId(notification.getSenderId())
                 .receiverId(notification.getReceiverId())
                 .contents(notification.getContents())
                 .relatedUrl(notification.getRelatedUrl())
+                .createdDate(createdAt)
                 .build();
     }
 

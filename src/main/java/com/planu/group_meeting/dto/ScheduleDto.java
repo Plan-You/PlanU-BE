@@ -69,8 +69,8 @@ public class ScheduleDto {
         private Long id;
         private String title;
         private String color;
-        private LocalDateTime startDateTime;
-        private LocalDateTime endDateTime;
+        private String startDateTime;
+        private String endDateTime;
         private String location;
         private double latitude;
         private double longitude;
