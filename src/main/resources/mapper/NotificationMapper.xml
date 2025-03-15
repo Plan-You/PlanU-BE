@@ -7,8 +7,8 @@
 
     <insert id="save" parameterType="com.planu.group_meeting.dto.NotificationDTO" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO NOTIFICATION (
-        RECEIVER_ID, SENDER_ID, EVENT_TYPE, CONTENT, RELATED_URL ,IS_READ ) VALUES
-        (#{receiverId}, #{senderId}, #{eventType}, #{contents}, #{relatedUrl},0)
+        RECEIVER_ID, SENDER_ID, EVENT_TYPE, CONTENT, RELATED_URL ,IS_READ, CREATED_DATE) VALUES
+        (#{receiverId}, #{senderId}, #{eventType}, #{contents}, #{relatedUrl},0, #{createdDate})
     </insert>
 
     <select id="findById" parameterType="Long" resultType="com.planu.group_meeting.dto.NotificationDTO">
