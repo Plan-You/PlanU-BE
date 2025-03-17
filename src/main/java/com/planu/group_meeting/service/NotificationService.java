@@ -117,6 +117,10 @@ public class NotificationService {
         notificationDAO.updateIsRead(notificationId);
     }
 
+    public void readAllNotifications(Long userId){
+        notificationDAO.updateAllIsRead(userId);
+    }
+
     public UnreadNotificationResponse hasUnreadNotification(Long userId){
         return notificationDAO.hasUnreadNotification(userId);
     }

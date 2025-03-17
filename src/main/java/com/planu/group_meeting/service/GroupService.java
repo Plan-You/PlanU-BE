@@ -222,12 +222,12 @@ public class GroupService {
 
     private void createGroupDeleteNotification(Long groupId, Group group) {
         List<Long> groupUserIds = groupDAO.findUserIdsByGroupId(groupId);
-        log.info("groupUserIds={}", groupUserIds);
         for (Long groupUserId : groupUserIds) {
-            log.info("groupUserId={}", groupUserId);
-            GroupDeleteNotification groupDeleteNotification =
-                    new GroupDeleteNotification(groupUserId, group.getName() + " 그룹이 삭제되었습니다.");
-            notificationService.sendNotification(EventType.GROUP_DELETE, groupDeleteNotification);
+            if(!groupUserDAO.isLeader(groupUserId,groupId)){
+                GroupDeleteNotification groupDeleteNotification =
+                        new GroupDeleteNotification(groupUserId, group.getName() + " 그룹이 삭제되었습니다.");
+                notificationService.sendNotification(EventType.GROUP_DELETE, groupDeleteNotification);
+            }
         }
     }
 

@@ -19,6 +19,8 @@ public interface NotificationDAO {
 
     void updateIsRead(Long notificationId);
 
+    void updateAllIsRead(Long userId);
+
     void deleteOldNotification();
 
     UnreadNotificationResponse hasUnreadNotification(Long userId);
