@@ -1,18 +1,16 @@
 package com.planu.group_meeting.controller.docs;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.dto.*;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRanks;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
-import com.planu.group_meeting.dto.BaseResponse;
-import com.planu.group_meeting.dto.DataResponse;
 import com.planu.group_meeting.dto.GroupDTO.AvailableDateInfos;
 import com.planu.group_meeting.dto.GroupDTO.AvailableMemberInfos;
 import com.planu.group_meeting.dto.GroupDTO.GroupMembersResponse;
 import com.planu.group_meeting.dto.GroupDTO.NonGroupFriendsResponse;
-import com.planu.group_meeting.dto.GroupInviteResponseDTO;
-import com.planu.group_meeting.dto.GroupResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -32,10 +30,90 @@ import org.springframework.web.multipart.MultipartFile;
 @Tag(name = "GROUP API", description = "그룹 API")
 public interface GroupDocs {
 
+
+    @Operation(summary = "그룹 생성", description = "그룹을 생성합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "그룹 생성 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(example = "{\n" +
+                                    "  \"groupId\": \"group1\",\n" +
+                                    "  \"groupName\": \"컴공\",\n" +
+                                    "  \"leadeUsername\": \"ehgk4245\",\n" +
+                                    "  \"groupIamgeUrl\": \"http://example.com/images/teamx_logo.jpg\"\n" +
+                                    "}"))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(mediaType = "application/json",
+                            examples = {
+                                    @ExampleObject(name = "그룹명이 15자를 넘어갈 경우.",
+                                            value = "{\n" +
+                                                    "  \"ResultCode\": 400,\n" +
+                                                    "  \"ResultMsg\": \"그룹명은 15자 이내로 입력해야 합니다.\"\n" +
+                                                    "}"),
+                                    @ExampleObject(name = "그룹 이미지가 없을 경우.",
+                                            value = "{\n" +
+                                                    "  \"ResultCode\": 400,\n" +
+                                                    "  \"ResultMsg\": \"그룹 이미지는 필수 항목입니다.\"\n" +
+                                                    "}"),
+                                    @ExampleObject(name = "그룹 이미지 형식이 JPEG, PNG, GIF가 아닌경우.",
+                                            value = "{\n" +
+                                                    "  \"ResultCode\": 400,\n" +
+                                                    "  \"ResultMsg\": \"허용된 이미지 파일 형식은 JPEG, PNG, GIF 입니다.\"\n" +
+                                                    "}"),
+                                    @ExampleObject(name = "그룹 이미지의 크기가 5MB를 넘을 경우.",
+                                            value = "{\n" +
+                                                    "  \"ResultCode\": 400,\n" +
+                                                    "  \"ResultMsg\": \"그룹 이미지 파일은 5MB를 초과할 수 없습니다.\"\n" +
+                                                    "}")
+                            })
+            )
+    })
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "그룹 생성을 위한 데이터. `form-data` 형식으로 요청해야 합니다.",
+            content = @Content(
+                    mediaType = "multipart/form-data",
+                    schema = @Schema(implementation = MultipartFile.class)
+            )
+    )
     ResponseEntity<GroupResponseDTO> createGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                  @RequestParam("groupName") String groupName,
                                                  @RequestParam("groupImage") MultipartFile groupImage);
 
+    @Operation(summary = "그룹 초대", description = "그룹원을 초대합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "그룹 초대 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(example = "{\n" +
+                                    "\t\"invitedUsername\" : \"ehgk4245\",\n" +
+                                    "\t\"groupId\" : 1\n" +
+                                    "\t\"groupName\" : \"가나다\"\n" +
+                                    "\t\"groupImageUrl\" : \"http://example.com/images/teamx_logo.jpg\"\n" +
+                                    "}"))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(mediaType = "application/json",
+                            examples = {
+                                    @ExampleObject(name = "그룹에 속해있지 않는유저가 초대하는 경우",
+                                            value = "{\n" +
+                                                    "  \"ResultCode\": 400,\n" +
+                                                    "  \"ResultMsg\": \"초대 권한이 없습니다.\"\n" +
+                                                    "}"),
+                                    @ExampleObject(name = "자기 자신을 초대한 경우",
+                                            value = "{\n" +
+                                                    "  \"ResultCode\": 400,\n" +
+                                                    "  \"ResultMsg\": \"자기 자신을 초대할 수 없습니다.\"\n" +
+                                                    "}"),
+                                    @ExampleObject(name = "초대받을 유저가 없을 경우",
+                                            value = "{\n" +
+                                                    "  \"ResultCode\": 400,\n" +
+                                                    "  \"ResultMsg\": \"사용자 '\" + userName + \"'을 찾을 수 없습니다.\"\n" +
+                                                    "}"),
+                                    @ExampleObject(name = "초대하려는 그룹이 존재하지 않을 경우",
+                                            value = "{\n" +
+                                                    "  \"ResultCode\": 400,\n" +
+                                                    "  \"ResultMsg\": \"해당 그룹이 존재하지 않습니다.\"\n" +
+                                                    "}")
+                            })
+            )
+    })
     ResponseEntity<GroupInviteResponseDTO> inviteUser(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                       @RequestParam("groupId") Long id,
                                                       @RequestParam("username") String userName);
