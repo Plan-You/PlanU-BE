@@ -39,6 +39,12 @@ public class NotificationController {
         return BaseResponse.toResponseEntity(HttpStatus.OK, "알림 읽기 성공");
     }
 
+    @PostMapping("/read-all")
+    public ResponseEntity<BaseResponse> readAllNotification(@AuthenticationPrincipal CustomUserDetails userDetails){
+        notificationService.readAllNotifications(userDetails.getId());
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "알림 전체 읽기 성공");
+    }
+
     @GetMapping("/unread-exists")
     public ResponseEntity<UnreadNotificationResponse>hasUnreadNotification(@AuthenticationPrincipal CustomUserDetails userDetails){
         return ResponseEntity.ok(notificationService.hasUnreadNotification(userDetails.getId()));

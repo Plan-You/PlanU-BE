@@ -45,6 +45,12 @@
         WHERE ID = ${notificationId}
     </update>
 
+    <update id="updateAllIsRead">
+        UPDATE NOTIFICATION
+        SET IS_READ = 1
+        WHERE RECEIVER_ID = ${userId}
+    </update>
+
     <delete id="deleteOldNotification">
         DELETE FROM NOTIFICATION
         WHERE CREATED_DATE &lt; DATE_SUB(NOW(), INTERVAL 6 MONTH)
