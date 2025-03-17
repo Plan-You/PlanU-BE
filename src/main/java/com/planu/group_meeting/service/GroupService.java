@@ -133,8 +133,15 @@ public class GroupService {
         if (groupUserUser.getGroupState() == 1) {
             throw new IllegalArgumentException("사용자 '" + username + "'은 이미 그룹의 멤버입니다.");
         }
-
         groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
+        sendGroupInviteCancelNotification(leaderId, groupId, userId);
+    }
+
+    private void sendGroupInviteCancelNotification(Long leaderId, Long groupId, Long userId) {
+        String content = String.format("%s님이 '%s' 그룹 초대를 취소했습니다.", userDAO.findNameById(leaderId),groupDAO.findNameByGroupId(groupId));
+        GroupInviteCancelNotification notification =
+                new GroupInviteCancelNotification(leaderId, userId, content);
+        notificationService.sendNotification(EventType.GROUP_INVITATION_CANCELLED, notification);
     }
 
     @Transactional
@@ -191,6 +198,18 @@ public class GroupService {
         groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
         groupDAO.deleteByUserId(userId);
 
+        sendGroupLeftNotification(groupId, userId);
+    }
+
+    private void sendGroupLeftNotification(Long groupId, Long userId) {
+        List<Long> groupMemberIds = groupUserDAO.getGroupMemberIds(groupId);
+        for(Long groupMemberId : groupMemberIds){
+            String content = String.format("%s님이 '%s' 그룹에서 탈퇴하였습니다.",
+                    userDAO.findNameById(userId), groupDAO.findNameByGroupId(groupId));
+            GroupMemberLeaveNotification notification =
+                    new GroupMemberLeaveNotification(userId, groupMemberId, content, groupId);
+            notificationService.sendNotification(EventType.GROUP_MEMBER_LEFT, notification);
+        }
     }
 
     @Transactional
