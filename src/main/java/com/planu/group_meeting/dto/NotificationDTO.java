@@ -72,6 +72,7 @@ public class NotificationDTO {
 
     }
 
+    // 일정 알림 (개인 일정에 대한 알림)
     public static class ScheduleNotification extends NotificationDTO {
         public ScheduleNotification(Long receiverId, String contents, Long scheduleId) {
             super(EventType.SCHEDULE_REMINDER, SYSTEM_SENDER_ID, receiverId, contents,
@@ -79,6 +80,7 @@ public class NotificationDTO {
         }
     }
 
+    // 그룹 일정 알림 (그룹 일정에 대한 알림)
     public static class GroupScheduleNotification extends NotificationDTO {
         public GroupScheduleNotification(Long receiverId, String contents, Long groupId, Long scheduleId) {
             super(EventType.SCHEDULE_REMINDER, SYSTEM_SENDER_ID, receiverId, contents,
@@ -86,12 +88,14 @@ public class NotificationDTO {
         }
     }
 
+    // 친구 관련 알림 (친구 추가/거절 관련 알림)
     public static class FriendNotification extends NotificationDTO {
         public FriendNotification(EventType eventType, Long senderId, Long receiverId, String contents) {
             super(eventType, senderId, receiverId, contents, NotificationUrl.FRIEND_MANAGEMENT.getPattern());
         }
     }
 
+    // 그룹 삭제 알림 (그룹 삭제에 대한 알림)
     public static class GroupDeleteNotification extends NotificationDTO {
         public GroupDeleteNotification(Long receiverId, String contents) {
             super(EventType.GROUP_DELETE, SYSTEM_SENDER_ID, receiverId, contents,
@@ -99,6 +103,7 @@ public class NotificationDTO {
         }
     }
 
+    // 그룹 초대 알림 (그룹 초대에 대한 알림)
     public static class GroupInviteNotification extends NotificationDTO {
         public GroupInviteNotification(Long senderId, Long receiverId, String contents) {
             super(EventType.GROUP_INVITE, senderId, receiverId, contents,
@@ -106,6 +111,7 @@ public class NotificationDTO {
         }
     }
 
+    // 그룹 초대 수락 알림
     public static class GroupAcceptNotification extends NotificationDTO {
         public GroupAcceptNotification(Long senderId, Long receiverId, String contents, Long groupId) {
             super(EventType.GROUP_ACCEPT, senderId, receiverId, contents,
@@ -113,6 +119,7 @@ public class NotificationDTO {
         }
     }
 
+    // 그룹 추방 알림
     public static class GroupExpelNotification extends NotificationDTO {
         public GroupExpelNotification(Long senderId, Long receiverId, String contents) {
             super(EventType.GROUP_EXPEL, senderId, receiverId, contents,
@@ -120,6 +127,22 @@ public class NotificationDTO {
         }
     }
 
+    // 그룹 초대 취소 알림
+    public static class GroupInviteCancelNotification extends NotificationDTO{
+        public GroupInviteCancelNotification(Long senderId, Long receiverId, String contents){
+            super(EventType.GROUP_INVITATION_CANCELLED,senderId, receiverId, contents, NotificationUrl.GROUP_LIST.getPattern());
+        }
+    }
+
+    // 그룹원 자진 탈퇴 알림
+    public static class GroupMemberLeaveNotification extends NotificationDTO{
+        public GroupMemberLeaveNotification(Long senderId, Long receiverId, String contents, Long groupId){
+            super(EventType.GROUP_MEMBER_LEFT, senderId, receiverId, contents,
+                    formatUrl(NotificationUrl.GROUP_MEMBER_LIST,groupId));
+        }
+    }
+
+    // 그룹 일정 삭제 알림
     public static class GroupScheduleDeleteNotification extends NotificationDTO {
         public GroupScheduleDeleteNotification(Long receiverId, String contents, Long groupId) {
             super(EventType.GROUP_SCHEDULE_DELETE, SYSTEM_SENDER_ID, receiverId, contents,
@@ -127,6 +150,7 @@ public class NotificationDTO {
         }
     }
 
+    // 그룹 일정 생성 알림
     public static class GroupScheduleCreateNotification extends NotificationDTO {
         public GroupScheduleCreateNotification(Long receiverId, String contents, Long groupId, Long scheduleId) {
             super(EventType.GROUP_SCHEDULE_CREATE, SYSTEM_SENDER_ID, receiverId, contents,
@@ -134,6 +158,7 @@ public class NotificationDTO {
         }
     }
 
+    // 그룹 일정 댓글 알림
     public static class GroupScheduleCommentNotification extends NotificationDTO {
         public GroupScheduleCommentNotification(Long senderId, Long receiverId, String contents, Long groupId, Long scheduleId) {
             super(EventType.COMMENT, senderId, receiverId, contents,
@@ -141,6 +166,7 @@ public class NotificationDTO {
         }
     }
 
+    // 친구 생일 알림
     public static class BirthdayFriendNotification extends NotificationDTO{
         public BirthdayFriendNotification(Long receiverId, String contents){
             super(EventType.BIRTHDAY, SYSTEM_SENDER_ID ,receiverId, contents, NotificationUrl.MY_CALENDAR.getPattern());
