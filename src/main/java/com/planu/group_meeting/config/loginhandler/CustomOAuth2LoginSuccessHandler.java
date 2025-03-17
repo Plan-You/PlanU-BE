@@ -34,7 +34,7 @@ public class CustomOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSucc
         String refresh = jwtUtil.createRefreshToken(username, role);
         CookieUtil.createCookie(response, "refresh", refresh);
 
-        response.sendRedirect("https://localhost:5173");
+        response.sendRedirect("https://localhost:5173/myCalendar");
     }
 
 }
