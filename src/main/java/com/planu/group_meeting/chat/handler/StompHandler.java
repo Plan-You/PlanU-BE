@@ -30,6 +30,9 @@ public class StompHandler implements ChannelInterceptor {
 
     public static final String DEFAULT_DISCONNECT_SUB_PATH = "/sub/disconnect/";
 
+    public static final String GROUP_LOCATION_SUB_PATH = "/sub/location/groups/";
+    public static final String GROUP_LOCATION_PUB_PATH = "/pub/location/groups/";
+
     private final JwtUtil jwtUtil;
     private final GroupDAO groupDAO;
     private final UserDAO userDAO;
@@ -52,6 +55,9 @@ public class StompHandler implements ChannelInterceptor {
             if(destination.startsWith(DEFAULT_SUB_PATH)){
                 Long groupId = parseGroupIdFromSubPath(accessor);
                 validateUserInGroup(username, groupId);
+            } else if(destination.startsWith(GROUP_LOCATION_SUB_PATH)){
+                Long groupId = parseGroupIdByPath(destination, GROUP_LOCATION_SUB_PATH);
+                validateUserInGroup(username, groupId);
             } else {
                 validateUsername(accessor, username);
             }
@@ -63,7 +69,11 @@ public class StompHandler implements ChannelInterceptor {
             if(destination.startsWith(DEFAULT_PUB_PATH)){
                 Long groupId = parseGroupIdFromPubPath(accessor);
                 validateUserInGroup(username, groupId);
-            } else {
+            } else if(destination.startsWith(GROUP_LOCATION_PUB_PATH)) {
+                Long groupId = parseGroupIdByPath(destination, GROUP_LOCATION_PUB_PATH);
+                validateUserInGroup(username, groupId);
+            }
+            else {
                 validateReadPubPath(accessor, username);
             }
 
@@ -110,6 +120,10 @@ public class StompHandler implements ChannelInterceptor {
         if(!Objects.equals(username, usernameFromDestination)) {
             throw new IllegalArgumentException("username : " + usernameFromDestination + "이 저장된 정보와 다릅니다.");
         }
+    }
+
+    private Long parseGroupIdByPath(String path, String prefix) {
+        return Long.parseLong(path.substring(prefix.length()));
     }
 
     private Long parseGroupIdFromSubPath(StompHeaderAccessor accessor) {
