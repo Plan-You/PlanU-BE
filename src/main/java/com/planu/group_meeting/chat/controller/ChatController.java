@@ -1,6 +1,7 @@
 package com.planu.group_meeting.chat.controller;
 
 
+import com.planu.group_meeting.chat.controller.swagger.ChatDocs;
 import com.planu.group_meeting.chat.dto.ChatMessage;
 import com.planu.group_meeting.chat.dto.request.ChatMessageRequest;
 import com.planu.group_meeting.chat.dto.response.ChatMessageResponse;
@@ -29,7 +30,7 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-public class ChatController {
+public class ChatController implements ChatDocs {
 
     private final SimpMessageSendingOperations simpMessageSendingOperations;
     private final ChatService chatService;
@@ -81,13 +82,13 @@ public class ChatController {
         return ResponseEntity.ok(response);
     }
 
-    @ResponseBody
-    @GetMapping("/chats/search/{name}")
-    public ResponseEntity<DataResponse<List<ChatRoomResponse>>> serachChatRooms(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("name") String name) {
-        List<ChatRoomResponse> chatRooms = chatService.searchChatRooms(userDetails.getId(), name);
-        DataResponse<List<ChatRoomResponse>> response = new DataResponse<>(chatRooms);
-        return ResponseEntity.ok(response);
-    }
+//    @ResponseBody
+//    @GetMapping("/chats/search/{name}")
+//    public ResponseEntity<DataResponse<List<ChatRoomResponse>>> serachChatRooms(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("name") String name) {
+//        List<ChatRoomResponse> chatRooms = chatService.searchChatRooms(userDetails.getId(), name);
+//        DataResponse<List<ChatRoomResponse>> response = new DataResponse<>(chatRooms);
+//        return ResponseEntity.ok(response);
+//    }
 
     @ResponseBody
     @GetMapping("/chats/messages")
