@@ -24,8 +24,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "GROUP API", description = "그룹 API")
 public interface GroupDocs {
@@ -71,12 +71,12 @@ public interface GroupDocs {
             description = "그룹 생성을 위한 데이터. `form-data` 형식으로 요청해야 합니다.",
             content = @Content(
                     mediaType = "multipart/form-data",
-                    schema = @Schema(implementation = MultipartFile.class)
+                    schema = @Schema(implementation = GroupRequestDTO.class)
             )
     )
-    ResponseEntity<GroupResponseDTO> createGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                 @RequestParam("groupName") String groupName,
-                                                 @RequestParam("groupImage") MultipartFile groupImage);
+    @PostMapping("/create")
+    public ResponseEntity<GroupResponseDTO> createGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                        GroupRequestDTO groupRequestDTO);
 
     @Operation(summary = "그룹 초대", description = "그룹원을 초대합니다.")
     @ApiResponses({

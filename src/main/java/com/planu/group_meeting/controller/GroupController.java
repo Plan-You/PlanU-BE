@@ -2,19 +2,15 @@ package com.planu.group_meeting.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.controller.docs.GroupDocs;
+import com.planu.group_meeting.dto.*;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRanks;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
-import com.planu.group_meeting.dto.BaseResponse;
-import com.planu.group_meeting.dto.DataResponse;
-import com.planu.group_meeting.dto.GroupDTO;
 import com.planu.group_meeting.dto.GroupDTO.AvailableDateInfos;
 import com.planu.group_meeting.dto.GroupDTO.AvailableMemberInfos;
 import com.planu.group_meeting.dto.GroupDTO.CountOfGroupMembers;
 import com.planu.group_meeting.dto.GroupDTO.GroupMembersResponse;
 import com.planu.group_meeting.dto.GroupDTO.Member;
 import com.planu.group_meeting.dto.GroupDTO.NonGroupFriendsResponse;
-import com.planu.group_meeting.dto.GroupInviteResponseDTO;
-import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.service.FriendService;
 import com.planu.group_meeting.service.GroupService;
 import com.planu.group_meeting.service.GroupUserService;
@@ -53,11 +49,10 @@ public class GroupController implements GroupDocs {
 
     @PostMapping("/create")
     public ResponseEntity<GroupResponseDTO> createGroup(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                        @RequestParam("groupName") String groupName,
-                                                        @RequestParam("groupImage") MultipartFile groupImage) {
-        inputValidator.groupNameValid(groupName);
-        inputValidator.groupImageValid(groupImage);
-        return ResponseEntity.ok(groupService.createGroup(userDetails.getUsername(), groupName, groupImage));
+                                                        GroupRequestDTO groupRequestDTO) {
+        inputValidator.groupNameValid(groupRequestDTO.getGroupName());
+        inputValidator.groupImageValid(groupRequestDTO.getGroupImage());
+        return ResponseEntity.ok(groupService.createGroup(userDetails.getUsername(), groupRequestDTO.getGroupName(), groupRequestDTO.getGroupImage()));
     }
 
     @PostMapping("/invite")

@@ -91,22 +91,30 @@
     </select>
 
     <select id="findChatMessages" resultMap="ChatMessageMap">
+        SELECT * FROM (
         SELECT ID, SENDER_ID, GROUP_ID, MESSAGE_TYPE, MESSAGE, CREATED_DATE, UPDATED_DATE
         FROM CHAT_MESSAGE
         WHERE GROUP_ID = #{groupId}
         <if test="messageId != null">
-            AND ID &lt; #{messageId}
+            AND CREATED_DATE &lt; (SELECT CREATED_DATE FROM CHAT_MESSAGE WHERE ID = #{messageId})
         </if>
-        ORDER BY ID DESC
+        ORDER BY CREATED_DATE DESC
         LIMIT #{limit}
+        ) sub
+        ORDER BY CREATED_DATE ASC
     </select>
+
 
     <select id="getMessageIdsByGroupAndRange" resultType="java.lang.Long">
         SELECT ID FROM CHAT_MESSAGE
         WHERE GROUP_ID = #{groupId}
-        AND ID BETWEEN #{startId} AND #{endId}
-        ORDER BY ID ASC
+        AND CREATED_DATE BETWEEN
+        (SELECT CREATED_DATE FROM CHAT_MESSAGE WHERE ID = #{startId})
+        AND
+        (SELECT CREATED_DATE FROM CHAT_MESSAGE WHERE ID = #{endId})
+        ORDER BY CREATED_DATE ASC
     </select>
+
 
     <update id="updateMessageStatusAsRead">
         UPDATE MESSAGE_STATUS
