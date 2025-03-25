@@ -2,6 +2,7 @@ package com.planu.group_meeting.chat.controller.swagger;
 
 import com.planu.group_meeting.chat.dto.response.ChatMessageResponse;
 import com.planu.group_meeting.chat.dto.response.ChatRoomResponse;
+import com.planu.group_meeting.chat.dto.response.GroupedChatMessages;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dto.DataResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -67,48 +68,55 @@ public interface ChatDocs{
     @GetMapping("/chats")
     public ResponseEntity<DataResponse<List<ChatRoomResponse>>> chatRooms(@AuthenticationPrincipal CustomUserDetails userDetails);
 
-    @Operation(summary = "채팅 조회", description = "채팅을 최대 50개 조회합니다.\nmesageId 바로 전 까지의 메시지 조회\nmessageId가 없으면 가장 최근 메시지부터 조회")
+    @Operation(summary = "채팅 조회", description = "채팅을 최대 50개 조회합니다.\nmessageId보다 이전 메시지를 조회하며, 없으면 가장 최근 메시지부터 가져옵니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "채팅 조회 성공",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(example = "{\n" +
                                     "  \"data\": [\n" +
                                     "    {\n" +
-                                    "      \"type\": 1,\n" +
-                                    "      \"messageId\": 101,\n" +
-                                    "      \"message\": \"안녕하세요!\",\n" +
-                                    "      \"sender\": \"UserA\",\n" +
-                                    "      \"unReadCount\": 3,\n" +
                                     "      \"chatDate\": \"2025-03-18\",\n" +
-                                    "      \"chatTime\": \"10:30\",\n" +
-                                    "      \"profileImageURL\": null\n" +
+                                    "      \"messages\": [\n" +
+                                    "        {\n" +
+                                    "          \"type\": 1,\n" +
+                                    "          \"messageId\": 101,\n" +
+                                    "          \"message\": \"안녕하세요!\",\n" +
+                                    "          \"sender\": \"UserA\",\n" +
+                                    "          \"unReadCount\": 3,\n" +
+                                    "          \"chatTime\": \"10:30\",\n" +
+                                    "          \"profileImageURL\": null\n" +
+                                    "        },\n" +
+                                    "        {\n" +
+                                    "          \"type\": 1,\n" +
+                                    "          \"messageId\": 102,\n" +
+                                    "          \"message\": \"오늘 회의 몇 시에 하시나요?\",\n" +
+                                    "          \"sender\": \"UserB\",\n" +
+                                    "          \"unReadCount\": 1,\n" +
+                                    "          \"chatTime\": \"11:00\",\n" +
+                                    "          \"profileImageURL\": null\n" +
+                                    "        }\n" +
+                                    "      ]\n" +
                                     "    },\n" +
                                     "    {\n" +
-                                    "      \"type\": 1,\n" +
-                                    "      \"messageId\": 102,\n" +
-                                    "      \"message\": \"오늘 회의 몇 시에 하시나요?\",\n" +
-                                    "      \"sender\": \"UserB\",\n" +
-                                    "      \"unReadCount\": 1,\n" +
-                                    "      \"chatDate\": \"2025-03-18\",\n" +
-                                    "      \"chatTime\": \"11:00\",\n" +
-                                    "      \"profileImageURL\": null\n" +
-                                    "    },\n" +
-                                    "    {\n" +
-                                    "      \"type\": 2,\n" +
-                                    "      \"messageId\": 103,\n" +
-                                    "      \"message\": null,\n" +
-                                    "      \"sender\": \"UserC\",\n" +
-                                    "      \"unReadCount\": 0,\n" +
-                                    "      \"chatDate\": \"2025-03-18\",\n" +
-                                    "      \"chatTime\": \"11:05\",\n" +
-                                    "      \"profileImageURL\": \"https://example.com/profile/userC.jpg\"\n" +
+                                    "      \"chatDate\": \"2025-03-17\",\n" +
+                                    "      \"messages\": [\n" +
+                                    "        {\n" +
+                                    "          \"type\": 2,\n" +
+                                    "          \"messageId\": 103,\n" +
+                                    "          \"message\": null,\n" +
+                                    "          \"sender\": \"UserC\",\n" +
+                                    "          \"unReadCount\": 0,\n" +
+                                    "          \"chatTime\": \"11:05\",\n" +
+                                    "          \"profileImageURL\": \"https://example.com/profile/userC.jpg\"\n" +
+                                    "        }\n" +
+                                    "      ]\n" +
                                     "    }\n" +
                                     "  ]\n" +
-                                    "}\n")))
+                                    "}")))
     })
     @ResponseBody
     @GetMapping("/chats/messages")
-    public ResponseEntity<DataResponse<List<ChatMessageResponse>>> getChats(
+    public ResponseEntity<DataResponse<List<GroupedChatMessages>>> getChats(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam("groupId") Long groupId,
             @RequestParam(value = "messageId", required = false) Long messageId);

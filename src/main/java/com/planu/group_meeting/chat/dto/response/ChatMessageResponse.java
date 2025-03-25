@@ -13,6 +13,6 @@ public class ChatMessageResponse {
     private String sender;
     private String profileImageUrl;
     private Integer unReadCount;
-    private String ChatDate;
-    private String ChatTime;
+    private String chatDate;
+    private String chatTime;
 }

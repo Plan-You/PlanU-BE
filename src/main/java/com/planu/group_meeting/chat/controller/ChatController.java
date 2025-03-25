@@ -6,6 +6,7 @@ import com.planu.group_meeting.chat.dto.ChatMessage;
 import com.planu.group_meeting.chat.dto.request.ChatMessageRequest;
 import com.planu.group_meeting.chat.dto.response.ChatMessageResponse;
 import com.planu.group_meeting.chat.dto.response.ChatRoomResponse;
+import com.planu.group_meeting.chat.dto.response.GroupedChatMessages;
 import com.planu.group_meeting.chat.handler.ReadMessageBatchProcessor;
 import com.planu.group_meeting.chat.service.ChatService;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
@@ -59,8 +60,8 @@ public class ChatController implements ChatDocs {
                                                     .profileImageUrl(userDAO.findProfileImageById(userDAO.findIdByUsername(username)))
                                                     .message(message.getMessage())
                                                     .unReadCount(chatService.getUnreadCountforMessage(chatMessage.getId()))
-                                                    .ChatDate(date)
-                                                    .ChatTime(time)
+                                                    .chatTime(date)
+                                                    .chatDate(time)
                                                     .build();
 
         simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId, chatMessageResponse);
@@ -92,13 +93,13 @@ public class ChatController implements ChatDocs {
 
     @ResponseBody
     @GetMapping("/chats/messages")
-    public ResponseEntity<DataResponse<List<ChatMessageResponse>>> getChats(
+    public ResponseEntity<DataResponse<List<GroupedChatMessages>>> getChats(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam("groupId") Long groupId,
             @RequestParam(value = "messageId", required = false) Long messageId) {
 
-        List<ChatMessageResponse> chatMessageResponseList = chatService.getMessages(userDetails.getId(), groupId, messageId);
-        DataResponse<List<ChatMessageResponse>> response = new DataResponse<>(chatMessageResponseList);
+        List<GroupedChatMessages> groupedChatMessages = chatService.getMessages(userDetails.getId(), groupId, messageId);
+        DataResponse<List<GroupedChatMessages>> response = new DataResponse<>(groupedChatMessages);
         return ResponseEntity.ok(response);
     }
 
