@@ -6,6 +6,7 @@ import com.planu.group_meeting.chat.dto.ChatMessage;
 import com.planu.group_meeting.chat.dto.MessageStatus;
 import com.planu.group_meeting.chat.dto.response.ChatMessageResponse;
 import com.planu.group_meeting.chat.dto.response.ChatRoomResponse;
+import com.planu.group_meeting.chat.dto.response.GroupedChatMessages;
 import com.planu.group_meeting.dao.GroupDAO;
 import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
@@ -17,10 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -91,38 +89,38 @@ public class ChatService {
 
     }
 
-    @Transactional
-    public List<ChatRoomResponse> searchChatRooms(Long userId, String searchName) {
-        if (searchName == null || searchName.trim().isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        String keyword = searchName.trim().toLowerCase();
-
-        List<GroupResponseDTO> groupList = groupDAO.findGroupsByUserId(userId);
-
-        return groupList.stream()
-                .filter(group -> group.getGroupName().toLowerCase().contains(keyword)) // 검색 필터 적용
-                .map(group -> {
-                    ChatInfo chatInfo = chatDAO.getChatInfo(group.getGroupId());
-                    return ChatRoomResponse.builder()
-                            .groupId(group.getGroupId())
-                            .groupName(group.getGroupName())
-                            .groupImageUrl(group.getGroupImageUrl())
-                            .participant(Long.parseLong(group.getParticipant()))
-                            .isPin(group.getIsPin())
-                            .lastChat(Optional.ofNullable(chatInfo).map(ChatInfo::getLastChat).orElse(""))
-                            .lastChatDate(Optional.ofNullable(chatInfo).map(ChatInfo::getLastChatDate).orElse(""))
-                            .lastChatTime(Optional.ofNullable(chatInfo).map(ChatInfo::getLastChatTime).orElse(""))
-                            .unreadChats(chatDAO.countUnreadChatByUserAndGroup(userId, group.getGroupId()))
-                            .build();
-                })
-                .sorted(Comparator.comparing(ChatRoomResponse::getIsPin)
-                        .reversed()
-                        .thenComparing(Comparator.comparing(ChatRoomResponse::getLastChatDate).reversed())
-                        .thenComparing(Comparator.comparing(ChatRoomResponse::getLastChatTime).reversed()))
-                .collect(Collectors.toList());
-    }
+//    @Transactional
+//    public List<ChatRoomResponse> searchChatRooms(Long userId, String searchName) {
+//        if (searchName == null || searchName.trim().isEmpty()) {
+//            return Collections.emptyList();
+//        }
+//
+//        String keyword = searchName.trim().toLowerCase();
+//
+//        List<GroupResponseDTO> groupList = groupDAO.findGroupsByUserId(userId);
+//
+//        return groupList.stream()
+//                .filter(group -> group.getGroupName().toLowerCase().contains(keyword)) // 검색 필터 적용
+//                .map(group -> {
+//                    ChatInfo chatInfo = chatDAO.getChatInfo(group.getGroupId());
+//                    return ChatRoomResponse.builder()
+//                            .groupId(group.getGroupId())
+//                            .groupName(group.getGroupName())
+//                            .groupImageUrl(group.getGroupImageUrl())
+//                            .participant(Long.parseLong(group.getParticipant()))
+//                            .isPin(group.getIsPin())
+//                            .lastChat(Optional.ofNullable(chatInfo).map(ChatInfo::getLastChat).orElse(""))
+//                            .lastChatDate(Optional.ofNullable(chatInfo).map(ChatInfo::getLastChatDate).orElse(""))
+//                            .lastChatTime(Optional.ofNullable(chatInfo).map(ChatInfo::getLastChatTime).orElse(""))
+//                            .unreadChats(chatDAO.countUnreadChatByUserAndGroup(userId, group.getGroupId()))
+//                            .build();
+//                })
+//                .sorted(Comparator.comparing(ChatRoomResponse::getIsPin)
+//                        .reversed()
+//                        .thenComparing(Comparator.comparing(ChatRoomResponse::getLastChatDate).reversed())
+//                        .thenComparing(Comparator.comparing(ChatRoomResponse::getLastChatTime).reversed()))
+//                .collect(Collectors.toList());
+//    }
 
     @Transactional
     public int getUnreadCountforMessage(Long messageId) {
@@ -142,7 +140,7 @@ public class ChatService {
     }
 
     @Transactional
-    public List<ChatMessageResponse> getMessages(Long userId, Long groupId, Long offset) {
+    public List<GroupedChatMessages> getMessages(Long userId, Long groupId, Long offset) {
         GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
 
         if(groupUser == null){
@@ -160,7 +158,16 @@ public class ChatService {
 
         simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId, ChatMessageResponse.builder().type(3).build());
 
-        return chatMessageList.stream().map(this::convertToResponse).collect(Collectors.toList());
+        // 메시지 변환 후 그룹화
+        Map<String, List<ChatMessageResponse>> groupedMessages = chatMessageList.stream()
+                .map(this::convertToResponse) // ChatMessage -> ChatMessageResponse 변환
+                .collect(Collectors.groupingBy(ChatMessageResponse::getChatDate)); // ChatDate 기준 그룹화
+
+        // 그룹화된 데이터를 List<GroupedChatMessages> 형태로 변환
+        return groupedMessages.entrySet().stream()
+                .map(entry -> new GroupedChatMessages(entry.getKey(), entry.getValue()))
+                .sorted(Comparator.comparing(GroupedChatMessages::getChatDate)) // 날짜 순 정렬
+                .collect(Collectors.toList());
     }
 
     private void updateMessageStatusAsRead(Long userId, Long groupId) {
@@ -178,8 +185,8 @@ public class ChatService {
                 .sender(userDAO.findUsernameById(chatMessage.getUserId()))// sender 변환
                 .profileImageUrl(userDAO.findProfileImageById(chatMessage.getUserId()))// 프로필 이미지
                 .unReadCount(chatDAO.countUnreadByMessageId(chatMessage.getId())) // 안 읽은 사람 수 조회
-                .ChatDate(chatMessage.getCreatedDate().format(dateFormatter)) // 날짜 변환
-                .ChatTime(chatMessage.getCreatedDate().format(timeFormatter)) // 시간 변환
+                .chatDate(chatMessage.getCreatedDate().format(dateFormatter)) // 날짜 변환
+                .chatTime(chatMessage.getCreatedDate().format(timeFormatter)) // 시간 변환
                 .build();
     }
 
@@ -220,8 +227,8 @@ public class ChatService {
         ChatMessageResponse chatMessageResponse = ChatMessageResponse.builder()
                 .type(chatMessage.getType())
                 .sender(username)
-                .ChatDate(date)
-                .ChatTime(time)
+                .chatDate(date)
+                .chatTime(time)
                 .build();
 
         simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId,chatMessageResponse);
@@ -242,8 +249,8 @@ public class ChatService {
         ChatMessageResponse chatMessageResponse = ChatMessageResponse.builder()
                                             .type(chatMessage.getType())
                                             .sender(username)
-                                            .ChatDate(date)
-                                            .ChatTime(time)
+                                            .chatTime(date)
+                                            .chatDate(time)
                                             .build();
 
         simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId,chatMessageResponse);
