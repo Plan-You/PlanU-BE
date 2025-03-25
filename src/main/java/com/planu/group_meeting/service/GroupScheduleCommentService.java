@@ -1,5 +1,8 @@
 package com.planu.group_meeting.service;
 
+import static com.planu.group_meeting.dto.GroupScheduleDTO.ParticipantsResponse;
+import static com.planu.group_meeting.dto.NotificationDTO.GroupScheduleCommentNotification;
+
 import com.planu.group_meeting.dao.GroupScheduleCommentDAO;
 import com.planu.group_meeting.dao.GroupScheduleDAO;
 import com.planu.group_meeting.dao.GroupScheduleParticipantDAO;
@@ -8,10 +11,6 @@ import com.planu.group_meeting.dto.GroupScheduleCommentDTO;
 import com.planu.group_meeting.entity.GroupSchedule;
 import com.planu.group_meeting.entity.GroupScheduleComment;
 import com.planu.group_meeting.entity.common.EventType;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -19,9 +18,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.planu.group_meeting.dto.GroupScheduleDTO.ParticipantsResponse;
-import static com.planu.group_meeting.dto.NotificationDTO.GroupScheduleCommentNotification;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -65,7 +64,7 @@ public class GroupScheduleCommentService {
     }
 
     @Transactional
-    public Map<String, Object> getAllByGroupScheduleId(Long groupId, Long groupScheduleId) {
+    public Map<String, Object> getAllByGroupScheduleId(Long userId, Long groupId, Long groupScheduleId) {
         Map<String, Object> response = new HashMap<>();
         List<GroupScheduleComment> groupScheduleComments = groupScheduleCommentDAO.getAllByGroupScheduleId(groupId, groupScheduleId);
 
@@ -84,7 +83,7 @@ public class GroupScheduleCommentService {
             commentView.put("name", name);
             commentView.put("timestamp", timestamp);
             commentView.put("message", comment.getMessage());
-
+            commentView.put("isMyComment", comment.getUserId().equals(userId));
             comments.add(commentView);
         }
 
