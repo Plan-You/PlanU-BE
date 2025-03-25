@@ -46,7 +46,7 @@ public class GroupScheduleCommentController implements GroupScheduleCommentDocs 
         groupUserService.isGroupMember(userDetails.getId(), groupId);
         groupScheduleService.isValidSchedule(groupId, groupScheduleId);
 
-        Map<String, Object> response = groupScheduleCommentService.getAllByGroupScheduleId(groupId, groupScheduleId);
+        Map<String, Object> response = groupScheduleCommentService.getAllByGroupScheduleId(userDetails.getId(), groupId, groupScheduleId);
 
         return ResponseEntity.ok(response);
     }
