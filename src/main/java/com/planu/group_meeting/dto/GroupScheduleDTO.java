@@ -123,4 +123,16 @@ public class GroupScheduleDTO {
         private Boolean isBirthday;
     }
 
+    @Getter
+    @AllArgsConstructor
+    public static class ScheduleLocation {
+        Double latitude;
+        Double longitude;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class GroupScheduleLocation {
+        ScheduleLocation groupScheduleLocation;
+    }
 }

@@ -3,27 +3,34 @@ package com.planu.group_meeting.controller;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.controller.docs.GroupScheduleDocs;
 import com.planu.group_meeting.dto.BaseResponse;
-import com.planu.group_meeting.dto.GroupScheduleCommentDTO;
 import com.planu.group_meeting.dto.GroupScheduleDTO;
+import com.planu.group_meeting.dto.GroupScheduleDTO.GroupScheduleLocation;
 import com.planu.group_meeting.dto.GroupScheduleDTO.GroupScheduleRequest;
 import com.planu.group_meeting.service.GroupScheduleService;
 import com.planu.group_meeting.service.GroupService;
 import com.planu.group_meeting.service.GroupUserService;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/groups")
@@ -121,6 +128,17 @@ public class GroupScheduleController implements GroupScheduleDocs {
         Map<String, Object> response = new HashMap<>();
         response.put("groupSchedules", groupScheduleService.getGroupScheduleByYearMonth(groupId, yearMonth));
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{groupId}/schedules/{schedulesId}/location")
+    public ResponseEntity<GroupScheduleLocation> getGroupScheduleLocation(
+            @PathVariable("groupId") Long groupId,
+            @PathVariable("schedulesId") Long scheduleId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        groupUserService.isGroupMember(userDetails.getId(), groupId);
+        GroupScheduleLocation groupScheduleLocation = groupScheduleService.getGroupScheduleLocation(groupId, scheduleId);
+        return ResponseEntity.ok(groupScheduleLocation);
     }
 }
 
