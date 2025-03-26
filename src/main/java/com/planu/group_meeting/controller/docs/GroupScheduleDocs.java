@@ -3,6 +3,7 @@ package com.planu.group_meeting.controller.docs;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.dto.GroupScheduleDTO;
+import com.planu.group_meeting.dto.GroupScheduleDTO.GroupScheduleLocation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -12,16 +13,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.Map;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.util.Map;
 
 @Tag(name = "GROUP SCHEDULE API", description = "그룹 일정 API")
 public interface GroupScheduleDocs {
@@ -698,4 +698,79 @@ public interface GroupScheduleDocs {
                     @RequestParam @DateTimeFormat(pattern = "yyyy-MM") @Nullable YearMonth yearMonth,
                     @AuthenticationPrincipal CustomUserDetails userDetails
             );
+
+    @Operation(summary = "그룹 일정 장소 위치 조회", description = "그룹 일정 장소 위치를 조회합니다.")
+    @ApiResponses
+            ({
+                    @ApiResponse
+                            (
+                                    responseCode = "200",
+                                    description = "그룹 일정 장소 위치 조회 성공",
+                                    content = @Content
+                                            (
+                                                    mediaType = "application/json",
+                                                    schema = @Schema
+                                                            (
+                                                                    example = """
+                                                                            {
+                                                                                "groupScheduleLocation": {
+                                                                                    "latitude": 23.22222,
+                                                                                    "longitude": 1.22231
+                                                                                }
+                                                                            }
+                                                                            """
+                                                            )
+                                            )
+                            ),
+                    @ApiResponse
+                            (
+                                    responseCode = "404",
+                                    description = "그룹 또는 일정이 없는 경우",
+                                    content = @Content
+                                            (
+                                                    mediaType = "application/json",
+                                                    examples = {
+                                                            @ExampleObject
+                                                                    (
+                                                                            name = "그룹을 찾을 수 없는 경우",
+                                                                            value = """
+                                                                                    {
+                                                                                        "ResultCode": 404,
+                                                                                        "ResultMsg": "그룹을 찾을 수 없습니다."
+                                                                                    }
+                                                                                    """
+                                                                    ),
+                                                            @ExampleObject
+                                                                    (
+                                                                            name = "그룹 일정을 찾을 수 없는 경우",
+                                                                            value = """
+                                                                                    {
+                                                                                        "ResultCode": 404,
+                                                                                        "ResultMsg": "해당 그룹 일정을 찾을 수 없습니다."
+                                                                                    }
+                                                                                    """
+                                                                    )
+                                                    }
+                                            )
+                            ),
+                    @ApiResponse
+                            (
+                                    responseCode = "403",
+                                    description = "그룹원이 아닌 경우",
+                                    content = @Content
+                                            (
+                                                    mediaType = "application/json",
+                                                    schema = @Schema
+                                                            (
+                                                                    example = "{\"resultCode\": 403, \"resultMsg\": \"접근 권한이 없습니다.\"}"
+                                                            )
+                                            )
+                            )
+
+            })
+    ResponseEntity<GroupScheduleLocation> getGroupScheduleLocation(
+            @PathVariable("groupId") Long groupId,
+            @PathVariable("schedulesId") Long scheduleId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    );
 }
