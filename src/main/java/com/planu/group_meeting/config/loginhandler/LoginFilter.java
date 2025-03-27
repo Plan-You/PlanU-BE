@@ -53,7 +53,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         String username = userDetails.getUsername();
         String role = userDetails.getAuthorities().stream()
@@ -67,6 +67,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         response.addHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + access);
         CookieUtil.createCookie(response,"refresh",refresh);
+        CookieUtil.createCookie(response, "username", username);
+
         response.setStatus(HttpStatus.OK.value());
     }
 
