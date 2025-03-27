@@ -60,8 +60,8 @@ public class ChatController implements ChatDocs {
                                                     .profileImageUrl(userDAO.findProfileImageById(userDAO.findIdByUsername(username)))
                                                     .message(message.getMessage())
                                                     .unReadCount(chatService.getUnreadCountforMessage(chatMessage.getId()))
-                                                    .chatTime(date)
-                                                    .chatDate(time)
+                                                    .chatTime(time)
+                                                    .chatDate(date)
                                                     .build();
 
         simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId, chatMessageResponse);
