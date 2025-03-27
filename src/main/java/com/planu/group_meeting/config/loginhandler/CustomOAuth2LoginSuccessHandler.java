@@ -13,8 +13,6 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 @Component
 @RequiredArgsConstructor
@@ -33,8 +31,11 @@ public class CustomOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSucc
 
         String refresh = jwtUtil.createRefreshToken(username, role);
         CookieUtil.createCookie(response, "refresh", refresh);
+        CookieUtil.createCookie(response, "username", username);
 
         response.sendRedirect("https://localhost:5173/myCalendar");
+
+
     }
 
 }
