@@ -64,13 +64,6 @@ public class ScheduleController implements ScheduleDocs {
         return ResponseEntity.ok(scheduleService.findScheduleList(username, startDate, endDate));
     }
 
-//    @GetMapping("/{username}/check-events")
-//    public ResponseEntity<List<ScheduleCheckResponse>> checkScheduleList(
-//            @PathVariable String username, @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth,
-//            @AuthenticationPrincipal CustomUserDetails userDetails) {
-//        return ResponseEntity.ok(scheduleService.getSchedulesForMonth(userDetails.getId(), username, yearMonth));
-//    }
-
     @GetMapping("/{username}/check-events")
     public ResponseEntity<ScheduleDto.MyScheduleData> checkScheduleList(
             @PathVariable String username, @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth,
