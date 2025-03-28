@@ -149,7 +149,31 @@ public class ScheduleService {
         }
     }
 
-    public List<ScheduleCheckResponse> getSchedulesForMonth(Long currentUserId, String username, YearMonth yearMonth) {
+//    public List<ScheduleCheckResponse> getSchedulesForMonth(Long currentUserId, String username, YearMonth yearMonth) {
+//        User targetUser = userDAO.findByUsername(username);
+//        if(targetUser==null){
+//            throw new NotFoundUserException();
+//        }
+//        Long targetUserId = targetUser.getId();
+//
+//        LocalDate firstDayOfMonth = yearMonth.atDay(1);
+//        LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
+//
+//        LocalDate startOfCalendar = firstDayOfMonth.minusDays(firstDayOfMonth.getDayOfWeek().getValue() % 7);
+//        LocalDate endOfCalendar = lastDayOfMonth.plusDays(6 - lastDayOfMonth.getDayOfWeek().getValue());
+//
+//        List<ScheduleCheckResponse> scheduleCheckResponse = new ArrayList<>();
+//        for (LocalDate current = startOfCalendar; !current.isAfter(endOfCalendar); current = current.plusDays(1)) {
+//            ScheduleCheckResponse response = createScheduleCheckResponse(targetUserId, current);
+//            if (existsEvent(response)) {
+//                scheduleCheckResponse.add(response);
+//            }
+//        }
+//
+//        return scheduleCheckResponse;
+//    }
+
+    public MyScheduleData getSchedulesForMonth(Long currentUserId, String username, YearMonth yearMonth) {
         User targetUser = userDAO.findByUsername(username);
         if(targetUser==null){
             throw new NotFoundUserException();
@@ -170,8 +194,10 @@ public class ScheduleService {
             }
         }
 
-        return scheduleCheckResponse;
+        return new MyScheduleData(scheduleCheckResponse);
     }
+
+
 
     private boolean existsEvent(ScheduleCheckResponse response) {
         return response.getIsSchedule() || response.getIsGroupSchedule() || response.getIsBirthday();
