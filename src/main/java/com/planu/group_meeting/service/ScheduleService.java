@@ -174,7 +174,7 @@ public class ScheduleService {
     }
 
     private boolean existsEvent(ScheduleCheckResponse response) {
-        return response.isSchedule() || response.isGroupSchedule() || response.isBirthday();
+        return response.getIsSchedule() || response.getIsGroupSchedule() || response.getIsBirthday();
     }
 
     private ScheduleCheckResponse createScheduleCheckResponse(Long userId, LocalDate current) {
@@ -182,13 +182,13 @@ public class ScheduleService {
         response.setDate(current);
 
         if (scheduleDAO.existsScheduleByDate(userId, current)) {
-            response.setSchedule(true);
+            response.setIsSchedule(true);
         }
         if (groupScheduleDAO.existsScheduleByDate(userId, current)) {
-            response.setGroupSchedule(true);
+            response.setIsGroupSchedule(true);
         }
         if (userDAO.existsBirthdayByDate(userId, current)) {
-            response.setBirthday(true);
+            response.setIsBirthday(true);
         }
 
         return response;

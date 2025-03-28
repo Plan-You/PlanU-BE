@@ -111,9 +111,9 @@ public class ScheduleDto {
     @Setter
     public static class ScheduleCheckResponse {
         private LocalDate date;
-        private boolean isSchedule;
-        private boolean isGroupSchedule;
-        private boolean isBirthday;
+        private Boolean isSchedule = false;
+        private Boolean isGroupSchedule = false;
+        private Boolean isBirthday = false;
     }
 
 }
