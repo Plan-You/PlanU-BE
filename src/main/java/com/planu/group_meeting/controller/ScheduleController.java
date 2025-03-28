@@ -3,8 +3,8 @@ package com.planu.group_meeting.controller;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.controller.docs.ScheduleDocs;
 import com.planu.group_meeting.dto.BaseResponse;
+import com.planu.group_meeting.dto.ScheduleDto;
 import com.planu.group_meeting.dto.ScheduleDto.DailyScheduleResponse;
-import com.planu.group_meeting.dto.ScheduleDto.ScheduleCheckResponse;
 import com.planu.group_meeting.dto.ScheduleDto.ScheduleDetailsResponse;
 import com.planu.group_meeting.dto.ScheduleDto.ScheduleSaveRequest;
 import com.planu.group_meeting.service.ScheduleService;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.List;
 
 @RestController
 @RequestMapping("/schedules")
@@ -65,8 +64,15 @@ public class ScheduleController implements ScheduleDocs {
         return ResponseEntity.ok(scheduleService.findScheduleList(username, startDate, endDate));
     }
 
+//    @GetMapping("/{username}/check-events")
+//    public ResponseEntity<List<ScheduleCheckResponse>> checkScheduleList(
+//            @PathVariable String username, @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth,
+//            @AuthenticationPrincipal CustomUserDetails userDetails) {
+//        return ResponseEntity.ok(scheduleService.getSchedulesForMonth(userDetails.getId(), username, yearMonth));
+//    }
+
     @GetMapping("/{username}/check-events")
-    public ResponseEntity<List<ScheduleCheckResponse>> checkScheduleList(
+    public ResponseEntity<ScheduleDto.MyScheduleData> checkScheduleList(
             @PathVariable String username, @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(scheduleService.getSchedulesForMonth(userDetails.getId(), username, yearMonth));

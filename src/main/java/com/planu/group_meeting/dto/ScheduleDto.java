@@ -116,4 +116,11 @@ public class ScheduleDto {
         private Boolean isBirthday = false;
     }
 
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class MyScheduleData{
+        List<ScheduleCheckResponse> myScheduleData = new ArrayList<>();
+    }
+
 }
