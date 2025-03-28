@@ -2,7 +2,6 @@ package com.planu.group_meeting.controller.docs;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dto.BaseResponse;
-import com.planu.group_meeting.dto.ScheduleDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -20,7 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.List;
+
+import static com.planu.group_meeting.dto.ScheduleDto.*;
 
 @Tag(name = "SCHEDULE API", description = "개인 스케줄 관련 API")
 public interface ScheduleDocs {
@@ -42,7 +42,7 @@ public interface ScheduleDocs {
                             })
             )
     })
-    ResponseEntity<BaseResponse> createSchedules(@Valid @RequestBody ScheduleDto.ScheduleSaveRequest scheduleSaveRequest,
+    ResponseEntity<BaseResponse> createSchedules(@Valid @RequestBody ScheduleSaveRequest scheduleSaveRequest,
                                                  @AuthenticationPrincipal CustomUserDetails userDetails);
 
     @Operation(summary = "개인일정 수정", description = "개인 일정을 수정합니다.")
@@ -70,7 +70,7 @@ public interface ScheduleDocs {
             )
     })
     ResponseEntity<BaseResponse> updateSchedule(@PathVariable("scheduleId") Long scheduleId,
-                                                @Valid @RequestBody ScheduleDto.ScheduleSaveRequest scheduleSaveRequest,
+                                                @Valid @RequestBody ScheduleSaveRequest scheduleSaveRequest,
                                                 @AuthenticationPrincipal CustomUserDetails userDetails);
 
 
@@ -128,7 +128,7 @@ public interface ScheduleDocs {
                     )
             )
     })
-    ResponseEntity<ScheduleDto.ScheduleDetailsResponse> getScheduleDetails(@PathVariable("scheduleId") Long scheduleId);
+    ResponseEntity<ScheduleDetailsResponse> getScheduleDetails(@PathVariable("scheduleId") Long scheduleId);
 
 
     @Operation(summary = "일정 목록 조회", description = "일정 목록을 조회합니다. 시작 날짜와 종료 날짜를 기준으로 필터링할 수 있습니다.")
@@ -143,7 +143,7 @@ public interface ScheduleDocs {
                     )
             )
     })
-    ResponseEntity<ScheduleDto.DailyScheduleResponse> getScheduleList(
+    ResponseEntity<DailyScheduleResponse> getScheduleList(
             @PathVariable String username,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
@@ -192,6 +192,6 @@ public interface ScheduleDocs {
                     )
             )
     })
-    ResponseEntity<List<ScheduleDto.ScheduleCheckResponse>> checkScheduleList(
+    ResponseEntity<MyScheduleData> checkScheduleList(
             @PathVariable String username, @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth, @AuthenticationPrincipal CustomUserDetails userDetails);
 }
