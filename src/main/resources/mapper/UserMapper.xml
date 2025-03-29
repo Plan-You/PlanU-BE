@@ -119,11 +119,21 @@
 
     <select id="existsBirthdayByDate">
         SELECT EXISTS (
-        SELECT 1
+        (SELECT 1
         FROM FRIEND F
         JOIN USER U ON F.FROM_USER_ID = U.ID
-        WHERE F.FRIEND_STATUS = 'FRIEND' AND
-        TO_USER_ID = ${userId} AND MONTH(U.BIRTH_DATE) = MONTH(#{date}) AND DAY(U.BIRTH_DATE) = DAY(#{date})
+        WHERE F.FRIEND_STATUS = 'FRIEND'
+        AND TO_USER_ID = ${userId}
+        AND MONTH(U.BIRTH_DATE) = MONTH(#{date})
+        AND DAY(U.BIRTH_DATE) = DAY(#{date}))
+
+        UNION
+
+        (SELECT 1
+        FROM USER U
+        WHERE U.ID = ${userId}
+        AND MONTH(U.BIRTH_DATE) = MONTH(#{date})
+        AND DAY(U.BIRTH_DATE) = DAY(#{date}))
         )
     </select>
 
