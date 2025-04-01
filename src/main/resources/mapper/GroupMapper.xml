@@ -16,8 +16,8 @@
     </select>
 
     <insert id="insertGroupUser">
-        INSERT INTO GROUP_USER (user_id, group_id, group_role, group_state, group_is_pin)
-        VALUES (#{userId}, #{groupId}, #{groupRole}, #{groupState}, #{isPin})
+        INSERT INTO GROUP_USER (user_id, group_id, group_role, group_state, invite_user_id, group_is_pin)
+        VALUES (#{userId}, #{groupId}, #{groupRole}, #{groupState}, #{inviteUserId}, #{isPin})
     </insert>
 
     <select id="findGroupById" resultType="com.planu.group_meeting.entity.Group">
@@ -38,6 +38,7 @@
         GROUP_ID AS groupId,
         GROUP_ROLE AS groupRole,
         GROUP_STATE AS groupState,
+        INVITE_USER_ID AS inviteUserId,
         GROUP_IS_PIN AS isPin,
         VERSION AS version,
         CREATED_DATE AS createdDate,
