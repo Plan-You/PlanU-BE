@@ -1,5 +1,6 @@
 package com.planu.group_meeting.location.service;
 
+import com.planu.group_meeting.dao.GroupScheduleParticipantDAO;
 import com.planu.group_meeting.dao.GroupUserDAO;
 import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.location.dto.request.LocationDTO;
@@ -17,6 +18,7 @@ public class LocationService {
 
     private final LocationImpl locationImpl;
     private final GroupUserDAO groupUserDAO;
+    private final GroupScheduleParticipantDAO groupScheduleParticipantDAO;
     private final UserDAO userDAO;
 
     public void updateLocation(String username, LocationDTO locationDTO) {
@@ -27,9 +29,10 @@ public class LocationService {
         }
     }
 
-    public GroupMemberLocationResponse getGroupMemberLocation(Long groupId)  {
+    public GroupMemberLocationResponse getGroupMemberLocation(Long groupId, Long scheduleId)  {
         List<GroupMemberLocation> groupMemberLocations = new ArrayList<>();
-        for(Long groupMemberId : groupUserDAO.getGroupMemberIds(groupId)) {
+        for(var participants : groupScheduleParticipantDAO.findByScheduleId(groupId, scheduleId)) {
+            Long groupMemberId = participants.getUserId();
             try {
                 LocationDTO locationDTO = locationImpl.findById(groupMemberId);
                 groupMemberLocations.add(
