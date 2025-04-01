@@ -2,10 +2,19 @@ package com.planu.group_meeting.chat.handler;
 
 import com.planu.group_meeting.chat.dao.ChatDAO;
 import com.planu.group_meeting.dao.GroupDAO;
+import com.planu.group_meeting.dao.GroupScheduleDAO;
+import com.planu.group_meeting.dao.GroupScheduleParticipantDAO;
 import com.planu.group_meeting.dao.UserDAO;
+import com.planu.group_meeting.entity.GroupSchedule;
 import com.planu.group_meeting.entity.GroupUser;
 import com.planu.group_meeting.entity.User;
 import com.planu.group_meeting.jwt.JwtUtil;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
@@ -14,10 +23,6 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
@@ -35,52 +40,62 @@ public class StompHandler implements ChannelInterceptor {
 
     private final JwtUtil jwtUtil;
     private final GroupDAO groupDAO;
+    private final GroupScheduleDAO groupScheduleDAO;
+    private final GroupScheduleParticipantDAO groupScheduleParticipantDAO;
     private final UserDAO userDAO;
     private final ChatDAO chatDAO;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-        StompCommand command = accessor.getCommand();
+        StompCommand command = null;
+        try {
+            StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+            command = accessor.getCommand();
 
-        if (StompCommand.CONNECT.equals(command)) {
-            String username = getUsernameByAuthorizationHeader(accessor.getFirstNativeHeader("Authorization"));
+            if (StompCommand.CONNECT.equals(command)) {
+                String username = getUsernameByAuthorizationHeader(accessor.getFirstNativeHeader("Authorization"));
 
-            setValue(accessor, "username", username);
-        }
+                setValue(accessor, "username", username);
+            } else if (StompCommand.SUBSCRIBE.equals(command)) {
+                String username = (String) getValue(accessor, "username");
+                String destination = accessor.getDestination();
+                if (destination.startsWith(DEFAULT_SUB_PATH)) {
+                    Long groupId = parseGroupIdFromSubPath(accessor);
+                    validateUserInGroup(username, groupId);
+                } else if (destination.startsWith(GROUP_LOCATION_SUB_PATH)) {
+                    Long[] ids = parseGroupAndShceduleIdByPath(destination, GROUP_LOCATION_SUB_PATH);
+                    Long groupId = ids[0];
+                    Long scheduleId = ids[1];
+                    validateUserInGroupsSchedules(username, groupId, scheduleId);
+                } else {
+                    validateUsername(accessor, username);
+                }
+            } else if (StompCommand.SEND.equals(command)) {
+                String username = (String) getValue(accessor, "username");
+                String destination = accessor.getDestination();
+                if (destination.startsWith(DEFAULT_PUB_PATH)) {
+                    Long groupId = parseGroupIdFromPubPath(accessor);
+                    validateUserInGroup(username, groupId);
+                } else if (destination.startsWith(GROUP_LOCATION_PUB_PATH)) {
+                    Long[] ids = parseGroupAndShceduleIdByPath(destination, GROUP_LOCATION_PUB_PATH);
+                    Long groupId = ids[0];
+                    Long scheduleId = ids[1];
+                    System.out.println("groupId: " + groupId);
+                    System.out.println("scheduleId: " + scheduleId);
+                    validateUserInGroupsSchedules(username, groupId, scheduleId);
+                } else {
+                    validateReadPubPath(accessor, username);
+                }
 
-        else if (StompCommand.SUBSCRIBE.equals(command)) {
-            String username = (String)getValue(accessor, "username");
-            String destination = accessor.getDestination();
-            if(destination.startsWith(DEFAULT_SUB_PATH)){
-                Long groupId = parseGroupIdFromSubPath(accessor);
-                validateUserInGroup(username, groupId);
-            } else if(destination.startsWith(GROUP_LOCATION_SUB_PATH)){
-                Long groupId = parseGroupIdByPath(destination, GROUP_LOCATION_SUB_PATH);
-                validateUserInGroup(username, groupId);
-            } else {
-                validateUsername(accessor, username);
+            } else if (StompCommand.DISCONNECT.equals(command)) {
+                String username = (String) getValue(accessor, "username");
             }
-        }
-        
-        else if (StompCommand.SEND.equals(command)) {
-            String username = (String)getValue(accessor, "username");
-            String destination = accessor.getDestination();
-            if(destination.startsWith(DEFAULT_PUB_PATH)){
-                Long groupId = parseGroupIdFromPubPath(accessor);
-                validateUserInGroup(username, groupId);
-            } else if(destination.startsWith(GROUP_LOCATION_PUB_PATH)) {
-                Long groupId = parseGroupIdByPath(destination, GROUP_LOCATION_PUB_PATH);
-                validateUserInGroup(username, groupId);
-            }
-            else {
-                validateReadPubPath(accessor, username);
-            }
-
-        }
-
-        else if (StompCommand.DISCONNECT.equals(command)) {
-            String username = (String)getValue(accessor, "username");
+        } catch (Exception e) {
+            System.out.println("에러 발생");
+            System.out.println(command);
+            System.out.println(e.getMessage());
+            System.out.println(LocalDateTime.now());
+            throw e;
         }
 
         return message;
@@ -191,5 +206,33 @@ public class StompHandler implements ChannelInterceptor {
             throw new IllegalArgumentException("Authorization header is missing or does not start with Bearer");
         }
         return authorizationHeader.substring(7);
+    }
+
+    private Long[] parseGroupAndShceduleIdByPath(String path, String prefix) {
+        try {
+            String[] parts = path.substring(prefix.length()).split("/");
+            return new Long[]{Long.parseLong(parts[0]), Long.parseLong(parts[1])};
+        } catch(Exception e) {
+            throw new IllegalArgumentException("올바르지 않은 경로 형식입니다.");
+        }
+    }
+
+    private void validateUserInGroupsSchedules(String username, Long groupId, Long scheduleId) {
+        validateUserInGroup(username, groupId);
+        GroupSchedule groupSchedule = groupScheduleDAO.findById(groupId, scheduleId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 그룹 일정을 찾을 수 없습니다."));
+
+        if(groupSchedule.getStartDateTime().minusHours(2).isAfter(LocalDateTime.now(Clock.system(ZoneId.of("Asia/Seoul"))))) {
+            throw new IllegalArgumentException("일정 시작 2시간 전부터만 위치 공유를 할 수 있습니다.");
+        }
+
+        for(var participantsInfo : groupScheduleParticipantDAO.findByScheduleId(groupId, scheduleId)) {
+            System.out.println("참석자 아이디: " + participantsInfo.getUserId());
+            if(participantsInfo.getUsername().equals(username)) {
+                return;
+            }
+        }
+
+        throw new IllegalArgumentException("해당 일정에 참여하고 있지않습니다.");
     }
 }

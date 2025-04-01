@@ -19,15 +19,16 @@ public class LocationController {
     private final LocationService locationService;
 
     @Transactional
-    @MessageMapping("/location/groups/{groupId}")
+    @MessageMapping("/location/groups/{groupId}/{scheduleId}")
     public void updateLocationAndget(
             LocationDTO locationDTO,
             @DestinationVariable("groupId") Long groupId,
+            @DestinationVariable("scheduleId") Long scheduleId,
             StompHeaderAccessor accessor
     ) {
         String username = (String) accessor.getSessionAttributes().get("username");
         locationService.updateLocation(username, locationDTO);
-        GroupMemberLocationResponse response = locationService.getGroupMemberLocation(groupId);
-        messageSender.convertAndSend("/sub/location/groups/" + groupId, response);
+        GroupMemberLocationResponse response = locationService.getGroupMemberLocation(groupId, scheduleId);
+        messageSender.convertAndSend("/sub/location/groups/" + groupId + "/" + scheduleId, response);
     }
 }
