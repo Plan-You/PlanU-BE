@@ -14,6 +14,7 @@ public class GroupUser {
     private Long groupId;
     private GroupRole groupRole;  // Enum을 사용
     private Integer groupState;   // 상태를 나타내는 Integer로 매핑
+    private Long inviteUserId;
     private Boolean isPin;
     private Long version;
     private LocalDateTime createdDate;
