@@ -105,6 +105,14 @@ public class GroupScheduleService {
     @Transactional
     public void insert(Long groupId, @Valid GroupScheduleRequest groupScheduleRequest) {
         checkValidGroupId(groupId);
+        if(groupScheduleRequest.getStartDateTime().isAfter(groupScheduleRequest.getEndDateTime())) {
+            throw new IllegalArgumentException("시작 시간이 종료 시간 이후일수 없습니다.");
+        }
+        if(groupScheduleRequest.getLatitude() == 0.0 || groupScheduleRequest.getLongitude() == 0.0) {
+            throw new IllegalArgumentException("위도나 경도는 0이어선 안됩니다.");
+        }
+
+
         GroupSchedule groupSchedule = groupScheduleRequest.toEntity(groupId);
         groupScheduleDAO.insert(groupSchedule);
         List<Long> groupScheduleParticipants = new ArrayList<>();
