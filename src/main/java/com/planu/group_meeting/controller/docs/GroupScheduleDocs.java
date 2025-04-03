@@ -172,7 +172,7 @@ public interface GroupScheduleDocs {
                                                                                     value = """
                                                                                             {
                                                                                                 "resultCode": 400,
-                                                                                                "resultMsg": 위도나 경도는 0이어서는 안됩니다.
+                                                                                                "resultMsg": "위도나 경도는 0이어서는 안됩니다."
                                                                                             }
                                                                                             """
                                                                             ),
