@@ -116,14 +116,16 @@ public interface GroupScheduleCommentDocs {
                                                                                         "username": "chlwnsgur",
                                                                                         "name": "최준혁",
                                                                                         "timestamp": "10분 전",
-                                                                                        "message": "니얼굴"
+                                                                                        "message": "니얼굴",
+                                                                                        "isMyComment": true
                                                                                     },
                                                                                     {
                                                                                         "id": 2,
                                                                                         "username": "wjdwogh",
                                                                                         "name": "정재호",
                                                                                         "timestamp": "11분 전",
-                                                                                        "message": "아 뭐하는데?"
+                                                                                        "message": "아 뭐하는데?",
+                                                                                        "isMyComment": false
                                                                                     }
                                                                                 ]
                                                                             }

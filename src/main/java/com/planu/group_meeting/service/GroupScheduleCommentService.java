@@ -13,6 +13,7 @@ import com.planu.group_meeting.entity.GroupScheduleComment;
 import com.planu.group_meeting.entity.common.EventType;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,7 +69,7 @@ public class GroupScheduleCommentService {
         Map<String, Object> response = new HashMap<>();
         List<GroupScheduleComment> groupScheduleComments = groupScheduleCommentDAO.getAllByGroupScheduleId(groupId, groupScheduleId);
 
-        LocalDateTime currentTime = LocalDateTime.now();
+        LocalDateTime currentTime = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         response.put("countOfComment", groupScheduleComments.size());
 
         List<Map<String, Object>> comments = new ArrayList<>();
