@@ -1,8 +1,13 @@
 package com.planu.group_meeting.location.service;
 
+import com.planu.group_meeting.dao.GroupDAO;
+import com.planu.group_meeting.dao.GroupScheduleDAO;
 import com.planu.group_meeting.dao.GroupScheduleParticipantDAO;
 import com.planu.group_meeting.dao.GroupUserDAO;
 import com.planu.group_meeting.dao.UserDAO;
+import com.planu.group_meeting.exception.group.GroupNotFoundException;
+import com.planu.group_meeting.exception.group.UnauthorizedAccessException;
+import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
 import com.planu.group_meeting.location.dto.request.LocationDTO;
 import com.planu.group_meeting.location.dto.response.GroupMemberLocation;
 import com.planu.group_meeting.location.dto.response.GroupMemberLocationResponse;
@@ -18,6 +23,8 @@ public class LocationService {
 
     private final LocationImpl locationImpl;
     private final GroupUserDAO groupUserDAO;
+    private final GroupScheduleDAO groupScheduleDAO;
+    private final GroupDAO groupDAO;
     private final GroupScheduleParticipantDAO groupScheduleParticipantDAO;
     private final UserDAO userDAO;
 
@@ -57,5 +64,31 @@ public class LocationService {
             }
         }
         return new GroupMemberLocationResponse(groupMemberLocations);
+    }
+
+    public GroupMemberLocationResponse getGroupMemberLocation(Long groupId, Long scheduleId, Long userId) {
+        if(groupDAO.findGroupById(groupId) == null) {
+            throw new GroupNotFoundException("그룹이 없습니다.");
+        }
+        if(!groupUserDAO.isGroupMember(userId, groupId)) {
+            throw new UnauthorizedAccessException("그룹원이 아닙니다.");
+        }
+        if(groupScheduleDAO.findById(groupId, scheduleId).isEmpty()) {
+            throw new ScheduleNotFoundException("그룹 일정이 없습니다.");
+        }
+
+        boolean isAccessible = false;
+        for(var participant : groupScheduleParticipantDAO.findByScheduleId(groupId, scheduleId)) {
+            if (participant.getUserId().equals(userId)) {
+                isAccessible = true;
+                break;
+            }
+        }
+
+        if(!isAccessible) {
+            throw new IllegalArgumentException("해당 일정에 참석자가 아닙니다.");
+        }
+
+        return getGroupMemberLocation(groupId, scheduleId);
     }
 }
