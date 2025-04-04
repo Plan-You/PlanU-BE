@@ -36,7 +36,7 @@
     <select id="findUsernameByEmail" parameterType="String" resultType="String">
         SELECT USERNAME
         FROM USER
-        WHERE EMAIL = #{email}
+        WHERE EMAIL = #{email} AND ROLE = 'ROLE_USER'
     </select>
 
     <select id="existsByUsername" parameterType="String" resultType="boolean">
