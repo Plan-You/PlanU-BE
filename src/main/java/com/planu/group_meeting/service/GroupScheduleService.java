@@ -1,37 +1,28 @@
 package com.planu.group_meeting.service;
 
-import static com.planu.group_meeting.dto.GroupScheduleDTO.GroupScheduleRequest;
-import static com.planu.group_meeting.dto.GroupScheduleDTO.ParticipantsResponse;
-import static com.planu.group_meeting.dto.NotificationDTO.GroupScheduleCreateNotification;
-import static com.planu.group_meeting.dto.NotificationDTO.GroupScheduleDeleteNotification;
-
-import com.planu.group_meeting.dao.GroupDAO;
-import com.planu.group_meeting.dao.GroupScheduleDAO;
-import com.planu.group_meeting.dao.GroupScheduleParticipantDAO;
-import com.planu.group_meeting.dao.GroupUserDAO;
-import com.planu.group_meeting.dao.UserDAO;
+import com.planu.group_meeting.dao.*;
 import com.planu.group_meeting.dto.GroupScheduleDTO;
-import com.planu.group_meeting.dto.GroupScheduleDTO.GroupScheduleLocation;
-import com.planu.group_meeting.dto.GroupScheduleDTO.GroupSchedulesDetailResponse;
-import com.planu.group_meeting.dto.GroupScheduleDTO.ScheduleLocation;
-import com.planu.group_meeting.dto.GroupScheduleDTO.scheduleOverViewResponse;
-import com.planu.group_meeting.dto.GroupScheduleDTO.todayScheduleResponse;
 import com.planu.group_meeting.entity.GroupSchedule;
 import com.planu.group_meeting.entity.GroupScheduleParticipant;
 import com.planu.group_meeting.entity.common.EventType;
 import com.planu.group_meeting.exception.group.GroupNotFoundException;
 import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import static com.planu.group_meeting.dto.GroupScheduleDTO.*;
+import static com.planu.group_meeting.dto.NotificationDTO.GroupScheduleCreateNotification;
+import static com.planu.group_meeting.dto.NotificationDTO.GroupScheduleDeleteNotification;
 
 @Service
 @AllArgsConstructor
@@ -103,7 +94,7 @@ public class GroupScheduleService {
     }
 
     @Transactional
-    public void insert(Long groupId, @Valid GroupScheduleRequest groupScheduleRequest) {
+    public void insert(Long userId, Long groupId, @Valid GroupScheduleRequest groupScheduleRequest) {
         checkValidGroupId(groupId);
         if(groupScheduleRequest.getStartDateTime().isAfter(groupScheduleRequest.getEndDateTime())) {
             throw new IllegalArgumentException("시작 시간이 종료 시간 이후일수 없습니다.");
@@ -119,6 +110,8 @@ public class GroupScheduleService {
         for (var username : groupScheduleRequest.getParticipants()) {
             groupScheduleParticipants.add(userDAO.findByUsername(username).getId());
         }
+        // 그룹 일정 생성자도 참여자에 포함
+        groupScheduleParticipants.add(userId);
         insertParticipants(groupSchedule, groupScheduleParticipants);
 
         for (Long groupScheduleParticipant : groupScheduleParticipants) {

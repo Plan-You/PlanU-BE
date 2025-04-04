@@ -11,26 +11,19 @@ import com.planu.group_meeting.service.GroupService;
 import com.planu.group_meeting.service.GroupUserService;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/groups")
@@ -46,7 +39,7 @@ public class GroupScheduleController implements GroupScheduleDocs {
                                                @PathVariable Long groupId,
                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
         groupUserService.isGroupMember(userDetails.getId(), groupId);
-        groupScheduleService.insert(groupId, groupScheduleRequest);
+        groupScheduleService.insert(userDetails.getId() ,groupId, groupScheduleRequest);
         return BaseResponse.toResponseEntity(HttpStatus.CREATED, "그룹 일정 생성 성공");
     }
 
