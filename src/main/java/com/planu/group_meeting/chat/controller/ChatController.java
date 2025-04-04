@@ -3,6 +3,7 @@ package com.planu.group_meeting.chat.controller;
 
 import com.planu.group_meeting.chat.controller.swagger.ChatDocs;
 import com.planu.group_meeting.chat.dto.ChatMessage;
+import com.planu.group_meeting.chat.dto.request.ChatFileRequest;
 import com.planu.group_meeting.chat.dto.request.ChatMessageRequest;
 import com.planu.group_meeting.chat.dto.response.ChatMessageResponse;
 import com.planu.group_meeting.chat.dto.response.ChatRoomResponse;
@@ -11,8 +12,10 @@ import com.planu.group_meeting.chat.handler.ReadMessageBatchProcessor;
 import com.planu.group_meeting.chat.service.ChatService;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dao.UserDAO;
+import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.dto.DataResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -21,10 +24,8 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -40,11 +41,18 @@ public class ChatController implements ChatDocs {
 
     @Transactional
     @MessageMapping("/chat/group/{groupId}")
-    public void chat(ChatMessageRequest message, @DestinationVariable("groupId") Long groupId, StompHeaderAccessor accessor){
+    public void chat(ChatMessageRequest messageRequest, @DestinationVariable("groupId") Long groupId, StompHeaderAccessor accessor){
         String username = (String) accessor.getSessionAttributes().get("username");
 
-        ChatMessage chatMessage = chatService.save(groupId, username, message.getType(), message.getMessage());
+        Integer type = messageRequest.getType();
+        String message = messageRequest.getMessage();
 
+        ChatMessage chatMessage = chatService.save(groupId, username, type, message);
+
+        sendMessage(groupId, chatMessage, username, type, message);
+    }
+
+    private void sendMessage(Long groupId, ChatMessage chatMessage, String username, Integer type, String message) {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String date = chatMessage.getCreatedDate().format(dateFormatter);
 
@@ -55,10 +63,10 @@ public class ChatController implements ChatDocs {
 
         ChatMessageResponse chatMessageResponse = ChatMessageResponse.builder()
                                                     .messageId(chatMessage.getId())
-                                                    .type(message.getType())
+                                                    .type(type)
                                                     .sender(username)
                                                     .profileImageUrl(userDAO.findProfileImageById(userDAO.findIdByUsername(username)))
-                                                    .message(message.getMessage())
+                                                    .message(message)
                                                     .unReadCount(chatService.getUnreadCountforMessage(chatMessage.getId()))
                                                     .chatTime(time)
                                                     .chatDate(date)
@@ -120,5 +128,22 @@ public class ChatController implements ChatDocs {
     @GetMapping("/chats/new")
     public ResponseEntity<Integer> countNewChat(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(chatService.getUnreadCountforUser(userDetails.getId()));
+    }
+
+
+    @ResponseBody
+    @PostMapping("/chats/file")
+    public ResponseEntity<BaseResponse> chatFileUpload(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                       @ModelAttribute ChatFileRequest chatFileRequest) {
+        Long userId = userDetails.getId();
+        String username = userDetails.getUsername();
+        Long groupId = chatFileRequest.getGroupId();
+        MultipartFile file = chatFileRequest.getFile();
+
+        ChatMessage chatMessage = chatService.UploadFileAndSaveChat(groupId, userId, username, file);
+
+        sendMessage(groupId, chatMessage, username, chatMessage.getType(), chatMessage.getContent());
+
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "사진 전송 및 업로드 성공");
     }
 }

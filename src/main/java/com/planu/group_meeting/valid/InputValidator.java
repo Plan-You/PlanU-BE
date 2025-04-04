@@ -38,6 +38,23 @@ public class InputValidator {
         }
     }
 
+    public void chatImageValid(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new InvalidInputException("파일이 없습니다.");
+        }
+
+        // 파일 크기 제한
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new InvalidInputException("이미지 파일은 5MB를 초과할 수 없습니다.");
+        }
+
+        // 파일 형식 검증
+        String contentType = file.getContentType();
+        if (contentType == null || !Arrays.asList(ACCEPTED_FILE_TYPES).contains(contentType)) {
+            throw new InvalidInputException("허용된 이미지 파일 형식은 JPEG, PNG, GIF 입니다.");
+        }
+    }
+
     public void invalidUserNameEquls(String name1, String name2){
         if(Objects.equals(name1, name2)){
             throw new InvalidInputException("자기 자신을 초대할 수 없습니다.");
