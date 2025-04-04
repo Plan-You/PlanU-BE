@@ -143,6 +143,7 @@ public class GroupScheduleDTO {
     public static class ScheduleLocation {
         Double latitude;
         Double longitude;
+        String startDateTime;
     }
 
     @Getter
