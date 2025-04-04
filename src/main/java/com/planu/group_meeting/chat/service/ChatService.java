@@ -268,7 +268,7 @@ public class ChatService {
         inputValidator.chatImageValid(file);
         GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
         if (groupUser == null || groupUser.getGroupState() == 0) {
-            throw new IllegalArgumentException("잘못된 userId 와 groupId");
+            throw new IllegalArgumentException("잘못된 groupId");
         }
 
         String fileUrl = s3Uploader.uploadFile(file);

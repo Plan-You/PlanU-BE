@@ -1,21 +1,22 @@
 package com.planu.group_meeting.chat.controller.swagger;
 
+import com.planu.group_meeting.chat.dto.request.ChatFileRequest;
 import com.planu.group_meeting.chat.dto.response.ChatMessageResponse;
 import com.planu.group_meeting.chat.dto.response.ChatRoomResponse;
 import com.planu.group_meeting.chat.dto.response.GroupedChatMessages;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
+import com.planu.group_meeting.dto.BaseResponse;
 import com.planu.group_meeting.dto.DataResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -173,4 +174,36 @@ public interface ChatDocs{
     @ResponseBody
     @GetMapping("/chats/new")
     public ResponseEntity<Integer> countNewChat(@AuthenticationPrincipal CustomUserDetails userDetails);
+
+
+    @Operation(summary = "사진 업로드 및 전송(채팅방)", description = "사진을 저장 한 후 채팅방에 메시지를 보냅니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "사진 업로드 및 전송 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(example = "{\n" +
+                                    "\t\"resultCode\": 200,\n" +
+                                    "  \"resultMsg\": \"사진 전송 및 업로드 성공\"\n" +
+                                    "}"))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(mediaType = "application/json",
+                            examples = {
+                                    @ExampleObject(name = "잘못된 groupId 를 전달 한 경우",
+                                            value = "{\n" +
+                                                    "\t\"resultCode\": 400,\n" +
+                                                    "  \"resultMsg\": \"잘못된 groupId\"\n" +
+                                                    "}")
+                            })
+            )
+    })
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "사진 업로드 및 전송. `form-data` 형식으로 요청해야 합니다.",
+            content = @Content(
+                    mediaType = "multipart/form-data",
+                    schema = @Schema(implementation = ChatFileRequest.class)
+            )
+    )
+    @ResponseBody
+    @PostMapping("/chats/file")
+    public ResponseEntity<BaseResponse> chatFileUpload(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                       @ModelAttribute ChatFileRequest chatFileRequest);
 }

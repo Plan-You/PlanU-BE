@@ -144,6 +144,6 @@ public class ChatController implements ChatDocs {
 
         sendMessage(groupId, chatMessage, username, chatMessage.getType(), chatMessage.getContent());
 
-        return BaseResponse.toResponseEntity(HttpStatus.OK, "파일 전송 및 업로드 성공");
+        return BaseResponse.toResponseEntity(HttpStatus.OK, "사진 전송 및 업로드 성공");
     }
 }
