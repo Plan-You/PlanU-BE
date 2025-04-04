@@ -12,10 +12,13 @@ import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.dto.GroupUserDTO;
 import com.planu.group_meeting.entity.GroupUser;
+import com.planu.group_meeting.service.file.S3Uploader;
+import com.planu.group_meeting.valid.InputValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -29,6 +32,8 @@ public class ChatService {
     private final UserDAO userDAO;
     private final ChatDAO chatDAO;
     private final GroupDAO groupDAO;
+    private final InputValidator inputValidator;
+    private final S3Uploader s3Uploader;
 
     @Transactional
     public ChatMessage save(Long groupId, String username, Integer type, String content){
@@ -256,5 +261,18 @@ public class ChatService {
         simpMessageSendingOperations.convertAndSend("/sub/chat/group/" + groupId,chatMessageResponse);
 
         simpMessageSendingOperations.convertAndSend("/sub/disconnect/" + username, "웹소켓 연결 종료요청 보내주세요.");
+    }
+
+    @Transactional
+    public ChatMessage UploadFileAndSaveChat(Long groupId, Long userId, String username, MultipartFile file) {
+        inputValidator.chatImageValid(file);
+        GroupUser groupUser = groupDAO.findGroupUserByUserIdAndGroupId(userId, groupId);
+        if (groupUser == null || groupUser.getGroupState() == 0) {
+            throw new IllegalArgumentException("잘못된 userId 와 groupId");
+        }
+
+        String fileUrl = s3Uploader.uploadFile(file);
+
+        return save(groupId, username, 2, fileUrl);
     }
 }
