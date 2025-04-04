@@ -222,8 +222,11 @@ public class StompHandler implements ChannelInterceptor {
         GroupSchedule groupSchedule = groupScheduleDAO.findById(groupId, scheduleId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 그룹 일정을 찾을 수 없습니다."));
 
-        if(groupSchedule.getStartDateTime().minusHours(2).isAfter(LocalDateTime.now(Clock.system(ZoneId.of("Asia/Seoul"))))) {
-            throw new IllegalArgumentException("일정 시작 2시간 전부터만 위치 공유를 할 수 있습니다.");
+        LocalDateTime now = LocalDateTime.now(Clock.system(ZoneId.of("Asia/Seoul")));
+        LocalDateTime startDateTime = groupSchedule.getStartDateTime();
+
+        if (now.isBefore(startDateTime.minusHours(1)) || now.isAfter(startDateTime.plusHours(1))) {
+            throw new IllegalArgumentException("일정 시작 1시간 전후일 때만 위치 공유를 할 수 있습니다.");
         }
 
         for(var participantsInfo : groupScheduleParticipantDAO.findByScheduleId(groupId, scheduleId)) {
