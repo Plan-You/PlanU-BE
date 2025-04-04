@@ -30,10 +30,11 @@
 
     <select id="existsScheduleByDate" resultType="boolean">
         SELECT EXISTS (
-            SELECT 1
-            FROM GROUP_SCHEDULE GS
-            JOIN GROUP_SCHEDULE_PARTICIPANT GSP ON GS.ID = GSP.GROUP_SCHEDULE_ID
-            WHERE GSP.USER_ID = #{userId} AND DATE(GS.START_DATETIME) = #{date}
+        SELECT 1
+        FROM GROUP_SCHEDULE GS
+        JOIN GROUP_SCHEDULE_PARTICIPANT GSP ON GS.ID = GSP.GROUP_SCHEDULE_ID
+        WHERE GSP.USER_ID = #{userId}
+        AND #{date} BETWEEN DATE(GS.START_DATETIME) AND DATE(GS.END_DATETIME)
         )
     </select>
 
