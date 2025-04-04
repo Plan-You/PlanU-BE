@@ -250,6 +250,6 @@ public class GroupScheduleService {
     public GroupScheduleLocation getGroupScheduleLocation(Long groupId, Long scheduleId) {
         GroupSchedulesDetailResponse groupScheduleDetails = findByGroupScheduleID(groupId, scheduleId);
         return new GroupScheduleLocation(new ScheduleLocation(groupScheduleDetails.getLatitude(),
-                groupScheduleDetails.getLongitude()));
+                groupScheduleDetails.getLongitude(), groupScheduleDetails.getStartDate()));
     }
 }
