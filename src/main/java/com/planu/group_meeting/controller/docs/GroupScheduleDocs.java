@@ -65,7 +65,149 @@ public interface GroupScheduleDocs {
                                                                             (
                                                                                     name = "메모 100자 초과",
                                                                                     value = "{\"resultCode\": 400, \"resultMsg\": \"메모는 100자 이내로 입력해주세여.\"}"
+                                                                            ),
+                                                                    @ExampleObject
+                                                                            (
+                                                                                    name = "시작 시간 누락",
+                                                                                    value = """
+                                                                                            {
+                                                                                                "resultCode": 400,
+                                                                                                "resultMsg": "시작 날짜와 시간은 필수 입력 값입니다."
+                                                                                            }
+                                                                                            """
+                                                                            ),
+                                                                    @ExampleObject
+                                                                            (
+                                                                                    name = "종료 시간 누락",
+                                                                                    value = """
+                                                                                            {
+                                                                                                "resultCode": 400,
+                                                                                                "resultMsg": "종료날짜와 시간은 필수 입력 값입니다."
+                                                                                            }
+                                                                                            """
+                                                                            ),
+                                                                    @ExampleObject
+                                                                            (
+                                                                                    name = "시작 시간이 종료 시간 이후",
+                                                                                    value = """
+                                                                                            {
+                                                                                                "resultCode": 400,
+                                                                                                "resultMsg": "시간 시간이 종료 시간보다 이후일 수 없습니다."
+                                                                                            }
+                                                                                            """
+                                                                            ),
+                                                                    @ExampleObject
+                                                                            (
+                                                                                    name = "일정 장소 누락",
+                                                                                    value = """
+                                                                                            {
+                                                                                                "resultCode": 400,
+                                                                                                "resultMsg": "그룹 일정 장소는 필수 입력 값입니다."
+                                                                                            }
+                                                                                            """
+                                                                            ),
+                                                                    @ExampleObject
+                                                                            (
+                                                                                    name = "위도 값 누락",
+                                                                                    value = """
+                                                                                            {
+                                                                                                "resultCode": 400,
+                                                                                                "resultMsg": "위도 값은 필수 입력 값입니다."
+                                                                                            }
+                                                                                            """
+                                                                            ),
+                                                                    @ExampleObject
+                                                                            (
+                                                                                    name = "유효하지않은 위도 값",
+                                                                                    value = """
+                                                                                            {
+                                                                                                "resultCode": 400,
+                                                                                                "resultMsg": "위도는 -90 이상이어야 합니다."
+                                                                                            }
+                                                                                            """
+                                                                            ),
+                                                                    @ExampleObject
+                                                                            (
+                                                                                    name = "유효하지않은 위도 값",
+                                                                                    value = """
+                                                                                            {
+                                                                                                "resultCode": 400,
+                                                                                                "resultMsg": "위도는 90 이하이어야 합니다."
+                                                                                            }
+                                                                                            """
+                                                                            ),
+                                                                    @ExampleObject
+                                                                            (
+                                                                                    name = "경도값 누락",
+                                                                                    value = """
+                                                                                            {
+                                                                                                "resultCode": 400,
+                                                                                                "resultMsg": "경도 값은 필수 입력 값입니다."
+                                                                                            }
+                                                                                            """
+                                                                            ),
+                                                                    @ExampleObject
+                                                                            (
+                                                                                    name = "유효하지 않은 경도값",
+                                                                                    value = """
+                                                                                            {
+                                                                                                "resultCode": 400,
+                                                                                                "resultMsg": "경도는 -180 이상이어야 합니다."
+                                                                                            }
+                                                                                            """
+                                                                            ),
+                                                                    @ExampleObject
+                                                                            (
+                                                                                    name = "유효하지 않은 경도값",
+                                                                                    value = """
+                                                                                            {
+                                                                                                "resultCode": 400,
+                                                                                                "resultMsg": "경도는 180 이하이어야 합니다."
+                                                                                            }
+                                                                                            """
+                                                                            ),
+                                                                    @ExampleObject
+                                                                            (
+                                                                                    name = "경도 또는 위도의 값이 0",
+                                                                                    value = """
+                                                                                            {
+                                                                                                "resultCode": 400,
+                                                                                                "resultMsg": "위도나 경도는 0이어서는 안됩니다."
+                                                                                            }
+                                                                                            """
+                                                                            ),
+                                                                    @ExampleObject
+                                                                            (
+                                                                                    name = "참석자 누락",
+                                                                                    value = """
+                                                                                            {
+                                                                                                "resultCode": 400,
+                                                                                                "resultMsg": "참석자는 필수 입력 값입니다."
+                                                                                            }
+                                                                                            """
+
+                                                                            ),
+                                                                    @ExampleObject
+                                                                            (
+                                                                                    name = "참석자수 누락",
+                                                                                    value = """
+                                                                                            {
+                                                                                                "resultCode": 400,
+                                                                                                "resultMsg": "참석자는 적어도 한 명 이상이어야 합니다."
+                                                                                            }
+                                                                                            """
+                                                                            ),
+                                                                    @ExampleObject
+                                                                            (
+                                                                                    name = "참석자가 빈칸",
+                                                                                    value = """
+                                                                                            {
+                                                                                                "resultCode": 400,
+                                                                                                "resultMsg": "참석자는 빈칸일 수 없습니다."
+                                                                                            }
+                                                                                            """
                                                                             )
+
 
                                                             }
                                             )
