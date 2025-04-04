@@ -12,6 +12,9 @@ import com.planu.group_meeting.location.dto.request.LocationDTO;
 import com.planu.group_meeting.location.dto.response.GroupMemberLocation;
 import com.planu.group_meeting.location.dto.response.GroupMemberLocationResponse;
 import com.planu.group_meeting.location.impl.LocationImpl;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -75,6 +78,13 @@ public class LocationService {
         }
         if(groupScheduleDAO.findById(groupId, scheduleId).isEmpty()) {
             throw new ScheduleNotFoundException("그룹 일정이 없습니다.");
+        }
+
+        LocalDateTime startDateTime = groupScheduleDAO.findById(groupId, scheduleId).get().getStartDateTime();
+        LocalDateTime now = LocalDateTime.now(Clock.system(ZoneId.of("Asia/Seoul")));
+
+        if (now.isBefore(startDateTime.minusHours(1)) || now.isAfter(startDateTime.plusHours(1))) {
+            throw new IllegalArgumentException("일정 시작 1시간 전후일 때만 위치 공유를 할 수 있습니다.");
         }
 
         boolean isAccessible = false;
