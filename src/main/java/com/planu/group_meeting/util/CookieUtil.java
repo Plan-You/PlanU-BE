@@ -13,10 +13,9 @@ public class CookieUtil {
         cookie.setMaxAge(24 * 60 * 60);
         cookie.setSecure(true);
         cookie.setPath("/");
-        //cookie.setDomain("localhost");
+//        cookie.setDomain("localhost");
         cookie.setAttribute("SameSite","None");
         cookie.setDomain("15.165.3.168.nip.io");
-        cookie.setAttribute("SameSite","None");
         cookie.setHttpOnly(true);
         response.addCookie(cookie);
     }
@@ -26,7 +25,9 @@ public class CookieUtil {
         cookie.setMaxAge(0);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        cookie.setSecure(true); // https에서만 동작
+        cookie.setSecure(true);
+        cookie.setAttribute("SameSite","None");
+        cookie.setDomain("15.165.3.168.nip.io");
         return cookie;
     }
 
