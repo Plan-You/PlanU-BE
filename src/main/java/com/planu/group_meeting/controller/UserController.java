@@ -109,6 +109,7 @@ public class UserController implements UserDocs {
         System.out.println("refresh 토큰 : " + refresh);
         userService.logout(refresh);
         response.addCookie(CookieUtil.deleteCookie("refresh"));
+        response.addCookie(CookieUtil.deleteCookie("username"));
         return BaseResponse.toResponseEntity(HttpStatus.OK, "로그아웃 성공");
     }
 
