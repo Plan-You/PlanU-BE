@@ -250,14 +250,13 @@ public class GroupScheduleService {
     }
 
     public GroupScheduleLocation getGroupScheduleLocation(Long groupId, Long scheduleId) {
-        System.out.println("[도착 일정 장소 조회]: 조회 시작");
         GroupSchedulesDetailResponse groupScheduleDetails = findByGroupScheduleID(groupId, scheduleId);
-        System.out.println("[도착 일정 장소 조회]: 그룹 일정 상세 내역");
-        System.out.println(groupScheduleDetails);
-        System.out.println("[도착 일정 장소 조회]: 도착 정보");
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        LocalDateTime dateTime = LocalDateTime.parse(groupScheduleDetails.getStartDate(), inputFormatter);
+        String result = dateTime.format(outputFormatter);
         var response = new GroupScheduleLocation(new ScheduleLocation(groupScheduleDetails.getLatitude(),
-                groupScheduleDetails.getLongitude(), groupScheduleDetails.getStartDate()));
-        System.out.println(response);
+                groupScheduleDetails.getLongitude(), result));
         return response;
     }
 }
