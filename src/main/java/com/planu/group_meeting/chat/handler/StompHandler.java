@@ -63,10 +63,17 @@ public class StompHandler implements ChannelInterceptor {
                     Long groupId = parseGroupIdFromSubPath(accessor);
                     validateUserInGroup(username, groupId);
                 } else if (destination.startsWith(GROUP_LOCATION_SUB_PATH)) {
+                    System.out.println("[실시간 위치 구독]: 엔드포인트 " + destination);
+                    System.out.println("[실시간 위치 구독]: 엔드포인트 경로에서 정보 추출 시작");
                     Long[] ids = parseGroupAndShceduleIdByPath(destination, GROUP_LOCATION_SUB_PATH);
                     Long groupId = ids[0];
                     Long scheduleId = ids[1];
+                    System.out.println("[실시간 위치 구독]: 엔드포인트 경로 추출 결과");
+                    System.out.println("[실시간 위치 구독]: 그룹 아이디 " + ids[0]);
+                    System.out.println("[실시간 위치 구독]: 일정 아이디 " + ids[1]);
+                    System.out.println("[실시간 위치 구독]: 데이터 검증 시작");
                     validateUserInGroupsSchedules(username, groupId, scheduleId);
+                    System.out.println("[실시간 위치 구독]: 데이터 검증 성공");
                 } else {
                     validateUsername(accessor, username);
                 }
@@ -91,7 +98,7 @@ public class StompHandler implements ChannelInterceptor {
                 String username = (String) getValue(accessor, "username");
             }
         } catch (Exception e) {
-            System.out.println("에러 발생");
+            System.out.println("[웹소켓 에러 발생]");
             System.out.println(command);
             System.out.println(e.getMessage());
             System.out.println(LocalDateTime.now());
@@ -218,20 +225,29 @@ public class StompHandler implements ChannelInterceptor {
     }
 
     private void validateUserInGroupsSchedules(String username, Long groupId, Long scheduleId) {
+        System.out.println("[실시간 위치 구독]:" + username +"이 " + groupId + "의 그룹원인지 검증 시작");
         validateUserInGroup(username, groupId);
+        System.out.println("[실시간 위치 구독]: 그룹원 검증 성공");
+
+        System.out.println("[실시간 위치 구독]: " + scheduleId + "의 일정이 있는지 검증 시작");
         GroupSchedule groupSchedule = groupScheduleDAO.findById(groupId, scheduleId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 그룹 일정을 찾을 수 없습니다."));
+        System.out.println("[실시간 위치 구독]: 그룹 일정이 있음 검증 성공");
 
         LocalDateTime now = LocalDateTime.now(Clock.system(ZoneId.of("Asia/Seoul")));
         LocalDateTime startDateTime = groupSchedule.getStartDateTime();
 
+        System.out.println("[실시간 위치 구독]: 구독이 가능한 시간대인지 검증 시작");
+        System.out.println("[실시간 위치 구독]: 그룹 일정 시작 시간: " + startDateTime);
+        System.out.println("[실시간 위치 구독]: 구독 시도 시간: " + now);
         if (now.isBefore(startDateTime.minusHours(1)) || now.isAfter(startDateTime.plusHours(1))) {
             throw new IllegalArgumentException("일정 시작 1시간 전후일 때만 위치 공유를 할 수 있습니다.");
         }
-
+        System.out.println("[실시간 위치 구독]: " + username + "이 일정에 참여중인지 검증 시작");
         for(var participantsInfo : groupScheduleParticipantDAO.findByScheduleId(groupId, scheduleId)) {
-            System.out.println("참석자 아이디: " + participantsInfo.getUserId());
+            System.out.println("[실시간 위치 구독]: 참석자 아이디: " + participantsInfo.getUsername());
             if(participantsInfo.getUsername().equals(username)) {
+                System.out.println("[실시간 위치 구독]: 참석 중임 검증 성공");
                 return;
             }
         }

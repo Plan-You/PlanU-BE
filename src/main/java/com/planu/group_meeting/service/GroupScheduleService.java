@@ -1,6 +1,20 @@
 package com.planu.group_meeting.service;
 
-import com.planu.group_meeting.dao.*;
+import static com.planu.group_meeting.dto.GroupScheduleDTO.GroupScheduleLocation;
+import static com.planu.group_meeting.dto.GroupScheduleDTO.GroupScheduleRequest;
+import static com.planu.group_meeting.dto.GroupScheduleDTO.GroupSchedulesDetailResponse;
+import static com.planu.group_meeting.dto.GroupScheduleDTO.ParticipantsResponse;
+import static com.planu.group_meeting.dto.GroupScheduleDTO.ScheduleLocation;
+import static com.planu.group_meeting.dto.GroupScheduleDTO.scheduleOverViewResponse;
+import static com.planu.group_meeting.dto.GroupScheduleDTO.todayScheduleResponse;
+import static com.planu.group_meeting.dto.NotificationDTO.GroupScheduleCreateNotification;
+import static com.planu.group_meeting.dto.NotificationDTO.GroupScheduleDeleteNotification;
+
+import com.planu.group_meeting.dao.GroupDAO;
+import com.planu.group_meeting.dao.GroupScheduleDAO;
+import com.planu.group_meeting.dao.GroupScheduleParticipantDAO;
+import com.planu.group_meeting.dao.GroupUserDAO;
+import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dto.GroupScheduleDTO;
 import com.planu.group_meeting.entity.GroupSchedule;
 import com.planu.group_meeting.entity.GroupScheduleParticipant;
@@ -8,21 +22,16 @@ import com.planu.group_meeting.entity.common.EventType;
 import com.planu.group_meeting.exception.group.GroupNotFoundException;
 import com.planu.group_meeting.exception.schedule.ScheduleNotFoundException;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.planu.group_meeting.dto.GroupScheduleDTO.*;
-import static com.planu.group_meeting.dto.NotificationDTO.GroupScheduleCreateNotification;
-import static com.planu.group_meeting.dto.NotificationDTO.GroupScheduleDeleteNotification;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
@@ -241,8 +250,14 @@ public class GroupScheduleService {
     }
 
     public GroupScheduleLocation getGroupScheduleLocation(Long groupId, Long scheduleId) {
+        System.out.println("[도착 일정 장소 조회]: 조회 시작");
         GroupSchedulesDetailResponse groupScheduleDetails = findByGroupScheduleID(groupId, scheduleId);
-        return new GroupScheduleLocation(new ScheduleLocation(groupScheduleDetails.getLatitude(),
+        System.out.println("[도착 일정 장소 조회]: 그룹 일정 상세 내역");
+        System.out.println(groupScheduleDetails);
+        System.out.println("[도착 일정 장소 조회]: 도착 정보");
+        var response = new GroupScheduleLocation(new ScheduleLocation(groupScheduleDetails.getLatitude(),
                 groupScheduleDetails.getLongitude(), groupScheduleDetails.getStartDate()));
+        System.out.println(response);
+        return response;
     }
 }
