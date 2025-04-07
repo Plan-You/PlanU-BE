@@ -129,7 +129,12 @@ public class GroupScheduleController implements GroupScheduleDocs {
             @PathVariable("schedulesId") Long scheduleId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        groupUserService.isGroupMember(userDetails.getId(), groupId);
+        System.out.println("[도착 일정 장소 조회]: 도착 일정 장소 조회 호출 성공");
+        try {
+            groupUserService.isGroupMember(userDetails.getId(), groupId);
+        } catch(Exception e) {
+            System.out.println("[도착 일정 장소 조회]: 그룹원이 아닙니다.");
+        }
         GroupScheduleLocation groupScheduleLocation = groupScheduleService.getGroupScheduleLocation(groupId, scheduleId);
         return ResponseEntity.ok(groupScheduleLocation);
     }

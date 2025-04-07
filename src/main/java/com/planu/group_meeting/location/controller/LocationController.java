@@ -58,6 +58,7 @@ public class LocationController {
             @PathVariable("scheduleId") Long scheduleId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        System.out.println("[그룹 일정 멤버 조회]: 호출 완료");
         GroupMemberLocationResponse response = locationService.getGroupMemberLocation(groupId, scheduleId, userDetails.getId());
         return ResponseEntity.ok(response);
     }
