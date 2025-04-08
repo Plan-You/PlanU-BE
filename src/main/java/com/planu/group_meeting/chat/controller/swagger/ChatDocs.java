@@ -83,6 +83,7 @@ public interface ChatDocs{
                                     "          \"messageId\": 101,\n" +
                                     "          \"message\": \"안녕하세요!\",\n" +
                                     "          \"sender\": \"UserA\",\n" +
+                                    "          \"name\": \"이상준\",\n" +
                                     "          \"unReadCount\": 3,\n" +
                                     "          \"chatTime\": \"10:30\",\n" +
                                     "          \"profileImageURL\": null\n" +
@@ -92,6 +93,7 @@ public interface ChatDocs{
                                     "          \"messageId\": 102,\n" +
                                     "          \"message\": \"오늘 회의 몇 시에 하시나요?\",\n" +
                                     "          \"sender\": \"UserB\",\n" +
+                                    "          \"name\": \"정재호\",\n" +
                                     "          \"unReadCount\": 1,\n" +
                                     "          \"chatTime\": \"11:00\",\n" +
                                     "          \"profileImageURL\": null\n" +
@@ -106,6 +108,7 @@ public interface ChatDocs{
                                     "          \"messageId\": 103,\n" +
                                     "          \"message\": null,\n" +
                                     "          \"sender\": \"UserC\",\n" +
+                                    "          \"name\": \"최준혁\",\n" +
                                     "          \"unReadCount\": 0,\n" +
                                     "          \"chatTime\": \"11:05\",\n" +
                                     "          \"profileImageURL\": \"https://example.com/profile/userC.jpg\"\n" +
@@ -133,6 +136,7 @@ public interface ChatDocs{
                                     "      \"messageId\": 201,\n" +
                                     "      \"message\": null,\n" +
                                     "      \"sender\": null,\n" +
+                                    "      \"name\": null,\n" +
                                     "      \"unReadCount\": 5,\n" +
                                     "      \"chatDate\": null,\n" +
                                     "      \"chatTime\": null,\n" +
@@ -143,6 +147,7 @@ public interface ChatDocs{
                                     "      \"messageId\": 202,\n" +
                                     "      \"message\": null,\n" +
                                     "      \"sender\": null,\n" +
+                                    "      \"name\": null,\n" +
                                     "      \"unReadCount\": 2,\n" +
                                     "      \"chatDate\": null,\n" +
                                     "      \"chatTime\": null,\n" +
@@ -153,6 +158,7 @@ public interface ChatDocs{
                                     "      \"messageId\": 203,\n" +
                                     "      \"message\": null,\n" +
                                     "      \"sender\": null,\n" +
+                                    "      \"name\": null,\n" +
                                     "      \"unReadCount\": 0,\n" +
                                     "      \"chatDate\": null,\n" +
                                     "      \"chatTime\": null,\n" +
