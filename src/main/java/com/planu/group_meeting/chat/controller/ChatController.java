@@ -66,6 +66,7 @@ public class ChatController implements ChatDocs {
                                                     .type(type)
                                                     .sender(username)
                                                     .profileImageUrl(userDAO.findProfileImageById(userDAO.findIdByUsername(username)))
+                                                    .name(userDAO.findNameById(userDAO.findIdByUsername(username)))
                                                     .message(message)
                                                     .unReadCount(chatService.getUnreadCountforMessage(chatMessage.getId()))
                                                     .chatTime(time)

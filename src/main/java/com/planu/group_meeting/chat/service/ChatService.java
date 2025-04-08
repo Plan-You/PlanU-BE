@@ -189,6 +189,7 @@ public class ChatService {
                 .message(chatMessage.getContent())
                 .sender(userDAO.findUsernameById(chatMessage.getUserId()))// sender 변환
                 .profileImageUrl(userDAO.findProfileImageById(chatMessage.getUserId()))// 프로필 이미지
+                .name(userDAO.findNameById(chatMessage.getUserId()))
                 .unReadCount(chatDAO.countUnreadByMessageId(chatMessage.getId())) // 안 읽은 사람 수 조회
                 .chatDate(chatMessage.getCreatedDate().format(dateFormatter)) // 날짜 변환
                 .chatTime(chatMessage.getCreatedDate().format(timeFormatter)) // 시간 변환
@@ -232,6 +233,7 @@ public class ChatService {
         ChatMessageResponse chatMessageResponse = ChatMessageResponse.builder()
                 .type(chatMessage.getType())
                 .sender(username)
+                .name(userDAO.findNameById(userDAO.findIdByUsername(username)))
                 .chatDate(date)
                 .chatTime(time)
                 .build();
@@ -254,6 +256,7 @@ public class ChatService {
         ChatMessageResponse chatMessageResponse = ChatMessageResponse.builder()
                                             .type(chatMessage.getType())
                                             .sender(username)
+                                            .name(userDAO.findNameById(userDAO.findIdByUsername(username)))
                                             .chatTime(date)
                                             .chatDate(time)
                                             .build();
