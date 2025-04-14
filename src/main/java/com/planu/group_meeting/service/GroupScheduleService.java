@@ -111,7 +111,9 @@ public class GroupScheduleService {
         if(groupScheduleRequest.getLatitude() == 0.0 || groupScheduleRequest.getLongitude() == 0.0) {
             throw new IllegalArgumentException("위도나 경도는 0이어선 안됩니다.");
         }
-
+        if(!groupScheduleRequest.getParticipants().contains(userDAO.findUsernameById(userId))) {
+            throw new IllegalArgumentException("일정 생성자는 참석자에 필수로 포함되어야합니다.");
+        }
 
         GroupSchedule groupSchedule = groupScheduleRequest.toEntity(groupId);
         groupScheduleDAO.insert(groupSchedule);
@@ -119,9 +121,6 @@ public class GroupScheduleService {
         for (var username : groupScheduleRequest.getParticipants()) {
             groupScheduleParticipants.add(userDAO.findByUsername(username).getId());
         }
-        // 그룹 일정 생성자도 참여자에 포함
-        groupScheduleParticipants.add(userId);
-        insertParticipants(groupSchedule, groupScheduleParticipants);
 
         for (Long groupScheduleParticipant : groupScheduleParticipants) {
             GroupScheduleCreateNotification groupScheduleCreateNotification =
