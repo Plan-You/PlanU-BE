@@ -1,13 +1,31 @@
 package com.planu.group_meeting.service;
 
+import static com.planu.group_meeting.dto.NotificationDTO.GroupAcceptNotification;
+import static com.planu.group_meeting.dto.NotificationDTO.GroupDeleteNotification;
+import static com.planu.group_meeting.dto.NotificationDTO.GroupExpelNotification;
+import static com.planu.group_meeting.dto.NotificationDTO.GroupInviteCancelNotification;
+import static com.planu.group_meeting.dto.NotificationDTO.GroupInviteNotification;
+import static com.planu.group_meeting.dto.NotificationDTO.GroupMemberLeaveNotification;
+
 import com.planu.group_meeting.chat.service.ChatService;
 import com.planu.group_meeting.config.auth.CustomUserDetails;
-import com.planu.group_meeting.dao.*;
+import com.planu.group_meeting.dao.AvailableDateDAO;
+import com.planu.group_meeting.dao.FriendDAO;
+import com.planu.group_meeting.dao.GroupDAO;
+import com.planu.group_meeting.dao.GroupUserDAO;
+import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRank;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatio;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRatios;
 import com.planu.group_meeting.dto.FriendDto.FriendInfo;
-import com.planu.group_meeting.dto.GroupDTO.*;
+import com.planu.group_meeting.dto.GroupDTO.AvailableDateInfo;
+import com.planu.group_meeting.dto.GroupDTO.AvailableDateInfos;
+import com.planu.group_meeting.dto.GroupDTO.AvailableMemberInfo;
+import com.planu.group_meeting.dto.GroupDTO.AvailableMemberInfos;
+import com.planu.group_meeting.dto.GroupDTO.GroupInfo;
+import com.planu.group_meeting.dto.GroupDTO.Member;
+import com.planu.group_meeting.dto.GroupDTO.NonGroupFriend;
+import com.planu.group_meeting.dto.GroupDTO.NonGroupFriendsResponse;
 import com.planu.group_meeting.dto.GroupInviteResponseDTO;
 import com.planu.group_meeting.dto.GroupResponseDTO;
 import com.planu.group_meeting.entity.Group;
@@ -18,17 +36,19 @@ import com.planu.group_meeting.entity.common.FriendStatus;
 import com.planu.group_meeting.exception.group.GroupNotFoundException;
 import com.planu.group_meeting.exception.group.UnauthorizedAccessException;
 import com.planu.group_meeting.service.file.S3Uploader;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.util.*;
-
-import static com.planu.group_meeting.dto.NotificationDTO.*;
 
 @Service
 @Slf4j
@@ -567,6 +587,6 @@ public class GroupService {
         Group group = groupDAO.findGroupById(groupId);
         Boolean isPin = groupUserDAO.getPinById(groupId, userId);
 
-        return new GroupInfo(group.getName(), isPin);
+        return new GroupInfo(group.getGroupImageUrl(), group.getName(), isPin);
     }
 }

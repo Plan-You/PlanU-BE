@@ -82,6 +82,7 @@ public class GroupDTO {
     @Setter
     @AllArgsConstructor
     public static class GroupInfo {
+        private String groupImage;
         private String groupName;
         private Boolean isPin;
     }
