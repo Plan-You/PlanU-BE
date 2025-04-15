@@ -212,6 +212,7 @@ public class ChatService {
         return messageIds.stream()
                 .map(messageId -> ChatMessageResponse.builder()
                         .messageId(messageId)
+                        .type(4)
                         .unReadCount(chatDAO.countUnreadByMessageId(messageId))
                         .build()
                 )

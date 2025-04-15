@@ -11,7 +11,7 @@ import java.util.Objects;
 public class InputValidator {
 
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB 제한
-    private static final String[] ACCEPTED_FILE_TYPES = {"image/jpeg", "image/png", "image/gif"};
+    private static final String[] ACCEPTED_FILE_TYPES = {"image/jpeg", "image/png", "image/gif", "video/mp4", "video/quicktime"};
 
     // 그룹명 검증
     public void groupNameValid(String groupName) {
