@@ -79,6 +79,7 @@ public class GroupScheduleCommentService {
             String name = userDAO.findNameById(comment.getUserId());
             String timestamp = formatTimestamp(currentTime, comment.getCreatedDate());
 
+            commentView.put("profileImage", userDAO.findProfileImageById(comment.getUserId()));
             commentView.put("id", comment.getId());
             commentView.put("username", username);
             commentView.put("name", name);
@@ -116,8 +117,10 @@ public class GroupScheduleCommentService {
             stringBuilder.append(days).append("일 전");
         } else if (hours > 0) {
             stringBuilder.append(hours).append("시간 전");
-        } else {
+        } else if(minutes > 0) {
             stringBuilder.append(minutes).append("분 전");
+        } else {
+            stringBuilder.append("방금 전");
         }
 
         return stringBuilder.toString();
