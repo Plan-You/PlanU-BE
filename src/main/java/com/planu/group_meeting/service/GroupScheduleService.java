@@ -121,7 +121,7 @@ public class GroupScheduleService {
         for (var username : groupScheduleRequest.getParticipants()) {
             groupScheduleParticipants.add(userDAO.findByUsername(username).getId());
         }
-
+        insertParticipants(groupSchedule, groupScheduleParticipants);
         for (Long groupScheduleParticipant : groupScheduleParticipants) {
             GroupScheduleCreateNotification groupScheduleCreateNotification =
                     new GroupScheduleCreateNotification(groupScheduleParticipant, "그룹 일정 '" + groupSchedule.getTitle() + "'이(가) 생성되었습니다.", groupId, groupSchedule.getId());
