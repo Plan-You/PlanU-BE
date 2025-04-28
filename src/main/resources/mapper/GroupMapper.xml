@@ -182,7 +182,7 @@
     <select id="findGroupsByGroupId" resultMap="GroupUserDTOResultMap">
         SELECT USER_ID, GROUP_ID, GROUP_ROLE, GROUP_STATE, GROUP_PIN, GROUP_IS_PIN, VERSION, CREATED_DATE, UPDATED_DATE
         FROM GROUP_USER
-        WHERE GROUP_ID = #{groupId}
+        WHERE GROUP_ID = #{groupId} AND (GROUP_STATE = 1 AND GROUP_STATE IS NOT NULL)
     </select>
 
     <delete id="deleteByUserId">
