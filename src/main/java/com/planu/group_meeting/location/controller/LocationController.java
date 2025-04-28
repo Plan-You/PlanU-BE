@@ -2,6 +2,7 @@ package com.planu.group_meeting.location.controller;
 
 import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dto.BaseResponse;
+import com.planu.group_meeting.location.controller.docs.LocationControllerDocs;
 import com.planu.group_meeting.location.dto.request.LocationDTO;
 import com.planu.group_meeting.location.dto.response.GroupMemberLocationResponse;
 import com.planu.group_meeting.location.service.LocationService;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 @RequiredArgsConstructor
-public class LocationController {
+public class LocationController implements LocationControllerDocs {
 
     private final SimpMessageSendingOperations messageSender;
     private final LocationService locationService;
