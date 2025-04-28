@@ -20,7 +20,7 @@ services:
       - ~/.gradle:/home/gradle/.gradle
 
   db:
-    image: mariadb:10.5
+    image: mariadb:latest
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}  # 환경 변수 사용
       MYSQL_DATABASE: ${MYSQL_DATABASE}
