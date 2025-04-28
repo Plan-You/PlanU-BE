@@ -33,9 +33,7 @@ public class CustomOAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSucc
         CookieUtil.createCookie(response, "refresh", refresh);
         CookieUtil.createCookie(response, "username", username);
 
-        response.sendRedirect("https://localhost:5173/myCalendar");
-
-
+        response.sendRedirect("https://www.planu.site/myCalendar");
     }
 
 }
