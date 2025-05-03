@@ -34,6 +34,10 @@ public class FriendService {
         if (!userDAO.existsByUsername(toUsername)) {
             throw new NotFoundUserException();
         }
+        if(userDAO.findById(userId).getUsername().equals(toUsername)){
+            throw new IllegalArgumentException("본인에게 친구 요청을 보낼 수 없습니다.");
+        }
+
         Long toUserId = userDAO.findByUsername(toUsername).getId();
         FriendStatus friendStatus = friendDAO.getFriendStatus(userId, toUserId);
         log.info("friendStatus={}", friendStatus);
