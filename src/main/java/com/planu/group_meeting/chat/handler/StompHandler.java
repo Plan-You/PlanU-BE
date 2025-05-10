@@ -10,7 +10,9 @@ import com.planu.group_meeting.entity.GroupUser;
 import com.planu.group_meeting.entity.User;
 import com.planu.group_meeting.jwt.JwtUtil;
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
@@ -223,9 +225,22 @@ public class StompHandler implements ChannelInterceptor {
 
         LocalDateTime now = LocalDateTime.now(Clock.system(ZoneId.of("Asia/Seoul")));
         LocalDateTime startDateTime = groupSchedule.getStartDateTime();
+        LocalDateTime endDateTime = groupSchedule.getEndDateTime();
 
-        if (now.isBefore(startDateTime.minusHours(1)) || now.isAfter(startDateTime.plusHours(1))) {
-            throw new IllegalArgumentException("일정 시작 1시간 전후일 때만 위치 공유를 할 수 있습니다.");
+        boolean isAllDaySchedule = isAllDaySchedule(startDateTime, endDateTime);
+
+        if(isAllDaySchedule) {
+            LocalDate scheduleDate = startDateTime.toLocalDate();
+            LocalDate currentDate = now.toLocalDate();
+
+            if(!currentDate.equals(scheduleDate)) {
+                throw new IllegalArgumentException("종일 일정은 해당 일정 당일에만 위치 공유를 할 수 있습니다.");
+            }
+        }
+        else {
+            if (now.isBefore(startDateTime.minusHours(1)) || now.isAfter(startDateTime.plusHours(1))) {
+                throw new IllegalArgumentException("일정 시작 1시간 전후일 때만 위치 공유를 할 수 있습니다.");
+            }
         }
         for(var participantsInfo : groupScheduleParticipantDAO.findByScheduleId(groupId, scheduleId)) {
             if(participantsInfo.getUsername().equals(username)) {
@@ -234,5 +249,20 @@ public class StompHandler implements ChannelInterceptor {
         }
 
         throw new IllegalArgumentException("해당 일정에 참여하고 있지않습니다.");
+    }
+
+    private boolean isAllDaySchedule(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        if(startDateTime == null || endDateTime == null) {
+            return false;
+        }
+
+        LocalTime startTime = startDateTime.toLocalTime();
+        LocalTime endTime = endDateTime.toLocalTime();
+        LocalDate startDate = startDateTime.toLocalDate();
+        LocalDate endDate = endDateTime.toLocalDate();
+
+        return startDate.equals(endDate) &&
+                startTime.equals(LocalTime.of(0, 0, 0)) &&
+                (endTime.equals(LocalTime.of(23, 59, 59)) || endTime.equals(LocalTime.of(23, 59, 0)));
     }
 }
