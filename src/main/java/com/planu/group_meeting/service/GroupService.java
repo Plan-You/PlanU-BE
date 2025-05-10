@@ -39,6 +39,7 @@ import com.planu.group_meeting.service.file.S3Uploader;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
@@ -518,6 +519,8 @@ public class GroupService {
                     .getAvailableDateInfos()
                     .add(new AvailableDateInfo(dateInfos.getKey().toString(), dateInfos.getValue()));
         }
+
+        availableDateInfos.getAvailableDateInfos().sort(Comparator.comparing(info -> LocalDate.parse(info.getAvailableDate())));
 
         return availableDateInfos;
     }
