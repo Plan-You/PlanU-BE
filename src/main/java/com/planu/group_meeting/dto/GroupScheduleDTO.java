@@ -144,6 +144,7 @@ public class GroupScheduleDTO {
         Double latitude;
         Double longitude;
         String startDateTime;
+        String endDateTime;
     }
 
     @Getter

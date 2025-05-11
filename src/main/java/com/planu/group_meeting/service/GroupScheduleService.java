@@ -253,9 +253,12 @@ public class GroupScheduleService {
         DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("HH:mm");
         LocalDateTime dateTime = LocalDateTime.parse(groupScheduleDetails.getStartDate(), inputFormatter);
-        String result = dateTime.format(outputFormatter);
+        String startDate = dateTime.format(outputFormatter);
+        dateTime = LocalDateTime.parse(groupScheduleDetails.getEndDate(), inputFormatter);
+        String endDate = dateTime.format(outputFormatter);
+
         var response = new GroupScheduleLocation(new ScheduleLocation(groupScheduleDetails.getLatitude(),
-                groupScheduleDetails.getLongitude(), result));
+                groupScheduleDetails.getLongitude(), startDate, endDate));
         return response;
     }
 }
