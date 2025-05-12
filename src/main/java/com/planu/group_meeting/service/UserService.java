@@ -194,7 +194,7 @@ public class UserService {
         String authCode = generateRandomCode();
         String key = String.format(AUTH_CODE_KEY, emailDto.getEmail(), emailDto.getPurpose());
         redisTemplate.opsForValue().set(key, authCode, AUTH_CODE_EXPIRATION_TIME, TimeUnit.MILLISECONDS);
-        mailService.sendVerificationCode(emailDto.getEmail(), authCode);
+        mailService.sendVerificationCode(emailDto.getEmail(), authCode, emailDto.getPurpose());
     }
 
     public void verifyEmailCode(EmailVerificationRequest request) {
