@@ -17,14 +17,16 @@ public class AvailableDateService {
 
     @Transactional
     public void createAvailableDates(Long userId, AvailableDatesRequest availableDatesDto) {
-        List<LocalDate>requestDates = availableDatesDto.getAvailableDates();
-        availableDateDAO.deleteAllAvailableDates(userId);
-        availableDateDAO.insertAvailableDates(userId,requestDates);
+        List<LocalDate> requestDates = availableDatesDto.getAvailableDates();
+        if (!requestDates.isEmpty()) {
+            availableDateDAO.deleteAllAvailableDates(userId);
+            availableDateDAO.insertAvailableDates(userId, requestDates);
+        }
 
     }
 
 
-    public List<LocalDate> findAvailableDates(Long userId, LocalDate startDate, LocalDate endDate){
+    public List<LocalDate> findAvailableDates(Long userId, LocalDate startDate, LocalDate endDate) {
         return availableDateDAO.findAvailableDatesByUserIdInRange(userId, startDate, endDate);
     }
 
