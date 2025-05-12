@@ -12,7 +12,6 @@ import com.planu.group_meeting.jwt.JwtUtil;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
@@ -242,6 +241,7 @@ public class StompHandler implements ChannelInterceptor {
                 throw new IllegalArgumentException("일정 시작 1시간 전후일 때만 위치 공유를 할 수 있습니다.");
             }
         }
+
         for(var participantsInfo : groupScheduleParticipantDAO.findByScheduleId(groupId, scheduleId)) {
             if(participantsInfo.getUsername().equals(username)) {
                 return;
@@ -256,13 +256,10 @@ public class StompHandler implements ChannelInterceptor {
             return false;
         }
 
-        LocalTime startTime = startDateTime.toLocalTime();
-        LocalTime endTime = endDateTime.toLocalTime();
-        LocalDate startDate = startDateTime.toLocalDate();
-        LocalDate endDate = endDateTime.toLocalDate();
+        boolean sameDayCheck = startDateTime.toLocalDate().equals(endDateTime.toLocalDate());
+        boolean startTimeCheck = startDateTime.getHour() == 0 && startDateTime.getMinute() == 0;
+        boolean endTimeCheck = endDateTime.getHour() == 23 && endDateTime.getMinute() == 59;
 
-        return startDate.equals(endDate) &&
-                startTime.equals(LocalTime.of(0, 0, 0)) &&
-                (endTime.equals(LocalTime.of(23, 59, 59)) || endTime.equals(LocalTime.of(23, 59, 0)));
+        return sameDayCheck && startTimeCheck && endTimeCheck;
     }
 }
