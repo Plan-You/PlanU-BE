@@ -13,6 +13,7 @@ import com.planu.group_meeting.location.dto.response.GroupMemberLocation;
 import com.planu.group_meeting.location.dto.response.GroupMemberLocationResponse;
 import com.planu.group_meeting.location.impl.LocationImpl;
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -81,9 +82,20 @@ public class LocationService {
         }
 
         LocalDateTime startDateTime = groupScheduleDAO.findById(groupId, scheduleId).get().getStartDateTime();
-        LocalDateTime now = LocalDateTime.now(Clock.system(ZoneId.of("Asia/Seoul")));
+        LocalDateTime endDateTime = groupScheduleDAO.findById(groupId, scheduleId).get().getEndDateTime();
 
-        if (now.isBefore(startDateTime.minusHours(1)) || now.isAfter(startDateTime.plusHours(1))) {
+        LocalDateTime now = LocalDateTime.now(Clock.system(ZoneId.of("Asia/Seoul")));
+        boolean isAllDaySchedule = isAllDaySchedule(startDateTime, endDateTime);
+
+        if(isAllDaySchedule) {
+            LocalDate scheduleDate = startDateTime.toLocalDate();
+            LocalDate currentDate = now.toLocalDate();
+
+            if(!currentDate.equals(scheduleDate)) {
+                throw new IllegalArgumentException("종일 일정은 해당 일정 당일에만 위치 공유를 할 수 있습니다.");
+            }
+        }
+        else if(now.isBefore(startDateTime.minusHours(1)) || now.isAfter(startDateTime.plusHours(1))) {
             throw new IllegalArgumentException("일정 시작 1시간 전후일 때만 위치 공유를 할 수 있습니다.");
         }
 
@@ -101,5 +113,17 @@ public class LocationService {
 
         var response =  getGroupMemberLocation(groupId, scheduleId);
         return response;
+    }
+
+    private boolean isAllDaySchedule(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        if(startDateTime == null || endDateTime == null) {
+            return false;
+        }
+
+        boolean sameDayCheck = startDateTime.toLocalDate().equals(endDateTime.toLocalDate());
+        boolean startTimeCheck = startDateTime.getHour() == 0 && startDateTime.getMinute() == 0;
+        boolean endTimeCheck = endDateTime.getHour() == 23 && endDateTime.getMinute() == 59;
+
+        return sameDayCheck && startTimeCheck && endTimeCheck;
     }
 }
