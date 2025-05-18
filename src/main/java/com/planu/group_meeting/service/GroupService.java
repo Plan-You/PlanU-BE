@@ -369,7 +369,9 @@ public class GroupService {
             throw new GroupNotFoundException("그룹을 찾을 수 없습니다.");
         }
         checkAccessPermission(groupId, userId);
-        return groupDAO.findGroupMembers(groupId, keyword);
+        List<Member> groupMembers = groupDAO.findGroupMembers(groupId, keyword);
+        groupMembers.sort(Comparator.comparing((Member m) -> !"LEADER".equals(m.getGroupRole())));
+        return groupMembers;
     }
 
     public void checkAccessPermission(Long groupId, Long id) throws UnauthorizedAccessException {
