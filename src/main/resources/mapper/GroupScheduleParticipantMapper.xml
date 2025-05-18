@@ -23,4 +23,9 @@
     <delete id="deleteAllByScheduleId" parameterType="Long">
         DELETE FROM GROUP_SCHEDULE_PARTICIPANT WHERE group_id = #{groupId} and group_schedule_id = #{scheduleId};
     </delete>
+
+    <delete id="deleteAllByGroupIdAndUserId">
+        DELETE FROM group_schedule_participant
+        WHERE groupId = #{groupId} AND user_id = #{userId}
+    </delete>
 </mapper>

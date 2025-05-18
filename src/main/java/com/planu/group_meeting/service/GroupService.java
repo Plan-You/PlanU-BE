@@ -12,6 +12,7 @@ import com.planu.group_meeting.config.auth.CustomUserDetails;
 import com.planu.group_meeting.dao.AvailableDateDAO;
 import com.planu.group_meeting.dao.FriendDAO;
 import com.planu.group_meeting.dao.GroupDAO;
+import com.planu.group_meeting.dao.GroupScheduleParticipantDAO;
 import com.planu.group_meeting.dao.GroupUserDAO;
 import com.planu.group_meeting.dao.UserDAO;
 import com.planu.group_meeting.dto.AvailableDateDto.AvailableDateRank;
@@ -61,6 +62,7 @@ public class GroupService {
     private final GroupUserDAO groupUserDAO;
     private final FriendDAO friendDAO;
     private final AvailableDateDAO availableDateDAO;
+    private final GroupScheduleParticipantDAO groupScheduleParticipantDAO;
     private final NotificationService notificationService;
     private final ChatService chatService;
 
@@ -217,7 +219,7 @@ public class GroupService {
         }
 
         chatService.expelChat(username, groupId);
-
+        groupScheduleParticipantDAO.deleteAllByGroupIdAndUserId(groupId, userId);
         groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
         groupDAO.deleteByUserId(userId);
 
@@ -312,7 +314,7 @@ public class GroupService {
 
         GroupExpelNotification groupExpelNotification = new GroupExpelNotification(leaderId, userId, groupDAO.findNameByGroupId(groupId) + " 그룹에서 추방되었습니다.");
         notificationService.sendNotification(EventType.GROUP_EXPEL, groupExpelNotification);
-
+        groupScheduleParticipantDAO.deleteAllByGroupIdAndUserId(groupId, userId);
         groupDAO.deleteGroupUserByUserIdAndGroupId(userId, groupId);
         groupDAO.deleteByUserId(userId);
     }
@@ -468,6 +470,7 @@ public class GroupService {
         }
         checkAccessPermission(groupId, userId);
 
+        LocalDate today = LocalDate.now();
         LocalDate firstDayOfMonth = yearMonth.atDay(1);
         LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
 
@@ -479,10 +482,13 @@ public class GroupService {
         for (var memberId : groupMemberIds) {
             String name = userDAO.findNameById(memberId);
             String profileImage = userDAO.findProfileImageById(memberId);
-            List<String> availableDates = new ArrayList<>();
-            for (var availableDate : availableDateDAO.findAvailableDatesByUserIdInRange(memberId, startOfCalendar, endOfCalendar)) {
-                availableDates.add(availableDate.toString());
-            }
+            List<String> availableDates = availableDateDAO.findAvailableDatesByUserIdInRange(memberId, startOfCalendar, endOfCalendar)
+                            .stream()
+                            .filter(availableDate -> !availableDate.isBefore(today))
+                            .sorted()
+                            .map(LocalDate::toString)
+                            .toList();
+
             availableMemberInfos.add(new AvailableMemberInfo(name, profileImage, availableDates));
         }
 
@@ -496,6 +502,7 @@ public class GroupService {
         }
         checkAccessPermission(groupId, userId);
 
+        LocalDate today = LocalDate.now();
         LocalDate firstDayOfMonth = yearMonth.atDay(1);
         LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
 
@@ -506,10 +513,11 @@ public class GroupService {
         HashMap<LocalDate, List<String>> membersByAvailableDate = new HashMap<>();
         for (var memberId : groupMembers) {
             for (var availableDate : availableDateDAO.findAvailableDatesByUserIdInRange(memberId, startOfCalendar, endOfCalendar)) {
-                if (!membersByAvailableDate.containsKey(availableDate)) {
-                    membersByAvailableDate.put(availableDate, new ArrayList<>());
+                if (!availableDate.isBefore(today)) {
+                    membersByAvailableDate
+                            .computeIfAbsent(availableDate, k -> new ArrayList<>())
+                            .add(userDAO.findNameById(memberId));
                 }
-                membersByAvailableDate.get(availableDate).add(userDAO.findNameById(memberId));
             }
         }
         AvailableDateInfos availableDateInfos = new AvailableDateInfos(new ArrayList<>());
