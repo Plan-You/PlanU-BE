@@ -13,4 +13,6 @@ public interface GroupScheduleParticipantDAO {
     List<GroupScheduleDTO.ParticipantsResponse> findByScheduleId(Long groupId, Long scheduleId);
 
     void deleteAllByScheduleId(Long groupId, Long scheduleId);
+
+    void deleteAllByGroupIdAndUserId(Long groupId, Long userId);
 }
