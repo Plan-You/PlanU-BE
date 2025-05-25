@@ -424,11 +424,15 @@ public class GroupService {
         LocalDate startOfCalendar = firstDayOfMonth.minusDays(firstDayOfMonth.getDayOfWeek().getValue() % 7);
         LocalDate endOfCalendar = lastDayOfMonth.plusDays(6 - lastDayOfMonth.getDayOfWeek().getValue());
 
+        LocalDate today = LocalDate.now();
         List<Long> groupMemberIds = groupUserDAO.getGroupMemberIds(groupId);
         HashMap<LocalDate, Double> availableDateRatio = new HashMap<>();
         for (var groupMemberId : groupMemberIds) {
             List<LocalDate> availableDates = availableDateDAO.findAvailableDatesByUserIdInRange(groupMemberId, startOfCalendar, endOfCalendar);
             for (var availableDate : availableDates) {
+                if(availableDate.isBefore(today)) {
+                    continue;
+                }
                 if (!availableDateRatio.containsKey(availableDate)) {
                     availableDateRatio.put(availableDate, 1.0);
                     continue;
@@ -548,10 +552,15 @@ public class GroupService {
         LocalDate startOfCalendar = firstDayOfMonth.minusDays(firstDayOfMonth.getDayOfWeek().getValue() % 7);
         LocalDate endOfCalendar = lastDayOfMonth.plusDays(6 - lastDayOfMonth.getDayOfWeek().getValue());
 
+        LocalDate today = LocalDate.now();
         List<Long> groupMemberIds = groupUserDAO.getGroupMemberIds(groupId);
         Map<LocalDate, Integer> countOfAvailableDate = new HashMap<>();
         for (var memberId : groupMemberIds) {
             for (var availableDate : availableDateDAO.findAvailableDatesByUserIdInRange(memberId, startOfCalendar, endOfCalendar)) {
+                if(availableDate.isBefore(today)) {
+                    continue;
+                }
+
                 if (!countOfAvailableDate.containsKey(availableDate)) {
                     countOfAvailableDate.put(availableDate, 0);
                 }
