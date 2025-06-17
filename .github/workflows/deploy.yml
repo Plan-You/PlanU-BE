@@ -103,4 +103,4 @@ jobs:
                 docker-compose -f docker-compose.\$CURRENT_ENV.yml down
                 
                 echo "✅ Blue-Green deployment complete."
-                EOF
+          EOF
