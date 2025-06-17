@@ -14,6 +14,8 @@ services:
     depends_on:
       - db
       - redis
+    networks:
+      - app-network
 
   db:
     image: mariadb:latest
@@ -27,6 +29,8 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       - ./initdb:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
 
   redis:
     image: redis:latest
@@ -35,6 +39,8 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    networks:
+      - app-network
 
 volumes:
   db_data:
