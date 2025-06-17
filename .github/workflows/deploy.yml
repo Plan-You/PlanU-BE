@@ -36,7 +36,6 @@ jobs:
             cd /home/ubuntu/projects/planu-backend
 
             echo "Pulling latest code..."
-            git pull origin main
 
             echo "Setting environment variables..."
             cat > .env <<ENV
