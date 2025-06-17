@@ -99,8 +99,8 @@ jobs:
           }
           EOL
   
-          docker cp nginx-upstream.conf nginx:/etc/nginx/conf.d/upstream.conf
-          docker exec nginx nginx -s reload
+          docker cp nginx-upstream.conf nginxserver:/etc/nginx/conf.d/upstream.conf
+          docker exec nginxserver nginx -s reload
     
           echo "✅ Blue-Green deployment complete."
           EOF
