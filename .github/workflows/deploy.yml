@@ -51,7 +51,7 @@ jobs:
                 aws.credentials.secret-key=${{ secrets.AWS_SECRET_ACCESS_KEY }}
                 KAKAO_ID=${{ secrets.KAKAO_ID }}
                 KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}
-                ENV
+          ENV
                 
                 echo "Ensuring shared services (db, redis) are up..."
                 docker-compose -f docker-compose.shared.yml up -d
