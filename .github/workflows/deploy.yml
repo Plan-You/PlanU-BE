@@ -21,8 +21,8 @@ jobs:
 
       - name: Build and Push Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/planu-backend:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/planu-backend:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/planu-app:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/planu-app:latest
 
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
