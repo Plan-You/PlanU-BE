@@ -56,14 +56,16 @@ jobs:
           echo "Determining currently active environment..."
   
           CURRENT_ENV=""
-          if docker ps | grep planu-app-blue; then
-          CURRENT_ENV="blue"
-          elif docker ps | grep planu-app-green; then
-          CURRENT_ENV="green"
+          if docker ps --filter "name=planu-app-blue" --quiet | grep -E .; then
+            CURRENT_ENV="blue"
+          elif docker ps --filter "name=planu-app-green" --quiet | grep -E .; then
+            CURRENT_ENV="green"
           else
-          echo "No active environment. Defaulting to blue."
-          CURRENT_ENV="green"
+            echo "No active environment. Defaulting to blue."
+            CURRENT_ENV="green"
           fi
+          
+          echo "Current environment is $CURRENT_ENV"
   
           if [ "$CURRENT_ENV" = "blue" ]; then
           TARGET_ENV="green"
@@ -81,7 +83,6 @@ jobs:
           
           docker pull ${{ secrets.DOCKER_USERNAME }}/planu-backend:latest
           
-          docker-compose -f $COMPOSE_FILE down
           docker-compose -f $COMPOSE_FILE up -d
   
           echo "Waiting for container to initialize..."
@@ -96,6 +97,7 @@ jobs:
   
           docker cp nginx-upstream.conf nginxserver:/etc/nginx/conf.d/upstream.conf
           docker exec nginxserver nginx -s reload
+          docker-compose -f docker-compose.${CURRENT_ENV}.yml down
     
           echo "✅ Blue-Green deployment complete."
           EOF
