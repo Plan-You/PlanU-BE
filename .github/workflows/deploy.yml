@@ -29,11 +29,6 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Upload blue/green compose files to EC2
-        run: |
-          scp -o StrictHostKeyChecking=no docker-compose.blue.yml ubuntu@${{ secrets.AWS_EC2_IP }}:/home/ubuntu/projects/planu-backend/
-          scp -o StrictHostKeyChecking=no docker-compose.green.yml ubuntu@${{ secrets.AWS_EC2_IP }}:/home/ubuntu/projects/planu-backend/
-
       - name: Blue-Green Deployment on EC2
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.AWS_EC2_IP }} << 'EOF'
