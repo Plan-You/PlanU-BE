@@ -100,7 +100,7 @@ jobs:
                 docker exec nginxserver nginx -s reload
                 
                 echo "Shutting down previous app container (\$CURRENT_ENV)..."
-                docker-compose -f docker-compose.\$CURRENT_ENV.yml down
+                docker rm -f planu-app-\$CURRENT_ENV || true
                 
                 echo "✅ Blue-Green deployment complete."
           EOF
