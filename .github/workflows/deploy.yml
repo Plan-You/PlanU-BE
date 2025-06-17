@@ -52,52 +52,57 @@ jobs:
           KAKAO_ID=${{ secrets.KAKAO_ID }}
           KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}
           ENV
-  
-          echo "Determining currently active environment..."
-  
-          CURRENT_ENV=""
-          if docker ps --filter "name=planu-app-blue" --quiet | grep -E .; then
-            CURRENT_ENV="blue"
-          elif docker ps --filter "name=planu-app-green" --quiet | grep -E .; then
-            CURRENT_ENV="green"
-          else
-            echo "No active environment. Defaulting to blue."
-            CURRENT_ENV="green"
-          fi
-          
-          echo "Current environment is $CURRENT_ENV"
-  
-          if [ "$CURRENT_ENV" = "blue" ]; then
-          TARGET_ENV="green"
-          COMPOSE_FILE="docker-compose.green.yml"
-          CONTAINER_NAME="planu-app-green"
-          NGINX_UPSTREAM="app-green"
-          else
-          TARGET_ENV="blue"
-          COMPOSE_FILE="docker-compose.blue.yml"
-          CONTAINER_NAME="planu-app-blue"
-          NGINX_UPSTREAM="app-blue"
-          fi
-  
-          echo "Deploying to $TARGET_ENV..."
-          
-          docker pull ${{ secrets.DOCKER_USERNAME }}/planu-backend:latest
-          
-          docker-compose -f $COMPOSE_FILE up -d
-  
-          echo "Waiting for container to initialize..."
-          sleep 10
-          
-          echo "Updating Nginx upstream to $NGINX_UPSTREAM..."
-          cat > nginx-upstream.conf <<EOL
-          upstream backend {
-          server ${NGINX_UPSTREAM}:8080;
-          }
-          EOL
+
+            echo "Ensuring shared services (db, redis) are up..."
+            docker-compose -f docker-compose.shared.yml up -d
+
+            echo "Determining currently active environment..."
+
+            CURRENT_ENV=""
+            if docker ps --filter "name=planu-app-blue" --quiet | grep -E .; then
+              CURRENT_ENV="blue"
+            elif docker ps --filter "name=planu-app-green" --quiet | grep -E .; then
+              CURRENT_ENV="green"
+            else
+              echo "No active environment. Defaulting to blue."
+              CURRENT_ENV="green"
+            fi
+
+            echo "Current environment is \$CURRENT_ENV"
+
+            if [ "\$CURRENT_ENV" = "blue" ]; then
+              TARGET_ENV="green"
+              COMPOSE_FILE="docker-compose.green.yml"
+              CONTAINER_NAME="planu-app-green"
+              NGINX_UPSTREAM="app-green"
+            else
+              TARGET_ENV="blue"
+              COMPOSE_FILE="docker-compose.blue.yml"
+              CONTAINER_NAME="planu-app-blue"
+              NGINX_UPSTREAM="app-blue"
+            fi
+
+            echo "Deploying to \$TARGET_ENV..."
+
+            docker pull ${{ secrets.DOCKER_USERNAME }}/planu-app:latest
+
+            docker-compose -f \$COMPOSE_FILE up -d
+
+            echo "Waiting for container to initialize..."
+            sleep 10
+
+            echo "Updating Nginx upstream to \$NGINX_UPSTREAM..."
+            cat > nginx-upstream.conf <<EOL
+            upstream backend {
+            server \$NGINX_UPSTREAM:8080;
+            }
+            EOL
   
           docker cp nginx-upstream.conf nginxserver:/etc/nginx/conf.d/upstream.conf
           docker exec nginxserver nginx -s reload
-          docker-compose -f docker-compose.${CURRENT_ENV}.yml down
-    
+  
+          echo "Shutting down previous app container (\$CURRENT_ENV)..."
+          docker-compose -f docker-compose.\$CURRENT_ENV.yml down
+          
           echo "✅ Blue-Green deployment complete."
           EOF
