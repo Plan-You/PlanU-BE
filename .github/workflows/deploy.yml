@@ -1,4 +1,4 @@
-name: Deploy to EC2
+name: Deploy to EC2 (Blue-Green)
 
 on:
   push:
@@ -29,140 +29,78 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Deploy on EC2
+      - name: Upload blue/green compose files to EC2
+        run: |
+          scp -o StrictHostKeyChecking=no docker-compose.blue.yml ubuntu@${{ secrets.AWS_EC2_IP }}:/home/ubuntu/projects/planu-backend/
+          scp -o StrictHostKeyChecking=no docker-compose.green.yml ubuntu@${{ secrets.AWS_EC2_IP }}:/home/ubuntu/projects/planu-backend/
+
+      - name: Blue-Green Deployment on EC2
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.AWS_EC2_IP }} << 'EOF'
             set -e
             cd /home/ubuntu/projects/planu-backend
 
-            echo "Pulling latest code..."
-
             echo "Setting environment variables..."
             cat > .env <<ENV
-            SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
-            SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
-            SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-            REDIS_HOST=${{ secrets.REDIS_HOST }}
-            REDIS_PORT=${{ secrets.REDIS_PORT }}
-            MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
-            MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
-            GOOGLE_EMAIL=${{ secrets.GOOGLE_EMAIL }}
-            GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}
-            SPRING_JWT_SECRET=${{ secrets.SPRING_JWT_SECRET }}
-            aws.credentials.access-key=${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws.credentials.secret-key=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            KAKAO_ID=${{ secrets.KAKAO_ID }}
-            KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}
-            ENV
-
-            echo "Pulling latest Docker image..."
-            docker pull ${{ secrets.DOCKER_USERNAME }}/planu-backend:latest
-
-            echo "Restarting application container..."
-            docker-compose down
-            docker-compose up -d
-
-            echo "✅ Deployment complete."
-          EOF
-
-# name: Deploy to EC2 (Blue-Green)
-
-# on:
-#   push:
-#     branches:
-#       - main
-
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v2
-
-#       - name: Log in to Docker Hub
-#         uses: docker/login-action@v2
-#         with:
-#           username: ${{ secrets.DOCKER_USERNAME }}
-#           password: ${{ secrets.DOCKER_PASSWORD }}
-
-#       - name: Build and Push Docker image
-#         run: |
-#           docker build -t ${{ secrets.DOCKER_USERNAME }}/planu-backend:latest .
-#           docker push ${{ secrets.DOCKER_USERNAME }}/planu-backend:latest
-
-#       - name: Set up SSH
-#         uses: webfactory/ssh-agent@v0.5.3
-#         with:
-#           ssh-private-key: ${{ secrets.SSH_KEY }}
-
-#       - name: Blue-Green Deployment on EC2
-#         run: |
-#           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.AWS_EC2_IP }} << 'EOF'
-#             set -e
-#             cd /home/ubuntu/projects/planu-backend
-
-#             echo "Setting environment variables..."
-#             cat > .env <<ENV
-#           SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
-#           SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
-#           SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
-#           REDIS_HOST=${{ secrets.REDIS_HOST }}
-#           REDIS_PORT=${{ secrets.REDIS_PORT }}
-#           MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
-#           MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
-#           GOOGLE_EMAIL=${{ secrets.GOOGLE_EMAIL }}
-#           GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}
-#           SPRING_JWT_SECRET=${{ secrets.SPRING_JWT_SECRET }}
-#           aws.credentials.access-key=${{ secrets.AWS_ACCESS_KEY_ID }}
-#           aws.credentials.secret-key=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           KAKAO_ID=${{ secrets.KAKAO_ID }}
-#           KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}
-#           ENV
+          SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
+          SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
+          SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+          REDIS_HOST=${{ secrets.REDIS_HOST }}
+          REDIS_PORT=${{ secrets.REDIS_PORT }}
+          MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
+          GOOGLE_EMAIL=${{ secrets.GOOGLE_EMAIL }}
+          GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}
+          SPRING_JWT_SECRET=${{ secrets.SPRING_JWT_SECRET }}
+          aws.credentials.access-key=${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws.credentials.secret-key=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          KAKAO_ID=${{ secrets.KAKAO_ID }}
+          KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}
+          ENV
   
-#           echo "Determining currently active environment..."
+          echo "Determining currently active environment..."
   
-#           CURRENT_ENV=""
-#           if docker ps | grep planu-app-blue; then
-#           CURRENT_ENV="blue"
-#           elif docker ps | grep planu-app-green; then
-#           CURRENT_ENV="green"
-#           else
-#           echo "No active environment. Defaulting to blue."
-#           CURRENT_ENV="green"
-#           fi
+          CURRENT_ENV=""
+          if docker ps | grep planu-app-blue; then
+          CURRENT_ENV="blue"
+          elif docker ps | grep planu-app-green; then
+          CURRENT_ENV="green"
+          else
+          echo "No active environment. Defaulting to blue."
+          CURRENT_ENV="green"
+          fi
   
-#           if [ "$CURRENT_ENV" = "blue" ]; then
-#           TARGET_ENV="green"
-#           COMPOSE_FILE="docker-compose.green.yml"
-#           CONTAINER_NAME="planu-app-green"
-#           NGINX_UPSTREAM="app-green"
-#           else
-#           TARGET_ENV="blue"
-#           COMPOSE_FILE="docker-compose.blue.yml"
-#           CONTAINER_NAME="planu-app-blue"
-#           NGINX_UPSTREAM="app-blue"
-#           fi
+          if [ "$CURRENT_ENV" = "blue" ]; then
+          TARGET_ENV="green"
+          COMPOSE_FILE="docker-compose.green.yml"
+          CONTAINER_NAME="planu-app-green"
+          NGINX_UPSTREAM="app-green"
+          else
+          TARGET_ENV="blue"
+          COMPOSE_FILE="docker-compose.blue.yml"
+          CONTAINER_NAME="planu-app-blue"
+          NGINX_UPSTREAM="app-blue"
+          fi
   
-#           echo "Deploying to $TARGET_ENV..."
+          echo "Deploying to $TARGET_ENV..."
           
-#           docker pull ${{ secrets.DOCKER_USERNAME }}/planu-backend:latest
+          docker pull ${{ secrets.DOCKER_USERNAME }}/planu-backend:latest
           
-#           docker-compose -f $COMPOSE_FILE down
-#           docker-compose -f $COMPOSE_FILE up -d
+          docker-compose -f $COMPOSE_FILE down
+          docker-compose -f $COMPOSE_FILE up -d
   
-#           echo "Waiting for container to initialize..."
-#           sleep 10
+          echo "Waiting for container to initialize..."
+          sleep 10
           
-#           echo "Updating Nginx upstream to $NGINX_UPSTREAM..."
-#           cat > nginx-upstream.conf <<EOL
-#           upstream backend {
-#           server ${NGINX_UPSTREAM}:8080;
-#           }
-#           EOL
+          echo "Updating Nginx upstream to $NGINX_UPSTREAM..."
+          cat > nginx-upstream.conf <<EOL
+          upstream backend {
+          server ${NGINX_UPSTREAM}:8080;
+          }
+          EOL
   
-#           docker cp nginx-upstream.conf nginx:/etc/nginx/conf.d/upstream.conf
-#           docker exec nginx nginx -s reload
+          docker cp nginx-upstream.conf nginx:/etc/nginx/conf.d/upstream.conf
+          docker exec nginx nginx -s reload
     
-#           echo "✅ Blue-Green deployment complete."
-#           EOF
+          echo "✅ Blue-Green deployment complete."
+          EOF
