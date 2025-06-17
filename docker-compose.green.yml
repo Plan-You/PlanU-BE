@@ -1,6 +1,6 @@
 services:
   app-green:
-    image: sj0320/planu-app:green
+    image: sj0320/planu-app:latest
     container_name: planu-app-green
     ports:
       - "8082:8080"
