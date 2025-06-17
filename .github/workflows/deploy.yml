@@ -31,7 +31,7 @@ jobs:
 
       - name: Blue-Green Deployment on EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.AWS_EC2_IP }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.AWS_EC2_IP }} << EOF
           set -e
           cd /home/ubuntu/projects/planu-backend
               
