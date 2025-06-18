@@ -102,22 +102,6 @@ jobs:
                 
                 echo "Shutting down previous app container (\$CURRENT_ENV)..."
                 docker rm -f planu-app-\$CURRENT_ENV || true
-
-                echo "📁 현재 디렉토리 이동: /home/ubuntu/projects/PlanU-BE"
-                cd /home/ubuntu/projects/PlanU-BE || { echo "❌ 디렉토리 이동 실패"; exit 1; }
-                
-                echo "📄 default.conf 존재 여부 확인"
-                ls -l nginx/conf_d/default.conf || { echo "❌ default.conf 파일 없음"; exit 1; }
-                
-                echo "📦 default.conf 컨테이너에 복사 중..."
-                docker cp nginx/conf_d/default.conf nginxserver:/etc/nginx/conf.d/app.conf || { echo "❌ 파일 복사 실패"; exit 1; }
-                
-                echo "🔄 nginx reload 중..."
-                docker exec nginxserver nginx -s reload || { echo "❌ nginx reload 실패"; exit 1; }
-                
-                echo "✅ nginx 설정 적용 완료"
-                  
-                docker exec nginxserver nginx -s reload
                 
                 echo "✅ Blue-Green deployment complete."
           EOF
