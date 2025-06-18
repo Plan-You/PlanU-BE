@@ -102,6 +102,8 @@ jobs:
                 
                 echo "Shutting down previous app container (\$CURRENT_ENV)..."
                 docker rm -f planu-app-\$CURRENT_ENV || true
+                docker cp nginx/conf_d/default.conf nginxserver:/etc/nginx/conf.d/app.conf
+                docker exec nginxserver nginx -s reload
                 
                 echo "✅ Blue-Green deployment complete."
           EOF
