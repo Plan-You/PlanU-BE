@@ -104,4 +104,7 @@ jobs:
                 docker rm -f planu-app-\$CURRENT_ENV || true
                 
                 echo "✅ Blue-Green deployment complete."
+
+                echo "Cleaning up dangling images..."
+                docker image prune -f
           EOF
