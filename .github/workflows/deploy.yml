@@ -35,7 +35,7 @@ jobs:
 
           set -e
           cd /home/ubuntu/projects/planu-backend
-              
+          
                 echo "Setting environment variables..."
                 cat > .env <<ENV
                 SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
@@ -53,12 +53,12 @@ jobs:
                 KAKAO_ID=${{ secrets.KAKAO_ID }}
                 KAKAO_SECRET=${{ secrets.KAKAO_SECRET }}
           ENV
-                
+          
                 echo "Ensuring shared services (db, redis) are up..."
                 docker-compose -f docker-compose.shared.yml up -d
-                
+          
                 echo "Determining currently active environment..."
-                
+          
                 CURRENT_ENV=""
                 if docker ps --filter "name=planu-app-blue" --quiet | grep -E .; then
                 CURRENT_ENV="blue"
@@ -68,9 +68,9 @@ jobs:
                 echo "No active environment. Defaulting to blue."
                 CURRENT_ENV="green"
                 fi
-                
+          
                 echo "Current environment is \$CURRENT_ENV"
-                
+          
                 if [ "\$CURRENT_ENV" = "blue" ]; then
                 TARGET_ENV="green"
                 COMPOSE_FILE="docker-compose.green.yml"
@@ -82,26 +82,29 @@ jobs:
                 CONTAINER_NAME="planu-app-blue"
                 NGINX_UPSTREAM="app-blue"
                 fi
-                
+          
                 echo "Deploying to \$TARGET_ENV..."
-                
+          
                 docker pull ${{ secrets.DOCKER_USERNAME }}/planu-app:latest
-                
+          
                 docker-compose -f \$COMPOSE_FILE up -d
-                
+          
                 echo "Waiting for container to initialize..."
                 sleep 10
-                
+          
                 echo "Updating Nginx upstream to \$NGINX_UPSTREAM..."
                 echo "upstream backend {" > nginx-upstream.conf
                 echo "  server \$NGINX_UPSTREAM:8080;" >> nginx-upstream.conf
                 echo "}" >> nginx-upstream.conf
-                
+          
                 docker cp nginx-upstream.conf nginxserver:/etc/nginx/conf.d/upstream.conf
                 docker exec nginxserver nginx -s reload
-                
+          
                 echo "Shutting down previous app container (\$CURRENT_ENV)..."
                 docker rm -f planu-app-\$CURRENT_ENV || true
-                
+          
                 echo "✅ Blue-Green deployment complete."
+
+                echo "Cleaning up dangling images..."
+                docker image prune -f
           EOF
