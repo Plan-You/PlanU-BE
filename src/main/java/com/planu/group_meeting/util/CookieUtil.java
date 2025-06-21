@@ -14,7 +14,7 @@ public class CookieUtil {
         cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setAttribute("SameSite","None");
-        cookie.setDomain("15.165.3.168.nip.io");
+        cookie.setDomain("planu.store");
         cookie.setHttpOnly(true);
         response.addCookie(cookie);
     }
@@ -26,7 +26,7 @@ public class CookieUtil {
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setAttribute("SameSite","None");
-        cookie.setDomain("15.165.3.168.nip.io");
+        cookie.setDomain("planu.store");
         return cookie;
     }
 

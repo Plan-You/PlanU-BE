@@ -18,14 +18,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final StompHandler stompHandler;
 
     @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry){
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("https://localhost:5173", "http://localhost:5173", "https://15.165.3.168.nip.io", "https://jiangxy.github.io", "https://www.planu.site")
+                .setAllowedOrigins("https://localhost:5173", "http://localhost:5173", "https://jiangxy.github.io", "https://www.planu.site"
+                        , "https://www.planu.store")
                 .withSockJS();
     }
 
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry registry){
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/sub");
         registry.setApplicationDestinationPrefixes("/pub");
     }
